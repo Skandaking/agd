@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 export default function HomePage() {
   return ( 
     <div className="container mx-auto py-8">
@@ -21,8 +19,7 @@ export default function HomePage() {
         </div>
         {/* Placeholder for hero image - replace with actual image */}
         <div className="absolute inset-0 bg-gray-800 z-0">
-          {/* Will be replaced with actual image */}
-          {/* <Image src="/images/hero.jpg" alt="AGD Office" fill className="object-cover" /> */}
+          {/* Will be replaced with actual image later */}
         </div>
       </section>
 
@@ -63,8 +60,7 @@ export default function HomePage() {
           {[1, 2, 3].map((item) => (
             <div key={item} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
               <div className="h-48 bg-gray-200 relative">
-                {/* Will be replaced with actual image */}
-                {/* <Image src={`/images/news-${item}.jpg`} alt={`News ${item}`} fill className="object-cover" /> */}
+                {/* Will be replaced with actual image later */}
               </div>
               <div className="p-4">
                 <p className="text-sm text-gray-500 mb-2">May {item + 10}, 2023</p>
