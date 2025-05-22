@@ -37,18 +37,7 @@ export default function Home() {
                     leveraging modern technology and best practices to serve the
                     nation.
                   </p>
-                  <p className="text-lg text-gray-600 leading-relaxed">
-                    As the central accounting office of the Government, AGD is entrusted 
-                    with the responsibility of managing and safeguarding public funds,
-                    ensuring that they are utilized effectively and in accordance with
-                    established financial regulations.
-                  </p>
-                  <p className="text-lg text-gray-600 leading-relaxed">
-                    Our department plays a crucial role in the implementation of the
-                    Integrated Financial Management Information System (IFMIS), which
-                    has significantly improved the efficiency and transparency of
-                    financial operations across government agencies.
-                  </p>
+                
                 </div>
               </div>
 
