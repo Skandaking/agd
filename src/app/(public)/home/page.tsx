@@ -2,41 +2,41 @@ import { Hero } from '@/components/public/home/Hero';
 import { Publications } from '@/components/public/home/Publications';
 import { LatestNews } from '@/components/public/home/LatestNews';
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ClipboardList, Landmark, CreditCard, Laptop } from 'lucide-react';
 
 const agdSections = [
   {
-    title: "IFMIS",
-    description:
-      "Integrated Financial Management Information System for efficient government operations.",
-    icon: "💻",
-    color: "bg-[var(--primary)]",
-    link: "/services/ifmis",
-  },
-  {
     title: "Accounting Services",
     description:
-      "Professional accounting and financial management services for government entities.",
-    icon: "📊",
+      "Handles budget monitoring, financial reporting, and ensures compliance with public finance laws. It processes all government payments through a structured workflow, including voucher auditing and cheque issuance.",
+    icon: <ClipboardList size={24} />,
+    color: "bg-[var(--primary)]",
+    link: "/services/accounting-services",
+  },
+  {
+    title: "Banking and Asset Management Services",
+    description:
+      "Manages government accounts, revenue, and assets. Oversees banking, foreign payments, account reconciliation, and asset compliance to ensure financial control and transparency.",
+    icon: <Landmark size={24} />,
     color: "bg-[var(--secondary)]",
-    link: "/services/accounting",
+    link: "/services/banking-asset-management",
   },
   {
     title: "Pay Services",
     description:
-      "Efficient payment processing and management for government employees.",
-    icon: "💳",
+      "Responsible for timely salary, pension, and compensation payments for all MDAs and councils. Also manages civil servant loans, salary reconciliations, and advance funding.",
+    icon: <CreditCard size={24} />,
     color: "bg-[var(--accent)]",
-    link: "/services/pay",
+    link: "/services/pay-services",
   },
   {
-    title: "ICT Services",
+    title: "IFMIS",
     description:
-      "Technical support and infrastructure management for government systems.",
-    icon: "🖥️",
+      "IFMIS improves financial management through electronic reporting and payment systems. The SAP-based system enhances transparency and was rolled out across MDAs in July 2021.",
+    icon: <Laptop size={24} />,
     color:
       "bg-gradient-to-r from-[var(--primary)] via-[var(--secondary)] to-[var(--accent)]",
-    link: "/services/ict",
+    link: "/services/ifmis",
   },
 ];
 
@@ -118,7 +118,7 @@ export default function Home() {
         <div className="relative z-10 container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 text-white">
-              Our Services
+              AGD Sections
             </h2>
             <div className="h-1 w-24 bg-[var(--primary)] mx-auto rounded-full" />
           </div>
@@ -131,7 +131,7 @@ export default function Home() {
                 className="group p-6 rounded-lg bg-white/95 hover:bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl backdrop-blur-sm block"
               >
                 <div
-                  className={`w-12 h-12 rounded-lg ${section.color} flex items-center justify-center mb-4 text-2xl text-white`}
+                  className={`w-12 h-12 rounded-lg ${section.color} flex items-center justify-center mb-4 text-white`}
                 >
                   {section.icon}
                 </div>
@@ -148,7 +148,7 @@ export default function Home() {
               href="/services"
               className="inline-flex items-center gap-2 py-3 px-8 bg-white text-[var(--primary)] font-semibold rounded-lg hover:bg-[var(--primary)] hover:text-white transition-all duration-300"
             >
-              View All Services
+              Learn More About AGD Sections
               <ChevronRight className="w-5 h-5" />
             </Link>
           </div>
