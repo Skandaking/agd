@@ -4,6 +4,42 @@ import { LatestNews } from '@/components/public/home/LatestNews';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 
+const agdSections = [
+  {
+    title: "IFMIS",
+    description:
+      "Integrated Financial Management Information System for efficient government operations.",
+    icon: "💻",
+    color: "bg-[var(--primary)]",
+    link: "/services/ifmis",
+  },
+  {
+    title: "Accounting Services",
+    description:
+      "Professional accounting and financial management services for government entities.",
+    icon: "📊",
+    color: "bg-[var(--secondary)]",
+    link: "/services/accounting",
+  },
+  {
+    title: "Pay Services",
+    description:
+      "Efficient payment processing and management for government employees.",
+    icon: "💳",
+    color: "bg-[var(--accent)]",
+    link: "/services/pay",
+  },
+  {
+    title: "ICT Services",
+    description:
+      "Technical support and infrastructure management for government systems.",
+    icon: "🖥️",
+    color:
+      "bg-gradient-to-r from-[var(--primary)] via-[var(--secondary)] to-[var(--accent)]",
+    link: "/services/ict",
+  },
+];
+
 export default function Home() {
   return (
     <div className="flex flex-col">
@@ -64,93 +100,60 @@ export default function Home() {
         </div>
       </div>
 
-      {/* AGD Sections */}
-      <div className="relative py-20 mt-12">
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/hero/2.JPG)' }}>
-          <div className="absolute inset-0 bg-black/70"></div>
+      {/* AGD Sections with Background */}
+      <section className="mt-16 relative py-20">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(/hero/2.JPG)`,
+            backgroundAttachment: "fixed",
+          }}
+        >
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/70" />
         </div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Our Divisions</h2>
-            <div className="h-1 w-32 bg-[var(--primary)] mx-auto"></div>
+
+        {/* Content */}
+        <div className="relative z-10 container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4 text-white">
+              Our Services
+            </h2>
+            <div className="h-1 w-24 bg-[var(--primary)] mx-auto rounded-full" />
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Accounting Services */}
-            <div className="backdrop-blur-sm bg-white/10 p-8 rounded-xl border border-white/20 text-white">
-              <div className="bg-[var(--primary)]/20 w-16 h-16 flex items-center justify-center rounded-full mb-6">
-                <span className="text-3xl">1</span>
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Accounting Services</h3>
-              <p className="text-white/80 leading-relaxed">
-                Handles budget monitoring, financial reporting, and ensures compliance with public finance laws. 
-                It processes all government payments through a structured workflow, including voucher auditing 
-                and cheque issuance.
-              </p>
-            </div>
-            
-            {/* Banking and Asset Management Services */}
-            <div className="backdrop-blur-sm bg-white/10 p-8 rounded-xl border border-white/20 text-white">
-              <div className="bg-[var(--secondary)]/20 w-16 h-16 flex items-center justify-center rounded-full mb-6">
-                <span className="text-3xl">2</span>
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Banking and Asset Management Services</h3>
-              <p className="text-white/80 leading-relaxed">
-                Manages government accounts, revenue, and assets. Oversees banking, foreign payments, account 
-                reconciliation, and asset compliance to ensure financial control and transparency.
-              </p>
-            </div>
-            
-            {/* Pay Services */}
-            <div className="backdrop-blur-sm bg-white/10 p-8 rounded-xl border border-white/20 text-white">
-              <div className="bg-[var(--accent)]/20 w-16 h-16 flex items-center justify-center rounded-full mb-6">
-                <span className="text-3xl">3</span>
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Pay Services</h3>
-              <p className="text-white/80 leading-relaxed">
-                Responsible for timely salary, pension, and compensation payments for all MDAs and councils. 
-                Also manages civil servant loans, salary reconciliations, and advance funding.
-              </p>
-            </div>
-            
-            {/* Administration and Support Services */}
-            <div className="backdrop-blur-sm bg-white/10 p-8 rounded-xl border border-white/20 text-white">
-              <div className="bg-[var(--primary)]/20 w-16 h-16 flex items-center justify-center rounded-full mb-6">
-                <span className="text-3xl">4</span>
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Administration and Support Services</h3>
-              <p className="text-white/80 leading-relaxed">
-                Supports AGD operations through HR, procurement, planning, and security services. Focuses on 
-                capacity building and efficient delivery of internal administrative functions.
-              </p>
-            </div>
-            
-            {/* Integrated Financial Management Information System (IFMIS) */}
-            <div className="backdrop-blur-sm bg-white/10 p-8 rounded-xl border border-white/20 text-white md:col-span-2 lg:col-span-1">
-              <div className="bg-[var(--secondary)]/20 w-16 h-16 flex items-center justify-center rounded-full mb-6">
-                <span className="text-3xl">5</span>
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Integrated Financial Management Information System (IFMIS)</h3>
-              <p className="text-white/80 leading-relaxed">
-                IFMIS improves financial management through electronic reporting and payment systems. The SAP-based 
-                system enhances transparency and was rolled out across MDAs in July 2021.
-              </p>
-            </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {agdSections.map((section, index) => (
+              <Link
+                key={index}
+                href={section.link}
+                className="group p-6 rounded-lg bg-white/95 hover:bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl backdrop-blur-sm block"
+              >
+                <div
+                  className={`w-12 h-12 rounded-lg ${section.color} flex items-center justify-center mb-4 text-2xl text-white`}
+                >
+                  {section.icon}
+                </div>
+                <h3 className="text-xl font-bold mb-2 group-hover:text-[var(--primary)] transition-colors">
+                  {section.title}
+                </h3>
+                <p className="text-gray-600">{section.description}</p>
+              </Link>
+            ))}
           </div>
           
           <div className="text-center mt-12">
             <Link
-              href="/divisions"
-              className="inline-flex items-center gap-2 py-3 px-8 bg-white text-[var(--primary)] font-semibold rounded-full hover:bg-[var(--primary)] hover:text-white transition-all duration-300"
+              href="/services"
+              className="inline-flex items-center gap-2 py-3 px-8 bg-white text-[var(--primary)] font-semibold rounded-lg hover:bg-[var(--primary)] hover:text-white transition-all duration-300"
             >
-              Learn More About Our Divisions
+              View All Services
               <ChevronRight className="w-5 h-5" />
             </Link>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 } 
