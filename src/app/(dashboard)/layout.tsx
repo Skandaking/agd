@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Menu } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "AGD Admin Dashboard",
@@ -70,8 +71,7 @@ export default function DashboardLayout({
         {/* Top navigation */}
         <header className="h-16 border-b bg-white flex items-center px-6 justify-between">
           <button className="md:hidden text-gray-500">
-            {/* Menu icon - would use an actual icon in production */}
-            ☰
+            <Menu />
           </button>
           
           <div className="flex items-center gap-4">
