@@ -29,22 +29,46 @@ const publications = [
     fileType: "PDF",
     downloadUrl: "/publications/procurement-guidelines.pdf",
   },
+  {
+    id: 4,
+    title: "Financial Statement 2023",
+    date: "June 10, 2024",
+    fileSize: "2.4 MB",
+    fileType: "PDF",
+    downloadUrl: "/publications/financial-statement-2023.pdf",
+  },
+  {
+    id: 5,
+    title: "Annual Budget Report",
+    date: "May 22, 2024",
+    fileSize: "3.7 MB",
+    fileType: "PDF",
+    downloadUrl: "/publications/annual-budget-report.pdf",
+  },
+  {
+    id: 6,
+    title: "Procurement Guidelines",
+    date: "April 15, 2024",
+    fileSize: "1.8 MB",
+    fileType: "PDF",
+    downloadUrl: "/publications/procurement-guidelines.pdf",
+  },
 ];
 
 export function Publications() {
   return (
-    <section className="bg-white rounded-xl shadow-lg border border-gray-100 flex flex-col overflow-hidden">
+    <section className="bg-white rounded-xl shadow-lg border border-gray-100 flex-1 flex flex-col overflow-hidden">
       <div className="p-6 pb-4 bg-gradient-to-r from-[var(--primary)]/5 to-[var(--secondary)]/5">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-1 bg-[var(--primary)] rounded-full" />
+          <div className="h-8 w-1 bg-[var(--secondary)] rounded-full" />
           <h2 className="text-2xl font-bold text-[var(--accent)]">
             Publications
           </h2>
         </div>
       </div>
       
-      <div className="flex-1 p-6">
-        <div className="space-y-4">
+      <div className="flex-1 overflow-auto">
+        <div className="p-6 space-y-4">
           {publications.map((pub) => (
             <div 
               key={pub.id} 
@@ -52,11 +76,11 @@ export function Publications() {
             >
               <div className="flex items-start justify-between">
                 <div className="flex gap-3">
-                  <div className="mt-1 text-[var(--primary)]">
+                  <div className="mt-1 text-[var(--secondary)]">
                     <FileText className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold group-hover:text-[var(--primary)] transition-colors">{pub.title}</h3>
+                    <h3 className="font-semibold group-hover:text-[var(--secondary)] transition-colors">{pub.title}</h3>
                     <p className="text-sm text-gray-500">{pub.date} • {pub.fileSize} • {pub.fileType}</p>
                   </div>
                 </div>
@@ -76,7 +100,7 @@ export function Publications() {
       <div className="p-4 border-t bg-white">
         <Link
           href="/publications"
-          className="flex items-center justify-center gap-2 py-2 px-4 bg-[var(--primary)]/10 text-[var(--primary)] font-semibold rounded-lg hover:bg-[var(--primary)]/20 transition-all duration-300"
+          className="flex items-center justify-center gap-2 py-2 px-4 bg-[var(--secondary)]/10 text-[var(--secondary)] font-semibold rounded-lg hover:bg-[var(--secondary)]/20 transition-all duration-300"
         >
           View All Publications
           <ChevronRight className="w-4 h-4" />
