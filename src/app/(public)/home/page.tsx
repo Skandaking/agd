@@ -1,4 +1,6 @@
 import { Hero } from '@/components/public/home/Hero';
+import { Publications } from '@/components/public/home/Publications';
+import { LatestNews } from '@/components/public/home/LatestNews';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 
@@ -53,96 +55,14 @@ export default function Home() {
             </section>
           </div>
           
-          {/* Additional sections can be added here */}
+          {/* Main content sections */}
           <div className="lg:col-span-8">
-            {/* Placeholder for news or other content */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-              <section className="bg-white rounded-xl shadow-lg border border-gray-100 flex flex-col overflow-hidden">
-                <div className="p-6 pb-4 bg-gradient-to-r from-[var(--primary)]/5 to-[var(--secondary)]/5">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-1 bg-[var(--secondary)] rounded-full" />
-                    <h2 className="text-2xl font-bold text-[var(--accent)]">
-                      Latest News
-                    </h2>
-                  </div>
-                </div>
-                
-                <div className="flex-1 p-6">
-                  <div className="space-y-4">
-                    <div className="border-b pb-4">
-                      <p className="text-sm text-gray-500">May 15, 2024</p>
-                      <h3 className="text-lg font-semibold">Launch of New Financial Portal</h3>
-                      <p className="text-gray-600">AGD has launched a new financial portal to improve service delivery...</p>
-                    </div>
-                    <div className="border-b pb-4">
-                      <p className="text-sm text-gray-500">April 28, 2024</p>
-                      <h3 className="text-lg font-semibold">IFMIS Upgrade Complete</h3>
-                      <p className="text-gray-600">The upgrade of the IFMIS has been successfully completed ahead of schedule...</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="p-4 border-t bg-white">
-                  <Link
-                    href="/news"
-                    className="flex items-center justify-center gap-2 py-2 px-4 bg-[var(--secondary)]/10 text-[var(--secondary)] font-semibold rounded-lg hover:bg-[var(--secondary)]/20 transition-all duration-300"
-                  >
-                    View All News
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </section>
+            <div className="grid grid-cols-1 gap-8">
+              {/* Publications in the middle */}
+              <Publications />
               
-              <section className="bg-white rounded-xl shadow-lg border border-gray-100 flex flex-col overflow-hidden">
-                <div className="p-6 pb-4 bg-gradient-to-r from-[var(--primary)]/5 to-[var(--secondary)]/5">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-1 bg-[var(--accent)] rounded-full" />
-                    <h2 className="text-2xl font-bold text-[var(--accent)]">
-                      Quick Links
-                    </h2>
-                  </div>
-                </div>
-                
-                <div className="flex-1 p-6">
-                  <div className="space-y-3">
-                    <Link href="/services" className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <div className="h-10 w-10 bg-[var(--primary)]/10 rounded-full flex items-center justify-center text-[var(--primary)]">
-                          <span className="text-lg">💼</span>
-                        </div>
-                        <span className="font-medium">Our Services</span>
-                      </div>
-                    </Link>
-                    
-                    <Link href="/publications" className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <div className="h-10 w-10 bg-[var(--secondary)]/10 rounded-full flex items-center justify-center text-[var(--secondary)]">
-                          <span className="text-lg">📄</span>
-                        </div>
-                        <span className="font-medium">Publications</span>
-                      </div>
-                    </Link>
-                    
-                    <Link href="/divisions" className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <div className="h-10 w-10 bg-[var(--accent)]/10 rounded-full flex items-center justify-center text-[var(--accent)]">
-                          <span className="text-lg">🏢</span>
-                        </div>
-                        <span className="font-medium">Our Divisions</span>
-                      </div>
-                    </Link>
-                    
-                    <Link href="/contact" className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <div className="h-10 w-10 bg-[var(--primary)]/10 rounded-full flex items-center justify-center text-[var(--primary)]">
-                          <span className="text-lg">📞</span>
-                        </div>
-                        <span className="font-medium">Contact Us</span>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              </section>
+              {/* Latest News at the end */}
+              <LatestNews />
             </div>
           </div>
         </div>
