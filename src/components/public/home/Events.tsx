@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
+
 interface Event {
   title: string;
   date: string;
@@ -21,13 +24,6 @@ export const Events = () => {
       time: "10:30 AM",
       location: "Main Conference Room",
       type: "meeting",
-    },
-    {
-      title: "IFMIS Workshop",
-      date: "2024-03-01",
-      time: "02:00 PM",
-      location: "ICT Lab",
-      type: "workshop",
     },
     {
       title: "IFMIS Workshop",
@@ -136,6 +132,17 @@ export const Events = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* View All Events Button */}
+      <div className="p-4 border-t bg-white mt-auto">
+        <Link
+          href="/events" // Assuming the link should go to /events
+          className="flex items-center justify-center gap-2 py-2 px-4 bg-[var(--primary)]/10 text-[var(--primary)] font-semibold rounded-lg hover:bg-[var(--primary)]/20 transition-all duration-300"
+        >
+          View All Events
+          <ChevronRight className="w-4 h-4" />
+        </Link>
       </div>
     </section>
   );
