@@ -78,7 +78,7 @@ export function LatestNews() {
                   <p className="text-gray-600 mt-2 line-clamp-2">{news.excerpt}</p>
                   <Link 
                     href={`/news/${news.slug}`}
-                    className="inline-flex items-center mt-3 text-sm font-medium text-[var(--accent)] hover:text-[var(--primary)] transition-colors"
+                    className="inline-flex items-center mt-3 text-sm font-medium text-[var(--primary)] hover:text-[var(--secondary)] transition-colors"
                   >
                     Read More
                     <ChevronRight className="w-4 h-4 ml-1" />
