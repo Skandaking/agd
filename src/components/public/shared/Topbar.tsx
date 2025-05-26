@@ -24,23 +24,23 @@ export default function Topbar() {
   const mainDivMountedClass = "flex flex-col md:flex-row";
 
   const contactsDivBaseClass = "w-[25%] bg-primary text-white py-3 px-4";
-  const contactsDivMountedClass = "w-full md:w-[25%] bg-primary text-white py-3 px-4";
+  const contactsDivMountedClass = "w-full md:w-[25%] bg-primary text-white py-3 px-4 hidden sm:block";
   const contactsInnerDivBaseClass = "flex items-center justify-start space-x-6";
   const contactsInnerDivMountedClass = "flex flex-col items-center space-y-2 md:flex-row md:items-center md:justify-start md:space-y-0 md:space-x-4";
 
   const workingHoursDivBaseClass = "w-[50%] bg-primary text-white py-3"; // No order-first initially
-  const workingHoursDivMountedClass = "w-full md:w-[50%] bg-primary text-white py-3 px-2 md:px-0 order-first md:order-none";
+  const workingHoursDivMountedClass = "w-full md:w-[50%] bg-primary text-white py-3 px-2 md:px-0 order-first md:order-none hidden sm:block";
   const workingHoursInnerDivBaseClass = "flex justify-center items-center";
   const workingHoursInnerDivMountedClass = "flex justify-center items-center text-center";
 
   const socialDivBaseClass = "w-[25%] bg-primary text-white py-3 px-4";
   const socialDivMountedClass = "w-full md:w-[25%] bg-primary text-white py-3 px-4";
   const socialInnerDivBaseClass = "flex items-center justify-center gap-4";
-  const socialInnerDivMountedClass = "flex items-center justify-center gap-3 sm:gap-4";
+  const socialInnerDivMountedClass = "flex items-center justify-center gap-6 sm:gap-4";
 
   return (
     <div className={hasMounted ? mainDivMountedClass : mainDivBaseClass}>
-      {/* Contacts Section - DOM order: 1st */}
+      {/* Contacts Section - DOM order: 1st - Hidden on small screens */}
       <div className={hasMounted ? contactsDivMountedClass : contactsDivBaseClass}>
         <div className={hasMounted ? contactsInnerDivMountedClass : contactsInnerDivBaseClass}>
           <div className="flex items-center gap-1">
@@ -54,7 +54,7 @@ export default function Topbar() {
         </div>
       </div>
 
-      {/* Working Hours Section - DOM order: 2nd */}
+      {/* Working Hours Section - DOM order: 2nd - Hidden on small screens */}
       {/* `order-first md:order-none` will apply on mount if needed */}
       <div className={hasMounted ? workingHoursDivMountedClass : workingHoursDivBaseClass}>
         <div className={hasMounted ? workingHoursInnerDivMountedClass : workingHoursInnerDivBaseClass}>
@@ -62,7 +62,7 @@ export default function Topbar() {
         </div>
       </div>
 
-      {/* Social Icons & Login Section - DOM order: 3rd */}
+      {/* Social Icons & Login Section - DOM order: 3rd - Always visible */}
       <div className={hasMounted ? socialDivMountedClass : socialDivBaseClass}>
         <div className={hasMounted ? socialInnerDivMountedClass : socialInnerDivBaseClass}>
           <Link
