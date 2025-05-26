@@ -75,7 +75,7 @@ export default function OrganizationStructurePage() {
         "Funding Unit",
         "Treasury Clearing Unit",
       ],
-      borderColorClass: "border-l-[var(--secondary)]", // Explicitly using secondary, assuming it's yellowish/orange
+      borderColorClass: "border-l-[var(--secondary)]", // Explicitly using secondary,
     },
     {
       title: "IFMIS",

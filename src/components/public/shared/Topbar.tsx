@@ -10,12 +10,39 @@ import {
   Twitter,
   User,
 } from "lucide-react";
+import { useState, useEffect } from 'react';
 
 export default function Topbar() {
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  // Determine class strings based on mounted state
+  const mainDivBaseClass = "flex";
+  const mainDivMountedClass = "flex flex-col md:flex-row";
+
+  const contactsDivBaseClass = "w-[25%] bg-primary text-white py-3 px-4";
+  const contactsDivMountedClass = "w-full md:w-[25%] bg-primary text-white py-3 px-4";
+  const contactsInnerDivBaseClass = "flex items-center justify-start space-x-6";
+  const contactsInnerDivMountedClass = "flex flex-col items-center space-y-2 md:flex-row md:items-center md:justify-start md:space-y-0 md:space-x-4";
+
+  const workingHoursDivBaseClass = "w-[50%] bg-primary text-white py-3"; // No order-first initially
+  const workingHoursDivMountedClass = "w-full md:w-[50%] bg-primary text-white py-3 px-2 md:px-0 order-first md:order-none";
+  const workingHoursInnerDivBaseClass = "flex justify-center items-center";
+  const workingHoursInnerDivMountedClass = "flex justify-center items-center text-center";
+
+  const socialDivBaseClass = "w-[25%] bg-primary text-white py-3 px-4";
+  const socialDivMountedClass = "w-full md:w-[25%] bg-primary text-white py-3 px-4";
+  const socialInnerDivBaseClass = "flex items-center justify-center gap-4";
+  const socialInnerDivMountedClass = "flex items-center justify-center gap-3 sm:gap-4";
+
   return (
-    <div className="flex">
-      <div className="w-[25%] bg-primary text-white py-3 px-4">
-        <div className="flex items-center justify-start space-x-6">
+    <div className={hasMounted ? mainDivMountedClass : mainDivBaseClass}>
+      {/* Contacts Section - DOM order: 1st */}
+      <div className={hasMounted ? contactsDivMountedClass : contactsDivBaseClass}>
+        <div className={hasMounted ? contactsInnerDivMountedClass : contactsInnerDivBaseClass}>
           <div className="flex items-center gap-1">
             <Phone size={14} />
             <span>+265 1 788 533</span>
@@ -27,14 +54,17 @@ export default function Topbar() {
         </div>
       </div>
 
-      <div className="w-[50%] bg-primary text-white py-3">
-        <div className="flex justify-center items-center">
+      {/* Working Hours Section - DOM order: 2nd */}
+      {/* `order-first md:order-none` will apply on mount if needed */}
+      <div className={hasMounted ? workingHoursDivMountedClass : workingHoursDivBaseClass}>
+        <div className={hasMounted ? workingHoursInnerDivMountedClass : workingHoursInnerDivBaseClass}>
           <span>Working Hours: Mon - Fri, 7:30 AM - 4:30 PM</span>
         </div>
       </div>
 
-      <div className="w-[25%] bg-primary text-white py-3 px-4">
-        <div className="flex items-center justify-center gap-4">
+      {/* Social Icons & Login Section - DOM order: 3rd */}
+      <div className={hasMounted ? socialDivMountedClass : socialDivBaseClass}>
+        <div className={hasMounted ? socialInnerDivMountedClass : socialInnerDivBaseClass}>
           <Link
             href="https://facebook.com"
             target="_blank"
@@ -82,4 +112,4 @@ export default function Topbar() {
       </div>
     </div>
   );
-} 
+}
