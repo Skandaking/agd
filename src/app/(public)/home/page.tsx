@@ -1,7 +1,7 @@
 import { Hero } from '@/components/public/home/Hero';
 import { Publications } from '@/components/public/home/Publications';
 import { LatestNews } from '@/components/public/home/LatestNews';
-import { UpcomingEvents } from '@/components/public/home/UpcomingEvents';
+import { Events } from '@/components/public/home/Events';
 import { Gallery } from '@/components/public/home/Gallery';
 import Link from 'next/link';
 import { ChevronRight, ClipboardList, Landmark, CreditCard, Laptop } from 'lucide-react';
@@ -160,9 +160,9 @@ export default function Home() {
       {/* Upcoming Events and Gallery Section */}
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Upcoming Events */}
+          {/* Events */}
           <div className="md:col-span-1 h-[600px] flex flex-col">
-            <UpcomingEvents />
+            <Events />
           </div>
           
           {/* Gallery */}
