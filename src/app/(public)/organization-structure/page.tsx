@@ -1,25 +1,24 @@
 import { cn } from "@/lib/utils";
 
-
-const logoImageUrl = "/logo.png";
+const logoImageUrl = "/logo.png"; // Assuming logo is in public/assets/
 
 interface DepartmentProps {
   title: string;
   units?: string[];
-  color?: string; // Will use project theme colors
+  borderColorClass?: string; // Changed from color to borderColorClass for clarity
 }
 
 const ArrowDown = ({ className = "" }) => (
   <svg
-    className={cn("w-6 h-12 text-[var(--primary)]", className)} // Using primary color for arrows
+    className={cn("w-5 h-10 text-gray-400", className)} // Default muted color for connectors
     viewBox="0 0 24 48"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M12 2 V38 M12 38 L4 30 M12 38 L20 30"
+      d="M12 2 V38 M12 38 L6 30 M12 38 L18 30" // Slightly narrower arrow head
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="2.5" // Slightly thicker stroke for visibility
       strokeLinecap="round"
       strokeLinejoin="round"
     />
@@ -27,50 +26,44 @@ const ArrowDown = ({ className = "" }) => (
 );
 
 const HorizontalLine = ({ width = "w-full" }) => (
-  <div className={cn("h-0.5 bg-gray-300", width)} /> // Slightly thicker line
+  <div className={cn("h-0.5 bg-gray-400", width)} /> // Muted color for line
 );
 
+// Updated DepartmentCard to use borderColorClass for the left border
 const DepartmentCard = ({
   title,
   units = [],
-  color = "before:bg-[var(--primary)]", // Default to primary color
+  borderColorClass = "border-l-[var(--secondary)]", // Default to secondary color (assuming yellowish/orange)
 }: DepartmentProps) => (
-  <div className="flex flex-col gap-3 h-full">
+  <div className="flex flex-col gap-2.5 w-full h-full"> {/* Ensure cards can grow to fill height if needed */}
+    {/* Department Title Card */}
     <div
       className={cn(
-        "border border-gray-300 p-4 rounded-lg relative shadow-sm hover:shadow-md transition-shadow",
-        "before:absolute before:left-0 before:top-0 before:bottom-0",
-        "before:w-1.5", // Slightly thicker color bar
-        color
+        "border border-gray-300 bg-white p-3 rounded-md shadow-sm",
+        "border-l-4", // Prominent left border
+        borderColorClass
       )}
     >
-      <h3 className="text-md font-semibold text-gray-800">{title}</h3>
+      <h3 className="text-sm font-semibold text-gray-700 text-left">{title}</h3>
     </div>
-    {units.length > 0 && (
-      <div className="space-y-2 pl-3 border-l-2 border-gray-200 ml-2">
-        {units.map((unit, index) => (
-          <div
-            key={index}
-            className={cn(
-              "border border-gray-200 p-2.5 rounded-md text-sm text-gray-600 bg-gray-50/50 shadow-xs hover:bg-gray-100 transition-colors"
-            )}
-          >
-            {unit}
-          </div>
-        ))}
+    {/* Unit Cards */}
+    {units.map((unit, index) => (
+      <div
+        key={index}
+        className={cn(
+          "border border-gray-200 bg-white p-2.5 rounded-md shadow-xs text-xs text-gray-600",
+          "border-l-4", // Prominent left border for units too
+          borderColorClass, // Match department color
+          "text-left"
+        )}
+      >
+        {unit}
       </div>
-    )}
+    ))}
   </div>
 );
 
 export default function OrganizationStructurePage() {
-  // Department colors will cycle through primary, secondary, accent for variety
-  const departmentColors = [
-    "before:bg-[var(--primary)]",
-    "before:bg-[var(--secondary)]",
-    "before:bg-[var(--accent)]",
-  ];
-
   const departments: DepartmentProps[] = [
     {
       title: "Banking & Asset Management",
@@ -82,6 +75,7 @@ export default function OrganizationStructurePage() {
         "Funding Unit",
         "Treasury Clearing Unit",
       ],
+      borderColorClass: "border-l-[var(--secondary)]", // Explicitly using secondary, assuming it's yellowish/orange
     },
     {
       title: "IFMIS",
@@ -91,10 +85,12 @@ export default function OrganizationStructurePage() {
         "Systems and Database Unit",
         "ICT Infrastructure",
       ],
+      borderColorClass: "border-l-[var(--secondary)]",
     },
     {
       title: "Pay Services",
       units: ["Pensions", "Losses and Compensation", "Salaries"],
+      borderColorClass: "border-l-[var(--secondary)]",
     },
     {
       title: "Accounting Services",
@@ -104,14 +100,17 @@ export default function OrganizationStructurePage() {
         "Central Payment Office",
         "Reporting",
       ],
+      borderColorClass: "border-l-[var(--secondary)]",
     },
     {
       title: "Administration",
       units: ["Procurement", "Planning", "Support Services"],
+      borderColorClass: "border-l-[var(--secondary)]",
     },
     {
       title: "Human Resource",
       units: ["Registry", "Confidential Registry", "Training"],
+      borderColorClass: "border-l-[var(--secondary)]",
     },
   ];
 
@@ -221,38 +220,47 @@ export default function OrganizationStructurePage() {
 
       {/* Main Chart Content */}
       <div className="container mx-auto px-4 py-16">
-        <div className="bg-white rounded-xl shadow-2xl p-6 sm:p-8 md:p-12">
-          <div className="flex flex-col items-center text-center">
+        <div className="bg-white rounded-xl shadow-2xl p-4 sm:p-6 md:p-10">
+          <div className="flex flex-col items-center text-center w-full">
             {/* Accountant General */}
-            <div className="mb-6">
-              <div className="inline-block border-2 border-[var(--accent)] bg-[var(--accent)]/5 p-4 rounded-lg shadow-lg w-72">
-                <h2 className="font-bold text-xl text-[var(--accent)]">
+            <div className="mb-2">
+              <div className="inline-block border-2 border-[var(--accent)] bg-white p-3 rounded-md shadow-md w-60 sm:w-72">
+                <h2 className="font-semibold text-base sm:text-lg text-[var(--accent)]">
                   Accountant General
                 </h2>
               </div>
-              <ArrowDown className="mx-auto mt-2" />
+            </div>
+            <ArrowDown className="mx-auto text-gray-500" />
+
+            {/* Principal Secretary (Finance) */}
+            <div className="my-2">
+              <div className="inline-block border-2 border-[var(--primary)] bg-white p-3 rounded-md shadow-md w-60 sm:w-72">
+                <h2 className="font-semibold text-base sm:text-lg text-[var(--primary)]">
+                  Principal Secretary (Finance)
+                </h2>
+              </div>
+            </div>
+            <ArrowDown className="mx-auto text-gray-500" />
+
+            {/* Main Horizontal Line for Departments */}
+            <HorizontalLine width="w-full max-w-5xl mx-auto my-4" />
+
+            {/* Departments Container - Flex row with horizontal scrolling */} 
+            <div className="w-full overflow-x-auto pb-4">
+              <div className="flex flex-row justify-start sm:justify-center items-start gap-x-4 md:gap-x-5 lg:gap-x-6 pt-2" style={{ minWidth: `${departments.length * 200}px` }}> {/* Heuristic min-width */} 
+                {departments.map((dept, index) => (
+                  <div key={index} className="flex flex-col items-center flex-shrink-0 pt-0" style={{ width: '180px' }}> {/* Consistent width for department columns */}
+                    <ArrowDown className="h-8 mb-0 text-gray-500 transform scale-90" /> {/* Arrow from H-line to card */}
+                    <DepartmentCard
+                      title={dept.title}
+                      units={dept.units}
+                      borderColorClass={dept.borderColorClass} 
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Horizontal Line connecting to Principal Secretary (Finance) if needed, or directly to departments */}
-            {/* This example connects AG directly to Deputy AGs / Directors based on common structures */}
-            <HorizontalLine width="w-1/2 sm:w-1/3 md:w-1/4 mx-auto mb-6" />
-            
-            {/* Departments Grid */}
-            {/* Grid layout will be responsive. For 6 departments, it might be 1, 2, or 3 columns depending on screen size */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 w-full max-w-6xl">
-              {departments.map((dept, index) => (
-                <div key={index} className="flex flex-col items-center">
-                  {/* Arrow from horizontal line to each department card */}
-                  <div className="w-px h-8 bg-gray-300" /> 
-                  <ArrowDown className="h-8 mb-1" /> 
-                  <DepartmentCard
-                    title={dept.title}
-                    units={dept.units}
-                    color={departmentColors[index % departmentColors.length]} // Cycle through defined colors
-                  />
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
