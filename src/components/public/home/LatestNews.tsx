@@ -11,7 +11,7 @@ const newsItems = [
     title: "AGD Launches New Financial Management System",
     date: "June 15, 2024",
     excerpt: "The Accountant General's Department has successfully launched a new financial management system to enhance transparency and efficiency in public finance...",
-    image: "/news/financial-system.jpg",
+    image: "/hero/5.jpg",
     slug: "agd-launches-new-financial-system",
   },
   {
@@ -19,7 +19,7 @@ const newsItems = [
     title: "Annual Public Sector Financial Report Released",
     date: "May 28, 2024",
     excerpt: "The AGD has released the annual financial report for the public sector, highlighting key achievements and challenges in fiscal management over the past year...",
-    image: "/news/annual-report.jpg",
+    image: "/hero/3.jpg",
     slug: "annual-public-sector-financial-report",
   },
   {
@@ -27,7 +27,7 @@ const newsItems = [
     title: "Training Workshop for Government Accountants",
     date: "May 10, 2024",
     excerpt: "Over 200 government accountants participated in a capacity building workshop organized by the AGD to enhance their skills in modern financial reporting...",
-    image: "/news/training-workshop.jpg",
+    image: "/hero/6.jpg",
     slug: "training-workshop-government-accountants",
   },
 ];
