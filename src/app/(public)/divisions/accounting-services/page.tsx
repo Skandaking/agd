@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Clock, Users, FileText, CheckCircle, CreditCard, Shield, ArrowRight } from 'lucide-react';
+import { Clock, Users, FileText, CheckCircle, CreditCard, Shield, ArrowRight } from 'lucide-react';
 
 export default function AccountingServices() {
   return (
@@ -11,7 +11,7 @@ export default function AccountingServices() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url(/images/t1.jpg)`,
+            backgroundImage: `url(/hero/6.jpg)`,
           }}
         >
           {/* Lighter overlay with reduced opacity */}
@@ -29,34 +29,25 @@ export default function AccountingServices() {
         {/* Content */}
         <div className="relative container mx-auto px-4 text-center z-10">
           <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <Link 
-                href="/" 
-                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Back to Home
-              </Link>
-            </div>
             <h1 className="text-5xl font-bold mb-6 text-white">Accounting Services Division</h1>
             <p className="text-xl text-white/90 font-medium mb-4">
               Monitoring Budget Implementation, Production of Public Financial Reports, 
               and ensuring total compliance to Public Finance Laws and Regulations.
             </p>
             <div className="flex justify-center gap-4">
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                <Clock className="w-4 h-4" />
-                <span className="text-sm">48-Hour Processing</span>
+              <div className="flex items-center gap-2 bg-[var(--accent)]/50  px-4 py-2 rounded-full">
+                <Clock className="w-4 h-4 text-white" />
+                <span className="text-sm text-white">48-Hour Processing</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                <Shield className="w-4 h-4" />
-                <span className="text-sm">Regulatory Compliance</span>
+              <div className="flex items-center gap-2 bg-[var(--secondary)]/50  px-4 py-2 rounded-full">
+                <Shield className="w-4 h-4 text-white" />
+                <span className="text-sm text-white">Regulatory Compliance</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                <FileText className="w-4 h-4" />
-                <span className="text-sm">Financial Reporting</span>
+              <div className="flex items-center gap-2 bg-[var(--primary)]/50  px-4 py-2 rounded-full">
+                <FileText className="w-4 h-4 text-white" />
+                <span className="text-sm text-white">Financial Reporting</span>
               </div>
-            </div>
+            </div>  
             <div className="mt-8 flex justify-center gap-2">
               <div className="h-1 w-12 bg-[var(--accent)] rounded-full" />
               <div className="h-1 w-12 bg-[var(--secondary)] rounded-full" />
