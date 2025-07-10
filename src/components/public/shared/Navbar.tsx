@@ -191,7 +191,7 @@ export default function Navbar() {
                             : "text-gray-700"
                         )}
                       >
-                        IFMIS Division
+                        IFMIS-SAP
                       </Link>
                       <Link
                         href="/divisions/administration"

@@ -32,7 +32,7 @@ const agdSections = [
     link: "/services/pay-services",
   },
   {
-    title: "IFMIS",
+    title: "IFMIS-SAP",
     description:
       "IFMIS improves financial management through electronic reporting and payment systems. The SAP-based system enhances transparency and was rolled out across MDAs in July 2021.",
     icon: <Laptop size={24} />,
@@ -120,7 +120,7 @@ export default function Home() {
         <div className="relative z-10 container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 text-white">
-              AGD Sections
+              AGD Divisions 
             </h2>
             <div className="h-1 w-24 bg-[var(--primary)] mx-auto rounded-full" />
           </div>
