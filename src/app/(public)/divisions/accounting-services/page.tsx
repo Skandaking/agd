@@ -6,7 +6,7 @@ export default function AccountingServices() {
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
-      <div className="relative h-[300px] flex items-center justify-center overflow-hidden">
+      <div className="relative min-h-[260px] flex items-center justify-center overflow-hidden py-8 px-2 sm:px-4 md:py-0 md:h-[300px]">
         {/* Background Image with Overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -14,45 +14,43 @@ export default function AccountingServices() {
             backgroundImage: `url(/hero/6.jpg)`,
           }}
         >
-          {/* Lighter overlay with reduced opacity */}
+          {/* Lighter overlay to match About page */}
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/70 to-[var(--secondary)]/70" />
         </div>
 
-        {/* Decorative Elements - reduced opacity */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-24 h-24 bg-[var(--accent)]/5 rounded-br-full" />
-          <div className="absolute bottom-0 right-0 w-32 h-32 bg-[var(--secondary)]/5 rounded-tl-full" />
-          <div className="absolute top-1/2 left-1/4 w-8 h-8 bg-[var(--primary)]/5 rounded-full transform -translate-y-1/2" />
-          <div className="absolute top-1/3 right-1/3 w-12 h-12 bg-[var(--accent)]/5 rounded-full" />
+        {/* Decorative Elements - matched to About page */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-0 w-16 h-16 bg-[var(--accent)]/5 rounded-br-full" />
+          <div className="absolute bottom-0 right-0 w-20 h-20 bg-[var(--secondary)]/5 rounded-tl-full" />
+          <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-[var(--primary)]/5 rounded-full -translate-y-1/2" />
+          <div className="absolute top-1/3 right-1/3 w-8 h-8 bg-[var(--accent)]/5 rounded-full" />
         </div>
 
         {/* Content */}
-        <div className="relative container mx-auto px-4 text-center z-10">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-5xl font-bold mb-6 text-white">Accounting Services Division</h1>
-            <p className="text-xl text-white/90 font-medium mb-4">
-              Monitoring Budget Implementation, Production of Public Financial Reports, 
-              and ensuring total compliance to Public Finance Laws and Regulations.
-            </p>
-            <div className="flex justify-center gap-4">
-              <div className="flex items-center gap-2 bg-[var(--accent)]/50  px-4 py-2 rounded-full">
-                <Clock className="w-4 h-4 text-white" />
-                <span className="text-sm text-white">48-Hour Processing</span>
-              </div>
-              <div className="flex items-center gap-2 bg-[var(--secondary)]/50  px-4 py-2 rounded-full">
-                <Shield className="w-4 h-4 text-white" />
-                <span className="text-sm text-white">Regulatory Compliance</span>
-              </div>
-              <div className="flex items-center gap-2 bg-[var(--primary)]/50  px-4 py-2 rounded-full">
-                <FileText className="w-4 h-4 text-white" />
-                <span className="text-sm text-white">Financial Reporting</span>
-              </div>
-            </div>  
-            <div className="mt-8 flex justify-center gap-2">
-              <div className="h-1 w-12 bg-[var(--accent)] rounded-full" />
-              <div className="h-1 w-12 bg-[var(--secondary)] rounded-full" />
-              <div className="h-1 w-12 bg-[var(--primary)] rounded-full" />
+        <div className="relative w-full max-w-2xl mx-auto text-center z-10 flex flex-col items-center justify-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-white leading-tight">Services Division</h1>
+          <p className="text-base sm:text-lg md:text-xl text-white/90 font-medium mb-4 px-2 sm:px-0">
+            Monitoring Budget Implementation, Production of Public Financial Reports, <br className="hidden sm:inline" />
+            and ensuring total compliance to Public Finance Laws and Regulations.
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 w-full mb-2">
+            <div className="flex items-center gap-2 bg-[var(--accent)]/70 px-3 py-1 rounded-full min-w-[120px] justify-center">
+              <Clock className="w-4 h-4 text-white" />
+              <span className="text-xs text-white">48-Hour Processing</span>
             </div>
+            <div className="flex items-center gap-2 bg-[var(--secondary)]/70 px-3 py-1 rounded-full min-w-[120px] justify-center">
+              <Shield className="w-4 h-4 text-white" />
+              <span className="text-xs text-white">Regulatory Compliance</span>
+            </div>
+            <div className="flex items-center gap-2 bg-[var(--primary)]/70 px-3 py-1 rounded-full min-w-[120px] justify-center">
+              <FileText className="w-4 h-4 text-white" />
+              <span className="text-xs text-white">Financial Reporting</span>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-center gap-2">
+            <div className="h-1 w-8 bg-[var(--accent)] rounded-full" />
+            <div className="h-1 w-8 bg-[var(--secondary)] rounded-full" />
+            <div className="h-1 w-8 bg-[var(--primary)] rounded-full" />
           </div>
         </div>
       </div>
