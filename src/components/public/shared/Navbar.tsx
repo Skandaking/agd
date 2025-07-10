@@ -193,17 +193,6 @@ export default function Navbar() {
                       >
                         IFMIS-SAP
                       </Link>
-                      <Link
-                        href="/divisions/administration"
-                        className={cn(
-                          "block px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
-                          isActive("/divisions/administration")
-                            ? "text-primary font-bold"
-                            : "text-gray-700"
-                        )}
-                      >
-                        Administration & Support Services
-                      </Link>
                     </div>
                   </div>
                 );

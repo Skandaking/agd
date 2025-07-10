@@ -249,49 +249,122 @@ export default function PayServicesPage() {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-bold text-[var(--accent)] mb-4">Services Include:</h3>
-              <div className="space-y-3">
-                {[
-                  "Monthly pension payments",
-                  "Gratuities",
-                  "Compensations and losses", 
-                  "Salaries and salary arrears",
-                  "Advances",
-                  "Leave grants"
-                ].map((service, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div className="bg-[var(--primary)]/10 p-2 rounded-lg">
-                      <Banknote className="h-4 w-4 text-[var(--primary)]" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Regular Services */}
+            <div className="lg:col-span-2">
+              <h3 className="text-xl font-bold text-[var(--accent)] mb-6">Service Categories</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Pension Services */}
+                <div className="bg-gradient-to-br from-[var(--primary)]/5 to-[var(--secondary)]/5 rounded-lg p-5 border border-gray-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-[var(--primary)] p-3 rounded-lg">
+                      <Users className="h-5 w-5 text-white" />
                     </div>
-                    <span className="text-gray-700">{service}</span>
+                    <h4 className="font-bold text-[var(--accent)]">Pension Services</h4>
                   </div>
-                ))}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <div className="w-2 h-2 bg-[var(--primary)] rounded-full"></div>
+                      <span>Monthly pension payments</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <div className="w-2 h-2 bg-[var(--primary)] rounded-full"></div>
+                      <span>Gratuities</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Compensation Services */}
+                <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-[var(--secondary)] p-3 rounded-lg">
+                      <Shield className="h-5 w-5 text-white" />
+                    </div>
+                    <h4 className="font-bold text-[var(--accent)]">Compensation Services</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <div className="w-2 h-2 bg-[var(--secondary)] rounded-full"></div>
+                      <span>Compensations and losses</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Salary Services */}
+                <div className="bg-gradient-to-br from-[var(--accent)]/5 to-[var(--primary)]/5 rounded-lg p-5 border border-gray-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-[var(--accent)] p-3 rounded-lg">
+                      <CreditCard className="h-5 w-5 text-white" />
+                    </div>
+                    <h4 className="font-bold text-[var(--accent)]">Salary Services</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <div className="w-2 h-2 bg-[var(--accent)] rounded-full"></div>
+                      <span>Salaries and salary arrears</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Services */}
+                <div className="bg-gradient-to-br from-[var(--secondary)]/5 to-[var(--accent)]/5 rounded-lg p-5 border border-gray-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-[var(--primary)] p-3 rounded-lg">
+                      <Banknote className="h-5 w-5 text-white" />
+                    </div>
+                    <h4 className="font-bold text-[var(--accent)]">Additional Services</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <div className="w-2 h-2 bg-[var(--primary)] rounded-full"></div>
+                      <span>Advances</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <div className="w-2 h-2 bg-[var(--primary)] rounded-full"></div>
+                      <span>Leave grants</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             
+            {/* Processing Information */}
             <div>
-              <h3 className="text-xl font-bold text-[var(--accent)] mb-4">Processing Information:</h3>
+              <h3 className="text-xl font-bold text-[var(--accent)] mb-6">Processing Information</h3>
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-[var(--primary)]/5 to-[var(--secondary)]/5 p-4 rounded-lg">
-                  <h4 className="font-semibold text-[var(--accent)] mb-2">Ideal Processing Time</h4>
+                <div className="bg-gradient-to-br from-[var(--primary)]/5 to-[var(--secondary)]/5 p-4 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="bg-[var(--primary)] p-2 rounded-lg">
+                      <Clock className="h-4 w-4 text-white" />
+                    </div>
+                    <h4 className="font-semibold text-[var(--accent)]">Ideal Processing Time</h4>
+                  </div>
                   <p className="text-gray-600 text-sm">
                     In an ideal environment, payments take at least 72 hours with network and system working without interruption, 
                     including timely funding release.
                   </p>
                 </div>
                 
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-[var(--accent)] mb-2">Funding Dependencies</h4>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="bg-[var(--secondary)] p-2 rounded-lg">
+                      <AlertCircle className="h-4 w-4 text-white" />
+                    </div>
+                    <h4 className="font-semibold text-[var(--accent)]">Funding Dependencies</h4>
+                  </div>
                   <p className="text-gray-600 text-sm">
                     Worker&apos;s compensation, gratuities, general compensation, salary arrears, and leave grants depend on 
                     funding released from Ministry of Finance (Budget).
                   </p>
                 </div>
                 
-                <div className="bg-[var(--accent)]/5 p-4 rounded-lg">
-                  <h4 className="font-semibold text-[var(--accent)] mb-2">Service Priority</h4>
+                <div className="bg-[var(--accent)]/5 p-4 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="bg-[var(--accent)] p-2 rounded-lg">
+                      <Users className="h-4 w-4 text-white" />
+                    </div>
+                    <h4 className="font-semibold text-[var(--accent)]">Service Priority</h4>
+                  </div>
                   <p className="text-gray-600 text-sm">
                     For workers&apos; compensation and gratuities, the division follows the first-come-first-serve rule due to inadequate funding.
                   </p>
