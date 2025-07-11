@@ -92,7 +92,7 @@ export function LatestNews() {
       
       <div className="p-4 border-t bg-white">
         <Link
-          href="/news"
+          href="/publications/news-events"
           className="flex items-center justify-center gap-2 py-2 px-4 bg-[var(--accent)]/10 text-[var(--accent)] font-semibold rounded-lg hover:bg-[var(--accent)]/20 transition-all duration-300"
         >
           View All News
