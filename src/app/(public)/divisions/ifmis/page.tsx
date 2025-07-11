@@ -60,9 +60,9 @@ export default function IFMISPage() {
               </div>
             </div>
             <div className="flex-1 md:max-w-[40%]">
-              <div className="relative h-[250px] overflow-hidden rounded-xl shadow-xl border border-gray-100">
+              <div className="relative h-[300px] overflow-hidden rounded-xl shadow-xl border border-gray-100">
                 <Image
-                  src="/images/t3.jpg"
+                  src="/images/t7.jpg"
                   alt="IFMIS-SAP System"
                   fill
                   className="object-cover"

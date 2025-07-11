@@ -13,7 +13,7 @@ const agdSections = [
       "Handles budget monitoring, financial reporting, and ensures compliance with public finance laws. It processes all government payments through a structured workflow, including voucher auditing and cheque issuance.",
     icon: <ClipboardList size={24} />,
     color: "bg-[var(--primary)]",
-    link: "/services/accounting-services",
+    link: "/divisions/accounting-services",
   },
   {
     title: "Banking and Asset Management Services",
@@ -21,7 +21,7 @@ const agdSections = [
       "Manages government accounts, revenue, and assets. Oversees banking, foreign payments, account reconciliation, and asset compliance to ensure financial control and transparency.",
     icon: <Landmark size={24} />,
     color: "bg-[var(--secondary)]",
-    link: "/services/banking-asset-management",
+    link: "/divisions/banking-asset-management",
   },
   {
     title: "Pay Services",
@@ -29,7 +29,7 @@ const agdSections = [
       "Responsible for timely salary, pension, and compensation payments for all MDAs and councils. Also manages civil servant loans, salary reconciliations, and advance funding.",
     icon: <CreditCard size={24} />,
     color: "bg-[var(--accent)]",
-    link: "/services/pay-services",
+    link: "/divisions/pay-services",
   },
   {
     title: "IFMIS-SAP",
@@ -38,7 +38,7 @@ const agdSections = [
     icon: <Laptop size={24} />,
     color:
       "bg-gradient-to-r from-[var(--primary)] via-[var(--secondary)] to-[var(--accent)]",
-    link: "/services/ifmis",
+    link: "/divisions/ifmis",
   },
 ];
 
@@ -150,7 +150,7 @@ export default function Home() {
               href="/services"
               className="inline-flex items-center gap-2 py-3 px-8 bg-white text-[var(--primary)] font-semibold rounded-lg hover:bg-[var(--primary)] hover:text-white transition-all duration-300"
             >
-              Learn More About AGD Sections
+              Learn More About AGD Divisions
               <ChevronRight className="w-5 h-5" />
             </Link>
           </div>

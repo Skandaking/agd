@@ -9,7 +9,7 @@ export default function BankingAssetManagementPage() {
       <div className="relative min-h-[260px] flex items-center justify-center overflow-hidden py-8 px-2 sm:px-4 md:py-0 md:h-[300px]">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(/hero/1.JPG)` }}
+          style={{ backgroundImage: `url(/hero/6.JPG)` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/70 to-[var(--secondary)]/70" />
         </div>
@@ -58,15 +58,29 @@ export default function BankingAssetManagementPage() {
               </div>
             </div>
             <div className="flex-1 md:max-w-[40%]">
-              <div className="relative h-[250px] overflow-hidden rounded-xl shadow-xl border border-gray-100">
+              <div className="relative h-[300px] overflow-hidden rounded-xl shadow-xl border border-gray-100">
                 <Image
-                  src="/hero/4.JPG"
+                  src="/pictures/DSC_1307.JPG"
                   alt="Asset Management"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 40vw"
-                />
-              </div>
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold">BAM</div>
+                      <div className="text-sm text-white/90">Banking and Asset Management</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Decorative Elements */}
+                <div className="hidden md:flex justify-end gap-2 pt-2">
+                  <div className="h-1.5 w-12 bg-[var(--accent)] rounded-full" />
+                  <div className="h-1.5 w-12 bg-[var(--secondary)] rounded-full" />
+                  <div className="h-1.5 w-12 bg-[var(--primary)] rounded-full" />
+                </div>
             </div>
           </div>
         </section>
