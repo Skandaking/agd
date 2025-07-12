@@ -379,27 +379,6 @@ export default function PressReleasesPage() {
           </div>
         </section>
 
-        {/* Newsletter Signup */}
-        <section className="mb-12">
-          <div className="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] rounded-xl p-8 text-white text-center">
-            <div className="max-w-2xl mx-auto">
-              <h2 className="text-2xl font-bold mb-3">Stay Updated</h2>
-              <p className="text-white/90 mb-6">
-                Subscribe to receive the latest press releases and announcements directly in your inbox.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  className="flex-1 px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-white/50"
-                />
-                <button className="bg-white text-[var(--primary)] px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                  Subscribe
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Pagination */}
         <section className="flex justify-center">
