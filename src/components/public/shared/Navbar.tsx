@@ -260,28 +260,50 @@ export default function Navbar() {
                     </button>
 
                     {/* Dropdown Menu */}
-                    <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div className="absolute left-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                       <Link
-                        href="/publications/news-events"
+                        href="/publications/news"
                         className={cn(
                           "block px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
-                          isActive("/publications/news-events")
+                          isActive("/publications/news")
                             ? "text-primary font-bold"
                             : "text-gray-700"
                         )}
                       >
-                        News and Events
+                        News
                       </Link>
                       <Link
-                        href="/publications/press-release"
+                        href="/publications/events"
                         className={cn(
                           "block px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
-                          isActive("/publications/press-release")
+                          isActive("/publications/events")
                             ? "text-primary font-bold"
                             : "text-gray-700"
                         )}
                       >
-                        Press Release
+                        Events
+                      </Link>
+                      <Link
+                        href="/publications/documents"
+                        className={cn(
+                          "block px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
+                          isActive("/publications/documents")
+                            ? "text-primary font-bold"
+                            : "text-gray-700"
+                        )}
+                      >
+                        Documents
+                      </Link>
+                      <Link
+                        href="/publications/press-releases"
+                        className={cn(
+                          "block px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
+                          isActive("/publications/press-releases")
+                            ? "text-primary font-bold"
+                            : "text-gray-700"
+                        )}
+                      >
+                        Press Releases
                       </Link>
                     </div>
                   </div>
@@ -556,32 +578,56 @@ export default function Navbar() {
               </button>
               <div className={cn(
                 "overflow-hidden transition-all duration-200 ease-in-out",
-                openMobileDropdown === 'publications' ? "max-h-32" : "max-h-0"
+                openMobileDropdown === 'publications' ? "max-h-48" : "max-h-0"
               )}>
                 <div className="pl-4 space-y-1">
                   <Link
-                    href="/publications/news-events"
+                    href="/publications/news"
                     onClick={closeMobileMenu}
                     className={cn(
                       "block px-4 py-2 rounded-md text-sm transition-colors",
-                      isActive("/publications/news-events")
+                      isActive("/publications/news")
                         ? "text-primary bg-primary/10 font-medium"
                         : "text-gray-600 hover:text-primary hover:bg-gray-100"
                     )}
                   >
-                    News and Events
+                    News
                   </Link>
                   <Link
-                    href="/publications/press-release"
+                    href="/publications/events"
                     onClick={closeMobileMenu}
                     className={cn(
                       "block px-4 py-2 rounded-md text-sm transition-colors",
-                      isActive("/publications/press-release")
+                      isActive("/publications/events")
                         ? "text-primary bg-primary/10 font-medium"
                         : "text-gray-600 hover:text-primary hover:bg-gray-100"
                     )}
                   >
-                    Press Release
+                    Events
+                  </Link>
+                  <Link
+                    href="/publications/documents"
+                    onClick={closeMobileMenu}
+                    className={cn(
+                      "block px-4 py-2 rounded-md text-sm transition-colors",
+                      isActive("/publications/documents")
+                        ? "text-primary bg-primary/10 font-medium"
+                        : "text-gray-600 hover:text-primary hover:bg-gray-100"
+                    )}
+                  >
+                    Documents
+                  </Link>
+                  <Link
+                    href="/publications/press-releases"
+                    onClick={closeMobileMenu}
+                    className={cn(
+                      "block px-4 py-2 rounded-md text-sm transition-colors",
+                      isActive("/publications/press-releases")
+                        ? "text-primary bg-primary/10 font-medium"
+                        : "text-gray-600 hover:text-primary hover:bg-gray-100"
+                    )}
+                  >
+                    Press Releases
                   </Link>
                 </div>
               </div>
