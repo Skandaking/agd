@@ -146,7 +146,7 @@ export default function LoginPage() {
               
               <Button 
                 type="submit" 
-                className="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-semibold py-2.5 transition-colors"
+                className="w-full bg-[var(--primary)] hover:bg-[var(--primary)]/80 text-white font-semibold py-2.5 transition-colors"
                 disabled={isLoading}
               >
                 {isLoading ? "Signing in..." : "Sign in"}
