@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Edit, Trash2, Eye, Search, Upload, Image, Video, File } from 'lucide-react';
+import { Edit, Trash2, Eye, Search, Upload, Image as ImageIcon, Video, File } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MediaItem {
@@ -89,7 +89,7 @@ export default function MediaManagementPage() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'image': return <Image className="h-4 w-4" />;
+      case 'image': return <ImageIcon className="h-4 w-4" />;
       case 'video': return <Video className="h-4 w-4" />;
       case 'document': return <File className="h-4 w-4" />;
       default: return <File className="h-4 w-4" />;
@@ -128,7 +128,7 @@ export default function MediaManagementPage() {
               <p className="text-2xl font-bold text-gray-900">{media.length}</p>
             </div>
             <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <Image className="h-4 w-4 text-white" />
+              <ImageIcon className="h-4 w-4 text-white" />
             </div>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function MediaManagementPage() {
               <p className="text-2xl font-bold text-gray-900">{media.filter(m => m.type === 'image').length}</p>
             </div>
             <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center">
-              <Image className="h-4 w-4 text-white" />
+              <ImageIcon className="h-4 w-4 text-white" />
             </div>
           </div>
         </div>
