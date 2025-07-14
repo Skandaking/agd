@@ -9,22 +9,22 @@ export default function DashboardPage() {
       {/* Dashboard stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[
-          { title: "Total News", value: "24", change: "+3", color: "bg-primary" },
-          { title: "Media Items", value: "156", change: "+12", color: "bg-secondary" },
-          { title: "Press Releases", value: "18", change: "+2", color: "bg-accent" },
-          { title: "Page Views", value: "2,345", change: "+105", color: "bg-green-500" }
-        ].map((stat, index) => (
-          <div key={index} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-gray-500 font-medium">{stat.title}</div>
-              <div className={`w-3 h-3 rounded-full ${stat.color}`}></div>
-            </div>
-            <div className="text-3xl font-bold mb-2">{stat.value}</div>
-            <div className="text-sm text-green-600">
-              {stat.change} since last month
-            </div>
-          </div>
-        ))}
+          { title: "Total News", value: "24", change: "+3", color: "bg-primary", href: "/dashboard/news" },
+          { title: "Documents", value: "156", change: "+12", color: "bg-secondary", href: "/dashboard/documents" },
+          { title: "Press Releases", value: "18", change: "+2", color: "bg-accent", href: "/dashboard/press-releases" },
+          { title: "Events", value: "12", change: "+5", color: "bg-green-500", href: "/dashboard/events" }
+                  ].map((stat, index) => (
+            <a key={index} href={stat.href} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-gray-500 font-medium">{stat.title}</div>
+                <div className={`w-3 h-3 rounded-full ${stat.color}`}></div>
+              </div>
+              <div className="text-3xl font-bold mb-2">{stat.value}</div>
+              <div className="text-sm text-green-600">
+                {stat.change} since last month
+              </div>
+            </a>
+          ))}
       </div>
       
       {/* Recent activity */}
@@ -60,15 +60,15 @@ export default function DashboardPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x">
           {[
-            { title: "Add News", description: "Create a new news article" },
-            { title: "Upload Media", description: "Add images or videos" },
-            { title: "New Press Release", description: "Publish a press release" },
-            { title: "Manage Users", description: "Add or edit user accounts" }
+            { title: "Add News", description: "Create a new news article", href: "/dashboard/news" },
+            { title: "Upload Documents", description: "Add official documents", href: "/dashboard/documents" },
+            { title: "New Press Release", description: "Publish a press release", href: "/dashboard/press-releases" },
+            { title: "Create Event", description: "Schedule a new event", href: "/dashboard/events" }
           ].map((action, index) => (
             <div key={index} className="p-6 text-center">
               <h3 className="font-medium mb-2">{action.title}</h3>
               <p className="text-sm text-gray-500 mb-4">{action.description}</p>
-              <button className="text-primary hover:underline">Get Started →</button>
+              <a href={action.href} className="text-primary hover:underline">Get Started →</a>
             </div>
           ))}
         </div>

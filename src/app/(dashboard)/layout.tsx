@@ -36,16 +36,28 @@ export default function DashboardLayout({
               News
             </a>
             <a 
-              href="/dashboard/media" 
-              className="block py-2 px-3 rounded-md text-white hover:bg-white/10"
-            >
-              Media
-            </a>
-            <a 
               href="/dashboard/press-releases" 
               className="block py-2 px-3 rounded-md text-white hover:bg-white/10"
             >
               Press Releases
+            </a>
+            <a 
+              href="/dashboard/events" 
+              className="block py-2 px-3 rounded-md text-white hover:bg-white/10"
+            >
+              Events
+            </a>
+            <a 
+              href="/dashboard/documents" 
+              className="block py-2 px-3 rounded-md text-white hover:bg-white/10"
+            >
+              Documents
+            </a>
+            <a 
+              href="/dashboard/media" 
+              className="block py-2 px-3 rounded-md text-white hover:bg-white/10"
+            >
+              Media Gallery
             </a>
           </div>
           
