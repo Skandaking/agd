@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Edit, Trash2, Eye, Search, Upload, Image as ImageIcon, Video, File } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -220,10 +221,11 @@ export default function MediaManagementPage() {
           <div key={item.id} className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
             <div className="relative h-48 bg-gray-200">
               {item.type === 'image' ? (
-                <img
+                <Image
                   src={item.url}
                   alt={item.alt || item.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
