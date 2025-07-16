@@ -8,14 +8,18 @@ import {
   Search, 
   Settings, 
   LogOut,
-  ChevronDown
+  ChevronDown,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 
 interface HeaderProps {
   onMobileMenuToggle?: () => void;
+  onSidebarToggle?: () => void;
+  isSidebarCollapsed?: boolean;
 }
 
-export default function Header({ onMobileMenuToggle }: HeaderProps) {
+export default function Header({ onMobileMenuToggle, onSidebarToggle, isSidebarCollapsed }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -29,15 +33,26 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-40">
-      {/* Left side - Mobile menu button */}
-      <div className="flex items-center gap-4">
+      {/* Left side - Mobile menu button and sidebar toggle */}
+      <div className="flex items-center gap-2 md:gap-4">
         <button 
           onClick={onMobileMenuToggle}
           className="md:hidden text-gray-500 hover:text-gray-700 transition-colors"
         >
           <Menu className="w-5 h-5" />
         </button>
-        
+        {/* Sidebar collapse/expand icon (desktop only) */}
+        <button
+          onClick={onSidebarToggle}
+          className="hidden md:flex items-center justify-center p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+          aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {isSidebarCollapsed ? (
+            <ChevronsRight className="w-5 h-5" />
+          ) : (
+            <ChevronsLeft className="w-5 h-5" />
+          )}
+        </button>
         {/* Search bar - hidden on mobile */}
         <div className="hidden md:flex items-center relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />

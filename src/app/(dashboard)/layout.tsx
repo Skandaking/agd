@@ -10,8 +10,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const toggleSidebarCollapse = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -30,19 +32,29 @@ export default function DashboardLayout({
         <Sidebar onClose={closeMobileMenu} />
       </aside>
 
-      {/* Desktop sidebar - Fixed and non-scrollable */}
-      <aside className="w-64 bg-[var(--primary)] hidden md:flex flex-col fixed inset-y-0 left-0 z-50">
-        <Sidebar />
+      {/* Desktop sidebar - Fixed and collapsible */}
+      <aside className={`hidden md:flex flex-col fixed inset-y-0 left-0 z-50 bg-[var(--primary)] transition-all duration-300 ${
+        isSidebarCollapsed ? 'w-16' : 'w-64'
+      }`}>
+        <Sidebar 
+          isCollapsed={isSidebarCollapsed} 
+        />
       </aside>
       
-      {/* Main content area */}
-      <div className="flex-1 flex flex-col md:ml-64">
+      {/* Main content area - Adjusts based on sidebar state */}
+      <div className={`flex-1 flex flex-col transition-all duration-300 w-full max-w-none ${
+        isSidebarCollapsed ? 'md:ml-16' : 'md:ml-64'
+      }`}>
         {/* Header - Sticky */}
-        <Header onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
+        <Header 
+          onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          onSidebarToggle={toggleSidebarCollapse}
+          isSidebarCollapsed={isSidebarCollapsed}
+        />
         
         {/* Page content - Scrollable */}
-        <main className="flex-1 overflow-y-auto bg-gray-50">
-          <div className="p-6">
+        <main className="flex-1 overflow-y-auto bg-gray-50 w-full max-w-none">
+          <div className="p-4 md:p-6 w-full max-w-none">
             {children}
           </div>
         </main>

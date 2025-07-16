@@ -105,7 +105,7 @@ export default function DocumentsManagementPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-none px-4 md:px-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -214,9 +214,10 @@ export default function DocumentsManagementPage() {
       </div>
 
       {/* Documents List */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+      <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
+        {/* Vertically scrollable table, no horizontal scroll */}
+        <div className="max-h-[60vh] overflow-y-auto">
+          <table className="min-w-full table-fixed divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

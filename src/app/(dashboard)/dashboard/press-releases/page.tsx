@@ -98,89 +98,92 @@ export default function PressReleasesManagementPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 max-w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Press Releases Management</h1>
-          <p className="text-gray-600">Manage official announcements and press releases</p>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">Press Releases Management</h1>
+          <p className="text-sm md:text-base text-gray-600">Manage official announcements and press releases</p>
         </div>
-        <Button className="bg-[var(--primary)] hover:bg-[var(--primary)]/90">
+        <Button className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 flex-shrink-0">
           <Plus className="h-4 w-4 mr-2" />
-          Add Press Release
+          <span className="hidden sm:inline">Add Press Release</span>
+          <span className="sm:hidden">Add</span>
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="bg-white rounded-lg shadow p-4 md:p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Releases</p>
-              <p className="text-2xl font-bold text-gray-900">{pressReleases.length}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs md:text-sm font-medium text-gray-600 truncate">Total Releases</p>
+              <p className="text-lg md:text-2xl font-bold text-gray-900">{pressReleases.length}</p>
             </div>
-            <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <Megaphone className="h-4 w-4 text-white" />
+            <div className="h-6 w-6 md:h-8 md:w-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <Megaphone className="h-3 w-3 md:h-4 md:w-4 text-white" />
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 md:p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Published</p>
-              <p className="text-2xl font-bold text-gray-900">{pressReleases.filter(p => p.status === 'published').length}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs md:text-sm font-medium text-gray-600 truncate">Published</p>
+              <p className="text-lg md:text-2xl font-bold text-gray-900">{pressReleases.filter(p => p.status === 'published').length}</p>
             </div>
-            <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">{pressReleases.filter(p => p.status === 'published').length}</span>
+            <div className="h-6 w-6 md:h-8 md:w-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs md:text-sm font-bold">{pressReleases.filter(p => p.status === 'published').length}</span>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 md:p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">High Priority</p>
-              <p className="text-2xl font-bold text-gray-900">{pressReleases.filter(p => p.priority === 'high').length}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs md:text-sm font-medium text-gray-600 truncate">High Priority</p>
+              <p className="text-lg md:text-2xl font-bold text-gray-900">{pressReleases.filter(p => p.priority === 'high').length}</p>
             </div>
-            <div className="h-8 w-8 bg-red-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">{pressReleases.filter(p => p.priority === 'high').length}</span>
+            <div className="h-6 w-6 md:h-8 md:w-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs md:text-sm font-bold">{pressReleases.filter(p => p.priority === 'high').length}</span>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 md:p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Views</p>
-              <p className="text-2xl font-bold text-gray-900">{pressReleases.reduce((sum, p) => sum + p.views, 0).toLocaleString()}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs md:text-sm font-medium text-gray-600 truncate">Total Views</p>
+              <p className="text-lg md:text-2xl font-bold text-gray-900">{pressReleases.reduce((sum, p) => sum + p.views, 0).toLocaleString()}</p>
             </div>
-            <div className="h-8 w-8 bg-purple-500 rounded-full flex items-center justify-center">
-              <Eye className="h-4 w-4 text-white" />
+            <div className="h-6 w-6 md:h-8 md:w-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <Eye className="h-3 w-3 md:h-4 md:w-4 text-white" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1">
+      <div className="bg-white rounded-lg shadow p-4 md:p-6">
+        <div className="space-y-4">
+          {/* Search */}
+          <div className="w-full">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
                 type="text"
                 placeholder="Search press releases..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 text-sm md:text-base"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
           
-          <div className="flex gap-4">
+          {/* Filter dropdowns */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 text-sm"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
@@ -192,7 +195,7 @@ export default function PressReleasesManagementPage() {
             </select>
             
             <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 text-sm"
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
             >
@@ -204,7 +207,7 @@ export default function PressReleasesManagementPage() {
             </select>
             
             <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 text-sm"
               value={selectedPriority}
               onChange={(e) => setSelectedPriority(e.target.value)}
             >
@@ -224,28 +227,28 @@ export default function PressReleasesManagementPage() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Press Release
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                   Priority
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                   Author
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
                   Views
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -253,58 +256,72 @@ export default function PressReleasesManagementPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredPressReleases.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <div className="max-w-xs">
                       <div className="text-sm font-medium text-gray-900 truncate">{item.title}</div>
                       <div className="text-sm text-gray-500 truncate">{item.excerpt}</div>
+                      {/* Mobile-only info */}
+                      <div className="sm:hidden mt-2 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                            {item.category}
+                          </span>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(item.priority)}`}>
+                            {item.priority}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {item.author} • {new Date(item.date).toLocaleDateString()} • {item.views.toLocaleString()} views
+                        </div>
+                      </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                     <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                       {item.category}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(item.priority)}`}>
                       {item.priority}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(item.status)}`}>
                       {item.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
                     <div className="flex items-center">
                       <User className="h-4 w-4 text-gray-400 mr-2" />
                       {item.author}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 text-gray-400 mr-2" />
                       {new Date(item.date).toLocaleDateString()}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden xl:table-cell">
                     <div className="flex items-center">
                       <Eye className="h-4 w-4 text-gray-400 mr-2" />
                       {item.views.toLocaleString()}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">
-                        <Eye className="h-4 w-4" />
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex items-center space-x-1 md:space-x-2">
+                      <button className="text-blue-600 hover:text-blue-900 p-1">
+                        <Eye className="h-3 w-3 md:h-4 md:w-4" />
                       </button>
-                      <button className="text-green-600 hover:text-green-900">
-                        <Edit className="h-4 w-4" />
+                      <button className="text-green-600 hover:text-green-900 p-1">
+                        <Edit className="h-3 w-3 md:h-4 md:w-4" />
                       </button>
                       <button 
                         onClick={() => handleDelete(item.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-red-600 hover:text-red-900 p-1"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                       </button>
                     </div>
                   </td>
