@@ -1,289 +1,453 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Search, Calendar, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useDashboard } from '@/contexts/DashboardContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { 
+  Plus,
+  Search,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Trash2,
+  Calendar,
+  User,
+  TrendingUp
+} from 'lucide-react';
 
-interface NewsItem {
-  id: number;
+interface NewsArticle {
+  id: string;
   title: string;
   excerpt: string;
-  category: string;
-  status: 'published' | 'draft' | 'archived';
+  content: string;
+  category: 'announcement' | 'update' | 'report' | 'event' | 'policy';
+  status: 'draft' | 'published' | 'archived';
   author: string;
-  date: string;
+  publishedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
   views: number;
+  featured: boolean;
 }
 
-const mockNews: NewsItem[] = [
+const mockNews: NewsArticle[] = [
   {
-    id: 1,
-    title: "AGD Launches New Financial Management System",
-    excerpt: "The Accountant General's Department has successfully launched a new financial management system to enhance transparency...",
-    category: "System Update",
-    status: "published",
-    author: "Admin User",
-    date: "2024-06-15",
-    views: 1247
+    id: '1',
+    title: 'AGD Launches New Financial Management System',
+    excerpt: 'The Accountant General\'s Department has successfully launched a new financial management system to enhance transparency and efficiency in government financial operations.',
+    content: 'Full article content here...',
+    category: 'announcement',
+    status: 'published',
+    author: 'Admin User',
+    publishedAt: new Date('2024-01-15'),
+    createdAt: new Date('2024-01-14'),
+    updatedAt: new Date('2024-01-15'),
+    views: 1247,
+    featured: true,
   },
   {
-    id: 2,
-    title: "Annual Public Sector Financial Report Released",
-    excerpt: "The AGD has released the annual financial report for the public sector, highlighting key achievements...",
-    category: "Report",
-    status: "published",
-    author: "John Doe",
-    date: "2024-05-28",
-    views: 892
+    id: '2',
+    title: 'Annual Public Sector Financial Report Released',
+    excerpt: 'The AGD has released the comprehensive annual financial report for the public sector, highlighting key achievements and financial performance metrics.',
+    content: 'Full article content here...',
+    category: 'report',
+    status: 'published',
+    author: 'John Doe',
+    publishedAt: new Date('2024-01-10'),
+    createdAt: new Date('2024-01-09'),
+    updatedAt: new Date('2024-01-10'),
+    views: 892,
+    featured: false,
   },
   {
-    id: 3,
-    title: "Training Workshop for Government Accountants",
-    excerpt: "Over 200 government accountants participated in a capacity building workshop organized by the AGD...",
-    category: "Training",
-    status: "draft",
-    author: "Jane Smith",
-    date: "2024-05-10",
-    views: 0
-  }
+    id: '3',
+    title: 'Training Workshop for Government Accountants',
+    excerpt: 'Over 200 government accountants participated in a comprehensive capacity building workshop organized by the AGD to enhance financial management skills.',
+    content: 'Full article content here...',
+    category: 'event',
+    status: 'draft',
+    author: 'Jane Smith',
+    publishedAt: null,
+    createdAt: new Date('2024-01-08'),
+    updatedAt: new Date('2024-01-08'),
+    views: 0,
+    featured: false,
+  },
 ];
 
-export default function NewsManagementPage() {
-  const [news, setNews] = useState<NewsItem[]>(mockNews);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+const categoryLabels: Record<NewsArticle['category'], string> = {
+  announcement: 'Announcement',
+  update: 'System Update',
+  report: 'Report',
+  event: 'Event',
+  policy: 'Policy',
+};
 
-  const categories = ['all', 'System Update', 'Report', 'Training', 'Technology', 'Policy'];
-  const statuses = ['all', 'published', 'draft', 'archived'];
+const statusLabels: Record<NewsArticle['status'], string> = {
+  draft: 'Draft',
+  published: 'Published',
+  archived: 'Archived',
+};
 
-  const filteredNews = news.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-    const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
+const getStatusVariant = (status: NewsArticle['status']) => {
+  switch (status) {
+    case 'published':
+      return 'default';
+    case 'draft':
+      return 'secondary';
+    case 'archived':
+      return 'outline';
+  }
+};
+
+const getCategoryVariant = (category: NewsArticle['category']) => {
+  switch (category) {
+    case 'announcement':
+      return 'default';
+    case 'update':
+      return 'secondary';
+    case 'report':
+      return 'outline';
+    case 'event':
+      return 'secondary';
+    case 'policy':
+      return 'outline';
+  }
+};
+
+export default function NewsPage() {
+  const { setPageTitle, setBreadcrumbs, showToast } = useDashboard();
+  const [news, setNews] = useState<NewsArticle[]>(mockNews);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<NewsArticle['status'] | 'all'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<NewsArticle['category'] | 'all'>('all');
+
+  useEffect(() => {
+    setPageTitle('News Management');
+    setBreadcrumbs([
+      { label: 'Home', href: '/dashboard' },
+      { label: 'News' },
+    ]);
+  }, [setPageTitle, setBreadcrumbs]);
+
+  const filteredNews = news.filter((article) => {
+    const matchesSearch = 
+      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || article.status === statusFilter;
+    const matchesCategory = categoryFilter === 'all' || article.category === categoryFilter;
     
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  const handleDelete = (id: number) => {
-    if (confirm('Are you sure you want to delete this news item?')) {
-      setNews(news.filter(item => item.id !== id));
-    }
+  const handleDelete = (id: string) => {
+    setNews(news.filter(article => article.id !== id));
+    showToast.success('Article deleted successfully');
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'published': return 'bg-green-100 text-green-800';
-      case 'draft': return 'bg-yellow-100 text-yellow-800';
-      case 'archived': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const handleStatusChange = (id: string, newStatus: NewsArticle['status']) => {
+    setNews(news.map(article => 
+      article.id === id 
+        ? { 
+            ...article, 
+            status: newStatus,
+            publishedAt: newStatus === 'published' ? new Date() : article.publishedAt
+          }
+        : article
+    ));
+    showToast.success(`Article status changed to ${newStatus}`);
+  };
+
+  const stats = {
+    total: news.length,
+    published: news.filter(n => n.status === 'published').length,
+    drafts: news.filter(n => n.status === 'draft').length,
+    totalViews: news.reduce((sum, n) => sum + n.views, 0),
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">News Management</h1>
-          <p className="text-gray-600">Manage news articles and announcements</p>
+          <h1 className="text-3xl font-bold tracking-tight">News Management</h1>
+          <p className="text-muted-foreground">
+            Create, manage, and publish news articles and announcements.
+          </p>
         </div>
-        <Button className="bg-[var(--primary)] hover:bg-[var(--primary)]/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Add News Article
+        <Button asChild>
+          <Link href="/dashboard/news/new">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Article
+          </Link>
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Articles</p>
-              <p className="text-2xl font-bold text-gray-900">{news.length}</p>
-            </div>
-            <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">{news.length}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Published</p>
-              <p className="text-2xl font-bold text-gray-900">{news.filter(n => n.status === 'published').length}</p>
-            </div>
-            <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">{news.filter(n => n.status === 'published').length}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Drafts</p>
-              <p className="text-2xl font-bold text-gray-900">{news.filter(n => n.status === 'draft').length}</p>
-            </div>
-            <div className="h-8 w-8 bg-yellow-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">{news.filter(n => n.status === 'draft').length}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Views</p>
-              <p className="text-2xl font-bold text-gray-900">{news.reduce((sum, n) => sum + n.views, 0).toLocaleString()}</p>
-            </div>
-            <div className="h-8 w-8 bg-purple-500 rounded-full flex items-center justify-center">
-              <Eye className="h-4 w-4 text-white" />
-            </div>
-          </div>
-        </div>
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Articles</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
+            <p className="text-xs text-muted-foreground">
+              All articles in system
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Published</CardTitle>
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.published}</div>
+            <p className="text-xs text-muted-foreground">
+              Live articles
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Drafts</CardTitle>
+            <Edit className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.drafts}</div>
+            <p className="text-xs text-muted-foreground">
+              Work in progress
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              All time views
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Search news articles..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+      {/* Filters and Search */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Filter Articles</CardTitle>
+          <CardDescription>
+            Use the filters below to find specific articles.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end">
+            <div className="flex-1">
+              <Label htmlFor="search">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Search articles..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="w-full md:w-48">
+              <Label htmlFor="status">Status</Label>
+              <select
+                id="status"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as NewsArticle['status'] | 'all')}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="all">All Status</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+            <div className="w-full md:w-48">
+              <Label htmlFor="category">Category</Label>
+              <select
+                id="category"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value as NewsArticle['category'] | 'all')}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="all">All Categories</option>
+                <option value="announcement">Announcement</option>
+                <option value="update">System Update</option>
+                <option value="report">Report</option>
+                <option value="event">Event</option>
+                <option value="policy">Policy</option>
+              </select>
             </div>
           </div>
-          
-          <div className="flex gap-4">
-            <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category}
-                </option>
-              ))}
-            </select>
-            
-            <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-            >
-              {statuses.map(status => (
-                <option key={status} value={status}>
-                  {status === 'all' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* News List */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Article
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Author
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Views
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredNews.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="max-w-xs">
-                      <div className="text-sm font-medium text-gray-900 truncate">{item.title}</div>
-                      <div className="text-sm text-gray-500 truncate">{item.excerpt}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                      {item.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(item.status)}`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div className="flex items-center">
-                      <User className="h-4 w-4 text-gray-400 mr-2" />
-                      {item.author}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-                      {new Date(item.date).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div className="flex items-center">
-                      <Eye className="h-4 w-4 text-gray-400 mr-2" />
-                      {item.views.toLocaleString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button className="text-green-600 hover:text-green-900">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(item.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      {filteredNews.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No news articles found matching your criteria.</p>
-        </div>
-      )}
+      {/* Articles Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Articles ({filteredNews.length})</CardTitle>
+          <CardDescription>
+            Manage your news articles and their publication status.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-hidden rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Article</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Author</TableHead>
+                  <TableHead>Published</TableHead>
+                  <TableHead>Views</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredNews.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      No articles found matching your criteria.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredNews.map((article) => (
+                    <TableRow key={article.id}>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="font-medium flex items-center gap-2">
+                            {article.title}
+                            {article.featured && (
+                              <Badge variant="secondary" className="text-xs">
+                                Featured
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-sm text-muted-foreground line-clamp-2">
+                            {article.excerpt}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getCategoryVariant(article.category)}>
+                          {categoryLabels[article.category]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusVariant(article.status)}>
+                          {statusLabels[article.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          {article.author}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {article.publishedAt ? (
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            {article.publishedAt.toLocaleDateString()}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">Not published</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                          {article.views.toLocaleString()}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/dashboard/news/${article.id}`}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/dashboard/news/${article.id}/edit`}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {article.status === 'draft' && (
+                              <DropdownMenuItem 
+                                onClick={() => handleStatusChange(article.id, 'published')}
+                              >
+                                Publish
+                              </DropdownMenuItem>
+                            )}
+                            {article.status === 'published' && (
+                              <DropdownMenuItem 
+                                onClick={() => handleStatusChange(article.id, 'draft')}
+                              >
+                                Unpublish
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              className="text-red-600"
+                              onClick={() => handleDelete(article.id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 } 

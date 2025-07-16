@@ -1,52 +1,104 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import { useDashboard } from '@/contexts/DashboardContext';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { 
+  Building2,
   LayoutDashboard, 
   Newspaper, 
   Megaphone, 
   Calendar, 
   FileText, 
   Image, 
-  User, 
+  Settings,
   LogOut,
-  Building2,
+  ChevronLeft,
   X
 } from 'lucide-react';
 
-const navigation = [
+interface NavItem {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+  badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline';
+}
+
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+const navigation: NavSection[] = [
   {
-    name: 'Main',
+    title: 'Overview',
     items: [
-      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      {
+        title: 'Dashboard',
+        href: '/dashboard',
+        icon: LayoutDashboard,
+      },
     ],
   },
   {
-    name: 'Content',
+    title: 'Content Management',
     items: [
-      { name: 'News', href: '/dashboard/news', icon: Newspaper },
-      { name: 'Press Releases', href: '/dashboard/press-releases', icon: Megaphone },
-      { name: 'Events', href: '/dashboard/events', icon: Calendar },
-      { name: 'Documents', href: '/dashboard/documents', icon: FileText },
-      { name: 'Media Gallery', href: '/dashboard/media', icon: Image },
+      {
+        title: 'News',
+        href: '/dashboard/news',
+        icon: Newspaper,
+        badge: '3',
+        badgeVariant: 'secondary',
+      },
+      {
+        title: 'Press Releases',
+        href: '/dashboard/press-releases',
+        icon: Megaphone,
+        badge: '2',
+        badgeVariant: 'secondary',
+      },
+      {
+        title: 'Events',
+        href: '/dashboard/events',
+        icon: Calendar,
+      },
+      {
+        title: 'Documents',
+        href: '/dashboard/documents',
+        icon: FileText,
+      },
+      {
+        title: 'Media Gallery',
+        href: '/dashboard/media',
+        icon: Image,
+      },
     ],
   },
   {
-    name: 'Settings',
+    title: 'System',
     items: [
-      { name: 'Profile', href: '/dashboard/profile', icon: User },
+      {
+        title: 'Settings',
+        href: '/dashboard/settings',
+        icon: Settings,
+      },
     ],
   },
 ];
 
-interface SidebarProps {
-  onClose?: () => void;
-  isCollapsed?: boolean;
-}
-
-export default function Sidebar({ onClose, isCollapsed = false }: SidebarProps) {
+export function Sidebar() {
   const pathname = usePathname();
+  const { 
+    isSidebarCollapsed, 
+    setSidebarCollapsed, 
+    isMobileSidebarOpen, 
+    setMobileSidebarOpen 
+  } = useDashboard();
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -55,104 +107,141 @@ export default function Sidebar({ onClose, isCollapsed = false }: SidebarProps) 
     return pathname.startsWith(href);
   };
 
-  return (
-    <div className={`flex flex-col h-full bg-[var(--primary)] text-white transition-all duration-300 ${
-      isCollapsed ? 'w-16' : 'w-64'
-    }`}>
-      {/* Logo/Brand */}
-      <div className="flex items-center justify-between p-6 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Building2 className="w-5 h-5 text-white" />
-          </div>
-          {!isCollapsed && (
-            <div className="overflow-hidden">
-              <h1 className="font-bold text-xl whitespace-nowrap">AGD Admin</h1>
-              <p className="text-white/70 text-xs whitespace-nowrap">Dashboard</p>
-            </div>
-          )}
-        </div>
-        {/* Mobile close button */}
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="md:hidden p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
-      </div>
+  const handleMobileClose = () => {
+    setMobileSidebarOpen(false);
+  };
 
-      {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-8 overflow-y-auto">
-        {navigation.map((section) => (
-          <div key={section.name}>
-            {!isCollapsed && (
-              <h3 className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-3 px-2">
-                {section.name}
-              </h3>
+  const handleToggleCollapse = () => {
+    setSidebarCollapsed(!isSidebarCollapsed);
+  };
+
+  return (
+    <>
+      {/* Mobile overlay */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={handleMobileClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-border transition-all duration-300",
+          // Mobile styles
+          "lg:translate-x-0",
+          isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full",
+          // Desktop styles
+          isSidebarCollapsed ? "lg:w-16" : "lg:w-64",
+          // Mobile width
+          "w-64"
+        )}
+      >
+        {/* Header */}
+        <div className="flex h-16 items-center justify-between border-b border-border px-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+              <Building2 className="h-5 w-5 text-primary-foreground" />
+            </div>
+            {!isSidebarCollapsed && (
+              <div className="flex flex-col">
+                <h1 className="text-lg font-semibold text-foreground">AGD Admin</h1>
+                <p className="text-xs text-muted-foreground">Dashboard</p>
+              </div>
             )}
-            <ul className="space-y-1">
-              {section.items.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.href);
-                
-                return (
-                  <li key={item.name}>
+          </div>
+          
+          {/* Mobile close button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={handleMobileClose}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          
+          {/* Desktop collapse button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden lg:flex"
+            onClick={handleToggleCollapse}
+          >
+            <ChevronLeft 
+              className={cn(
+                "h-4 w-4 transition-transform duration-200",
+                isSidebarCollapsed && "rotate-180"
+              )} 
+            />
+          </Button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 space-y-2 p-4 overflow-y-auto">
+          {navigation.map((section) => (
+            <div key={section.title} className="space-y-1">
+              {!isSidebarCollapsed && (
+                <h3 className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {section.title}
+                </h3>
+              )}
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+                  
+                  return (
                     <Link
+                      key={item.href}
                       href={item.href}
-                      onClick={onClose}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative ${
-                        active
-                          ? 'bg-white/15 text-white shadow-sm'
-                          : 'text-white/80 hover:bg-white/10 hover:text-white'
-                      } ${isCollapsed ? 'justify-center' : ''}`}
-                      title={isCollapsed ? item.name : ''}
+                      onClick={handleMobileClose}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                        "hover:bg-accent hover:text-accent-foreground",
+                        active 
+                          ? "bg-accent text-accent-foreground" 
+                          : "text-muted-foreground",
+                        isSidebarCollapsed && "justify-center"
+                      )}
                     >
-                      <Icon className={`w-4 h-4 transition-transform duration-200 flex-shrink-0 ${
-                        active ? 'scale-110' : 'group-hover:scale-105'
-                      }`} />
-                      {!isCollapsed && (
+                      <Icon className="h-4 w-4 shrink-0" />
+                      {!isSidebarCollapsed && (
                         <>
-                          <span className="truncate">{item.name}</span>
-                          {active && (
-                            <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full flex-shrink-0" />
+                          <span className="truncate">{item.title}</span>
+                          {item.badge && (
+                            <Badge 
+                              variant={item.badgeVariant || 'default'} 
+                              className="ml-auto h-5 w-5 shrink-0 items-center justify-center rounded-full p-0 text-xs"
+                            >
+                              {item.badge}
+                            </Badge>
                           )}
                         </>
                       )}
-                      {/* Tooltip for collapsed state */}
-                      {isCollapsed && (
-                        <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                          {item.name}
-                        </div>
-                      )}
                     </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
-      </nav>
-
-      {/* Logout Button */}
-      <div className="p-4 border-t border-white/10">
-        <button 
-          className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-all duration-200 group relative ${
-            isCollapsed ? 'justify-center' : ''
-          }`}
-          title={isCollapsed ? 'Logout' : ''}
-        >
-          <LogOut className="w-4 h-4 group-hover:scale-105 transition-transform duration-200 flex-shrink-0" />
-          {!isCollapsed && <span>Logout</span>}
-          {/* Tooltip for collapsed state */}
-          {isCollapsed && (
-            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-              Logout
+                  );
+                })}
+              </div>
             </div>
-          )}
-        </button>
-      </div>
-    </div>
+          ))}
+        </nav>
+
+        {/* Footer */}
+        <div className="border-t border-border p-4">
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
+              isSidebarCollapsed && "justify-center"
+            )}
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            {!isSidebarCollapsed && <span>Logout</span>}
+          </Button>
+        </div>
+      </aside>
+    </>
   );
 } 
