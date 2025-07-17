@@ -2,13 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Building2,
   LayoutDashboard, 
   Newspaper, 
   Megaphone, 
@@ -135,8 +135,14 @@ export function Sidebar() {
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Building2 className="h-5 w-5 text-primary-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
+              <NextImage 
+                src="/logo.png" 
+                alt="AGD Logo" 
+                width={24} 
+                height={24}
+                className="object-contain"
+              />
             </div>
             {!isSidebarCollapsed && (
               <div className="flex flex-col">
