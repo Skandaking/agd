@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +14,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { 
   Menu,
-  Search,
   Bell,
   User,
   Settings,
@@ -28,7 +26,6 @@ import {
 import { cn } from '@/lib/utils';
 
 export function Header() {
-  const [searchQuery, setSearchQuery] = useState('');
   const { 
     setMobileSidebarOpen,
     pageTitle,
@@ -40,14 +37,6 @@ export function Header() {
     isSidebarCollapsed,
     setSidebarCollapsed,
   } = useDashboard();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // Implement search functionality
-      console.log('Searching for:', searchQuery);
-    }
-  };
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -64,7 +53,7 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="lg:hidden hover:bg-primary hover:text-primary-foreground"
           onClick={() => setMobileSidebarOpen(true)}
         >
           <Menu className="h-5 w-5" />
@@ -75,7 +64,7 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
-          className="hidden lg:flex"
+          className="hidden lg:flex hover:bg-primary hover:text-primary-foreground"
           onClick={handleToggleCollapse}
         >
           <ChevronsLeft
@@ -115,19 +104,7 @@ export function Header() {
           </h1>
         </div>
 
-        {/* Search */}
-        <form onSubmit={handleSearch} className="hidden md:block">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64 pl-10"
-            />
-          </div>
-        </form>
+
 
         {/* Actions */}
         <div className="flex items-center gap-2">
@@ -136,7 +113,7 @@ export function Header() {
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="hidden md:flex"
+            className="hidden md:flex hover:bg-primary hover:text-primary-foreground"
           >
             {theme === 'light' ? (
               <Moon className="h-4 w-4" />
@@ -147,7 +124,7 @@ export function Header() {
           </Button>
 
           {/* Notifications bell - simple version */}
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="hover:bg-primary hover:text-primary-foreground">
             <Bell className="h-4 w-4" />
             <span className="sr-only">View notifications</span>
           </Button>
@@ -155,9 +132,9 @@ export function Header() {
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary-foreground" />
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/10">
+                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary-foreground" />
                 </div>
               </Button>
             </DropdownMenuTrigger>
