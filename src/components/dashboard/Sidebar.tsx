@@ -122,7 +122,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-border transition-all duration-300",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-sidebar border-r border-border transition-all duration-300",
           // Mobile styles
           "lg:translate-x-0",
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full",
@@ -179,9 +179,9 @@ export function Sidebar() {
                       onClick={handleMobileClose}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                        "hover:bg-accent hover:text-accent-foreground",
+                        "hover:bg-primary hover:text-primary-foreground",
                         active 
-                          ? "bg-accent text-accent-foreground" 
+                          ? "bg-primary text-primary-foreground" 
                           : "text-muted-foreground",
                         isSidebarCollapsed && "justify-center"
                       )}
