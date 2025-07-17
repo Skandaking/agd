@@ -22,8 +22,10 @@ import {
   LogOut,
   Sun,
   Moon,
-  ChevronRight
+  ChevronsRight,
+  ChevronsLeft
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,7 +36,9 @@ export function Header() {
     theme,
     setTheme,
     compactMode,
-    setCompactMode
+    setCompactMode,
+    isSidebarCollapsed,
+    setSidebarCollapsed,
   } = useDashboard();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -49,6 +53,10 @@ export function Header() {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
+  const handleToggleCollapse = () => {
+    setSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center gap-4 px-4 lg:px-6">
@@ -61,6 +69,22 @@ export function Header() {
         >
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle navigation menu</span>
+        </Button>
+
+        {/* Desktop sidebar toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden lg:flex"
+          onClick={handleToggleCollapse}
+        >
+          <ChevronsLeft
+            className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              isSidebarCollapsed && "rotate-180"
+            )}
+          />
+          <span className="sr-only">Toggle sidebar</span>
         </Button>
 
         {/* Breadcrumbs */}
@@ -79,7 +103,7 @@ export function Header() {
                   <span className="text-foreground font-medium">{crumb.label}</span>
                 )}
                 {index < breadcrumbs.length - 1 && (
-                  <ChevronRight className="h-4 w-4 shrink-0" />
+                  <ChevronsRight className="h-4 w-4 shrink-0" />
                 )}
               </React.Fragment>
             ))}

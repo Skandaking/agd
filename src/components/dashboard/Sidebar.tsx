@@ -17,7 +17,6 @@ import {
   Image, 
   Settings,
   LogOut,
-  ChevronLeft,
   X
 } from 'lucide-react';
 
@@ -95,7 +94,6 @@ export function Sidebar() {
   const pathname = usePathname();
   const { 
     isSidebarCollapsed, 
-    setSidebarCollapsed, 
     isMobileSidebarOpen, 
     setMobileSidebarOpen 
   } = useDashboard();
@@ -109,10 +107,6 @@ export function Sidebar() {
 
   const handleMobileClose = () => {
     setMobileSidebarOpen(false);
-  };
-
-  const handleToggleCollapse = () => {
-    setSidebarCollapsed(!isSidebarCollapsed);
   };
 
   return (
@@ -162,20 +156,6 @@ export function Sidebar() {
             <X className="h-4 w-4" />
           </Button>
           
-          {/* Desktop collapse button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hidden lg:flex"
-            onClick={handleToggleCollapse}
-          >
-            <ChevronLeft 
-              className={cn(
-                "h-4 w-4 transition-transform duration-200",
-                isSidebarCollapsed && "rotate-180"
-              )} 
-            />
-          </Button>
         </div>
 
         {/* Navigation */}
