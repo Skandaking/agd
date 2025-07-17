@@ -17,7 +17,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Main content area */}
       <div 
         className={cn(
-          "flex-1 flex flex-col transition-all duration-300",
+          "flex-1 flex flex-col transition-all duration-300 min-w-0",
           // Adjust margin based on sidebar state
           isSidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
         )}
@@ -26,8 +26,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         <Header />
         
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto px-4 py-6 lg:px-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full max-w-none px-4 py-6 lg:px-6">
             {children}
           </div>
         </main>

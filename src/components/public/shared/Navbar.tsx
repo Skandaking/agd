@@ -327,6 +327,18 @@ export default function Navbar() {
                       >
                         Press Releases
                       </Link>
+                      <Link 
+                    href="/projects/public-gallery"
+                    onClick={closeMobileMenu}
+                    className={cn(
+                      "block px-4 py-2 rounded-md text-sm transition-colors",
+                      isActive("/projects/ipsas-implementation")
+                        ? "text-primary bg-primary/10 font-medium"
+                        : "text-gray-600 hover:text-primary hover:bg-gray-100"
+                    )}
+                  >
+                    Public Gallery
+                  </Link>
                     </div>
                   </div>
                 );
@@ -511,18 +523,7 @@ export default function Navbar() {
                   >
                     IFMIS Division
                   </Link>
-                  <Link
-                    href="/divisions/administration"
-                    onClick={closeMobileMenu}
-                    className={cn(
-                      "block px-4 py-2 rounded-md text-sm transition-colors",
-                      isActive("/divisions/administration")
-                        ? "text-primary bg-primary/10 font-medium"
-                        : "text-gray-600 hover:text-primary hover:bg-gray-100"
-                    )}
-                  >
-                    Administration & Support Services
-                  </Link>
+               
                 </div>
               </div>
             </div>
@@ -587,18 +588,7 @@ export default function Navbar() {
                   >
                     EFT Project
                   </Link>
-                  <Link 
-                    href="/projects/public-gallery"
-                    onClick={closeMobileMenu}
-                    className={cn(
-                      "block px-4 py-2 rounded-md text-sm transition-colors",
-                      isActive("/projects/ipsas-implementation")
-                        ? "text-primary bg-primary/10 font-medium"
-                        : "text-gray-600 hover:text-primary hover:bg-gray-100"
-                    )}
-                  >
-                    Public Gallery
-                  </Link>
+                
                 </div>
               </div>
             </div>
@@ -674,6 +664,18 @@ export default function Navbar() {
                     )}
                   >
                     Press Releases
+                  </Link>
+                  <Link 
+                    href="/projects/public-gallery"
+                    onClick={closeMobileMenu}
+                    className={cn(
+                      "block px-4 py-2 rounded-md text-sm transition-colors",
+                      isActive("/projects/ipsas-implementation")
+                        ? "text-primary bg-primary/10 font-medium"
+                        : "text-gray-600 hover:text-primary hover:bg-gray-100"
+                    )}
+                  >
+                    Public Gallery
                   </Link>
                 </div>
               </div>

@@ -49,6 +49,9 @@ interface BreadcrumbItem {
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
+  // Track if component has mounted to prevent hydration issues
+  const [isMounted, setIsMounted] = useState(false);
+  
   // Sidebar state
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -65,8 +68,15 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     { label: 'Home', href: '/dashboard' },
   ]);
 
-  // Load preferences from localStorage
+  // Set mounted state on client-side only
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Load preferences from localStorage only after mounting
+  useEffect(() => {
+    if (!isMounted) return;
+    
     const saved = localStorage.getItem('dashboard-preferences');
     if (saved) {
       try {
@@ -84,17 +94,19 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         console.error('Failed to load dashboard preferences:', error);
       }
     }
-  }, []);
+  }, [isMounted]);
 
-  // Save preferences to localStorage
+  // Save preferences to localStorage only after mounting
   useEffect(() => {
+    if (!isMounted) return;
+    
     const preferences = {
       isSidebarCollapsed,
       theme,
       compactMode,
     };
     localStorage.setItem('dashboard-preferences', JSON.stringify(preferences));
-  }, [isSidebarCollapsed, theme, compactMode]);
+  }, [isMounted, isSidebarCollapsed, theme, compactMode]);
 
   // Apply theme to document
   useEffect(() => {

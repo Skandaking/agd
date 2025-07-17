@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -122,8 +122,8 @@ const getActivityIcon = (type: Activity['type']) => {
   }
 };
 
-const formatTimeAgo = (date: Date) => {
-  const now = new Date();
+const formatTimeAgo = (date: Date, currentTime?: Date) => {
+  const now = currentTime || new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
   
   if (diffInSeconds < 60) return 'Just now';
@@ -134,6 +134,7 @@ const formatTimeAgo = (date: Date) => {
 
 export default function DashboardPage() {
   const { setPageTitle, setBreadcrumbs } = useDashboard();
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
     setPageTitle('Dashboard');
@@ -141,6 +142,18 @@ export default function DashboardPage() {
       { label: 'Home', href: '/dashboard' },
     ]);
   }, [setPageTitle, setBreadcrumbs]);
+
+  // Set current time on client-side only to prevent hydration mismatch
+  useEffect(() => {
+    setCurrentTime(new Date());
+    
+    // Update time every minute
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -250,7 +263,7 @@ export default function DashboardPage() {
                           by {activity.user}
                         </p>
                         <Badge variant="outline" className="text-xs">
-                          {formatTimeAgo(activity.timestamp)}
+                          {currentTime ? formatTimeAgo(activity.timestamp, currentTime) : 'Loading...'}
                         </Badge>
                       </div>
                     </div>
