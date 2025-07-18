@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Header from "@/components/public/shared/Header";
 import Footer from "@/components/public/shared/Footer";
+import WhatsAppButton from "@/components/public/shared/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: "Accountant General Department | Malawi",
@@ -20,6 +21,9 @@ export default function PublicLayout({
       <main className="flex-1">{children}</main>
       
       <Footer />
+      
+      {/* WhatsApp floating button */}
+      <WhatsAppButton />
     </div>
   );
 }
