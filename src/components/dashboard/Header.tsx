@@ -53,7 +53,7 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden hover:bg-primary hover:text-primary-foreground"
+          className="lg:hidden hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)]"
           onClick={() => setMobileSidebarOpen(true)}
         >
           <Menu className="h-5 w-5" />
@@ -64,7 +64,7 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
-          className="hidden lg:flex hover:bg-primary hover:text-primary-foreground"
+          className="hidden lg:flex hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)]"
           onClick={handleToggleCollapse}
         >
           <ChevronsLeft
@@ -113,7 +113,7 @@ export function Header() {
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="hidden md:flex hover:bg-primary hover:text-primary-foreground"
+            className="hidden md:flex hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)]"
           >
             {theme === 'light' ? (
               <Moon className="h-4 w-4" />
@@ -124,7 +124,7 @@ export function Header() {
           </Button>
 
           {/* Notifications bell - simple version */}
-          <Button variant="ghost" size="icon" className="hover:bg-primary hover:text-primary-foreground">
+          <Button variant="ghost" size="icon" className="hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)]">
             <Bell className="h-4 w-4" />
             <span className="sr-only">View notifications</span>
           </Button>
@@ -132,9 +132,9 @@ export function Header() {
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/10">
-                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-                  <User className="h-5 w-5 text-primary-foreground" />
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-[var(--primary)]/10">
+                <div className="h-10 w-10 rounded-full bg-[var(--primary)] flex items-center justify-center">
+                  <User className="h-5 w-5 text-[var(--primary-foreground)]" />
                 </div>
               </Button>
             </DropdownMenuTrigger>
