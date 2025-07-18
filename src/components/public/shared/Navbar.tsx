@@ -339,18 +339,17 @@ export default function Navbar() {
                       >
                         Press Releases
                       </Link>
-                      <Link 
-                    href="/projects/public-gallery"
-                    onClick={closeMobileMenu}
-                    className={cn(
-                      "block px-4 py-2 rounded-md text-sm transition-colors",
-                      isActive("/projects/ipsas-implementation")
-                        ? "text-primary bg-primary/10 font-medium"
-                        : "text-gray-600 hover:text-primary hover:bg-gray-100"
-                    )}
-                  >
-                    Public Gallery
-                  </Link>
+                      <Link
+                        href="/publications/public-gallery"
+                        className={cn(
+                          "block px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
+                          isActive("/publications/public-gallery")
+                            ? "text-primary font-bold"
+                            : "text-gray-700"
+                        )}
+                      >
+                        Public Gallery
+                      </Link>
                     </div>
                   </div>
                 );
@@ -689,12 +688,12 @@ export default function Navbar() {
                   >
                     Press Releases
                   </Link>
-                  <Link 
-                    href="/projects/public-gallery"
+                  <Link
+                    href="/publications/public-gallery"
                     onClick={closeMobileMenu}
                     className={cn(
                       "block px-4 py-2 rounded-md text-sm transition-colors",
-                      isActive("/projects/ipsas-implementation")
+                      isActive("/publications/public-gallery")
                         ? "text-primary bg-primary/10 font-medium"
                         : "text-gray-600 hover:text-primary hover:bg-gray-100"
                     )}
