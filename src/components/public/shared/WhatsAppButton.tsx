@@ -32,7 +32,7 @@ export default function WhatsAppButton() {
         
         {/* Text */}
         <span className="text-sm font-medium whitespace-nowrap">
-          How can I help you?
+          How can we help you?
         </span>
       </button>
       
