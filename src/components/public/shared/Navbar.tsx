@@ -171,17 +171,40 @@ export default function Navbar() {
                       >
                         Banking & Asset Management
                       </Link>
-                      <Link
-                        href="/divisions/pay-services"
-                        className={cn(
-                          "block px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
-                          isActive("/divisions/pay-services")
-                            ? "text-primary font-bold"
-                            : "text-gray-700"
-                        )}
-                      >
-                        Pay Services
-                      </Link>
+                      <div className="relative group/pay">
+                        <button
+                          className={cn(
+                            "flex items-center justify-between w-full px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
+                            isActive("/divisions/pay-services")
+                              ? "text-primary font-bold"
+                              : "text-gray-700"
+                          )}
+                        >
+                          Pay Services
+                          <ChevronDown className="h-3 w-3 ml-1" />
+                        </button>
+                        
+                        {/* Pay Services Sub-dropdown */}
+                        <div className="absolute left-full top-0 ml-1 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover/pay:opacity-100 group-hover/pay:visible transition-all duration-200 z-50">
+                          <Link
+                            href="/divisions/pay-services"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary hover:text-white transition-colors"
+                          >
+                            Pay Services Overview
+                          </Link>
+                          <Link
+                            href="/divisions/pay-services/pensioners-corner"
+                            className={cn(
+                              "block px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
+                              isActive("/divisions/pay-services/pensioners-corner")
+                                ? "text-primary font-bold"
+                                : "text-gray-700"
+                            )}
+                          >
+                            Pensioner&apos;s Corner
+                          </Link>
+                        </div>
+                      </div>
                       <Link
                         href="/divisions/ifmis"
                         className={cn(
@@ -499,6 +522,18 @@ export default function Navbar() {
                     )}
                   >
                     Pay Services
+                  </Link>
+                  <Link
+                    href="/divisions/pay-services/pensioners-corner"
+                    onClick={closeMobileMenu}
+                    className={cn(
+                      "block px-4 py-2 rounded-md text-sm transition-colors ml-4",
+                      isActive("/divisions/pay-services/pensioners-corner")
+                        ? "text-primary bg-primary/10 font-medium"
+                        : "text-gray-600 hover:text-primary hover:bg-gray-100"
+                    )}
+                  >
+                    Pensioner&apos;s Corner
                   </Link>
                   <Link
                     href="/divisions/ifmis"
