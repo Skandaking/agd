@@ -123,7 +123,7 @@ export default function PressReleasesPage() {
       <div className="relative min-h-[260px] flex items-center justify-center overflow-hidden py-8 px-2 sm:px-4 md:py-0 md:h-[300px]">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(/hero/2.JPG)` }}
+          style={{ backgroundImage: `url(/hero/6.JPG)` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/70 to-[var(--secondary)]/70" />
         </div>
