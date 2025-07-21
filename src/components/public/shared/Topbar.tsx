@@ -3,11 +3,9 @@
 import Link from 'next/link';
 import {
   Facebook,
-  Instagram,
   Linkedin,
   Mail,
   Phone,
-  Twitter,
   User,
 } from "lucide-react";
 import { useState, useEffect } from 'react';
@@ -45,11 +43,23 @@ export default function Topbar() {
         <div className={hasMounted ? contactsInnerDivMountedClass : contactsInnerDivBaseClass}>
           <div className="flex items-center gap-1">
             <Phone size={14} />
-            <span>+265 1 788 533</span>
+            <a 
+              href="tel:+2651788533" 
+              className="hover:text-secondary transition-colors"
+              aria-label="Call +265 1 788 533"
+            >
+              +265 1 788 533
+            </a>
           </div>
           <div className="flex items-center gap-1">
             <Mail size={14} />
-            <span>ag@agd.gov.mw</span>
+            <a 
+              href="mailto:ag@agd.gov.mw" 
+              className="hover:text-secondary transition-colors"
+              aria-label="Email ag@agd.gov.mw"
+            >
+              ag@agd.gov.mw
+            </a>
           </div>
         </div>
       </div>
@@ -69,41 +79,23 @@ export default function Topbar() {
             href="https://facebook.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-accent transition-colors"
+            className="hover:text-secondary transition-colors"
             aria-label="Facebook"
           >
             <Facebook size={16} />
           </Link>
           <Link
-            href="https://twitter.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-accent transition-colors"
-            aria-label="Twitter"
-          >
-            <Twitter size={16} />
-          </Link>
-          <Link
             href="https://linkedin.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-accent transition-colors"
+            className="hover:text-secondary transition-colors"
             aria-label="LinkedIn"
           >
             <Linkedin size={16} />
           </Link>
           <Link
-            href="https://instagram.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-accent transition-colors"
-            aria-label="Instagram"
-          >
-            <Instagram size={16} />
-          </Link>
-          <Link
             href="/login"
-            className="hover:text-accent transition-colors"
+            className="hover:text-secondary transition-colors"
             aria-label="User login"
           >
             <User size={16} />
