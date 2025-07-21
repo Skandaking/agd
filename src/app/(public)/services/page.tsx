@@ -130,9 +130,24 @@ export default function ServicesPage() {
             return (
               <div 
                 key={index} 
-                className={`flex ${isEven ? 'justify-end' : 'justify-start'}`}
+                className="relative w-full"
               >
-                <div className="w-full max-w-5xl bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
+                {/* Background Logo */}
+                <div 
+                  className={`absolute inset-0 pointer-events-none ${isEven ? 'left-0' : 'right-0'}`}
+                  style={{
+                    backgroundImage: `url(/logo.png)`,
+                    backgroundSize: '100px 100px',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: isEven ? 'left center' : 'right center',
+                    opacity: 0.5,
+                    zIndex: 0
+                  }}
+                />
+                
+                {/* Content Container */}
+                <div className={`relative z-10 flex ${isEven ? 'justify-end' : 'justify-start'}`}>
+                  <div className="w-full max-w-5xl bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
                   <div className={`flex flex-col lg:flex-row ${isEven ? 'lg:flex-row-reverse' : ''}`}>
                     {/* Icon Section */}
                     <div className={`lg:w-2/5 ${principle.bgColor} p-8 flex flex-col items-center justify-center relative`}>
@@ -174,6 +189,7 @@ export default function ServicesPage() {
                   </div>
                 </div>
               </div>
+            </div>
             );
           })}
         </section>
