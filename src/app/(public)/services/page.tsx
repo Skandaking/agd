@@ -122,35 +122,54 @@ export default function ServicesPage() {
         </section>
 
         {/* Service Charter Principles */}
-        <section className="space-y-8 mb-12">
+        <section className="space-y-12 mb-12">
           {serviceCharter.map((principle, index) => {
             const IconComponent = principle.icon;
+            const isEven = index % 2 === 1;
+            
             return (
               <div 
                 key={index} 
-                className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-shadow duration-300"
+                className={`flex ${isEven ? 'justify-end' : 'justify-start'}`}
               >
-                <div className="flex flex-col lg:flex-row">
-                  {/* Icon Section */}
-                  <div className={`lg:w-1/4 ${principle.bgColor} p-8 flex flex-col items-center justify-center relative`}>
-                    {/* Decorative gear background */}
-                    <div className="absolute inset-0 opacity-10">
-                      <Settings className="w-32 h-32 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-400" />
+                <div className="w-full max-w-5xl bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
+                  <div className={`flex flex-col lg:flex-row ${isEven ? 'lg:flex-row-reverse' : ''}`}>
+                    {/* Icon Section */}
+                    <div className={`lg:w-2/5 ${principle.bgColor} p-8 flex flex-col items-center justify-center relative`}>
+                      {/* Decorative abstract pattern background */}
+                      <div className="absolute inset-0 opacity-10">
+                        {/* Abstract geometric pattern */}
+                        <div className="absolute top-4 left-4 w-8 h-8 border-2 border-gray-400 rounded-full"></div>
+                        <div className="absolute top-8 right-6 w-6 h-6 bg-gray-400 transform rotate-45"></div>
+                        <div className="absolute bottom-8 left-8 w-12 h-2 bg-gray-400 rounded-full"></div>
+                        <div className="absolute bottom-4 right-4 w-10 h-10 border-2 border-gray-400 transform rotate-12"></div>
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                          <div className="w-20 h-20 border border-gray-400 rounded-full"></div>
+                          <div className="absolute top-2 left-2 w-16 h-16 border border-gray-400 rounded-full"></div>
+                          <div className="absolute top-4 left-4 w-12 h-12 border border-gray-400 rounded-full"></div>
+                        </div>
+                        {/* Additional decorative elements */}
+                        <div className="absolute top-1/4 right-1/4 w-4 h-16 bg-gray-400 opacity-30 transform rotate-45 rounded-full"></div>
+                        <div className="absolute bottom-1/4 left-1/4 w-4 h-12 bg-gray-400 opacity-30 transform -rotate-45 rounded-full"></div>
+                      </div>
+                      
+                      <div className={`relative z-10 ${principle.bgColor} p-6 rounded-full shadow-lg border-4 ${principle.borderColor}`}>
+                        <IconComponent className={`h-12 w-12 ${principle.color}`} />
+                      </div>
+                      <h3 className={`text-2xl font-bold mt-4 ${principle.color} relative z-10 text-center`}>
+                        {principle.title}
+                      </h3>
                     </div>
-                    <div className={`relative z-10 ${principle.bgColor} p-6 rounded-full shadow-lg border-4 ${principle.borderColor}`}>
-                      <IconComponent className={`h-12 w-12 ${principle.color}`} />
-                    </div>
-                    <h3 className={`text-2xl font-bold mt-4 ${principle.color} relative z-10`}>
-                      {principle.title}
-                    </h3>
-                  </div>
-                  
-                  {/* Content Section */}
-                  <div className="lg:w-3/4 p-8 flex items-center">
-                    <div>
-                      <p className="text-gray-700 text-lg leading-relaxed">
-                        {principle.description}
-                      </p>
+                    
+                    {/* Content Section */}
+                    <div className="lg:w-3/5 p-8 flex items-center">
+                      <div className="w-full">
+                        <p className="text-gray-700 text-lg leading-relaxed">
+                          {principle.description}
+                        </p>
+                        {/* Optional: Add a small decorative line */}
+                        <div className={`mt-4 h-1 w-16 ${principle.bgColor} rounded-full`}></div>
+                      </div>
                     </div>
                   </div>
                 </div>
