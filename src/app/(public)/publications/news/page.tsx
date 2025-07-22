@@ -98,11 +98,11 @@ export default function NewsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Hero Section - Minimalist Approach */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 opacity-5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)] via-[var(--secondary)] to-[var(--accent)] opacity-5" />
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full mb-6 shadow-lg">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <div className="w-2 h-2 bg-[var(--primary)] rounded-full animate-pulse" />
               <span className="text-sm font-medium text-gray-700">Live Updates</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-6">
@@ -122,11 +122,11 @@ export default function NewsPage() {
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1">
                 <div className="relative group">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 group-focus-within:text-indigo-500 transition-colors" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 group-focus-within:text-[var(--primary)] transition-colors" />
                   <input
                     type="text"
                     placeholder="Search articles, topics, or keywords..."
-                    className="w-full pl-12 pr-6 py-4 bg-white/60 border-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:bg-white transition-all placeholder-gray-400 text-gray-700"
+                    className="w-full pl-12 pr-6 py-4 bg-white/60 border-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:bg-white transition-all placeholder-gray-400 text-gray-700"
                   />
                 </div>
               </div>
@@ -137,7 +137,7 @@ export default function NewsPage() {
                     key={category}
                     className={`px-6 py-3 rounded-2xl font-medium transition-all ${
                       category === "All"
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/25"
+                        ? "bg-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/25"
                         : "bg-white/60 text-gray-700 hover:bg-white/80 hover:shadow-md"
                     }`}
                   >
@@ -153,10 +153,10 @@ export default function NewsPage() {
         <section className="max-w-7xl mx-auto mb-16">
           <div className="flex items-center gap-4 mb-8">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-indigo-600" />
+              <TrendingUp className="h-6 w-6 text-[var(--primary)]" />
               <h2 className="text-3xl font-bold text-gray-900">Trending Now</h2>
             </div>
-            <div className="h-px bg-gradient-to-r from-indigo-600 to-transparent flex-1" />
+            <div className="h-px bg-gradient-to-r from-[var(--primary)] to-transparent flex-1" />
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -206,7 +206,7 @@ export default function NewsPage() {
                     </div>
                     
                     <Link href={`/publications/news/${featuredArticles[0].slug}`}>
-                      <h3 className="text-2xl lg:text-3xl font-bold mb-4 hover:text-indigo-300 transition-colors">
+                      <h3 className="text-2xl lg:text-3xl font-bold mb-4 hover:text-[var(--accent)] transition-colors">
                         {featuredArticles[0].title}
                       </h3>
                     </Link>
@@ -246,13 +246,13 @@ export default function NewsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
+                        <span className="px-2 py-1 bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-medium rounded-full">
                           {article.category}
                         </span>
                         <span className="text-xs text-gray-500">{article.readTime}</span>
                       </div>
                       <Link href={`/publications/news/${article.slug}`}>
-                        <h4 className="font-bold text-gray-900 mb-2 hover:text-indigo-600 transition-colors line-clamp-2">
+                        <h4 className="font-bold text-gray-900 mb-2 hover:text-[var(--primary)] transition-colors line-clamp-2">
                           {article.title}
                         </h4>
                       </Link>
@@ -279,7 +279,7 @@ export default function NewsPage() {
           <div className="flex items-center gap-4 mb-8">
             <h2 className="text-3xl font-bold text-gray-900">Recent Articles</h2>
             <div className="h-px bg-gradient-to-r from-gray-300 to-transparent flex-1" />
-            <button className="px-6 py-2 text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors font-medium">
+            <button className="px-6 py-2 text-[var(--primary)] hover:bg-[var(--primary)]/5 rounded-full transition-colors font-medium">
               View All
             </button>
           </div>
@@ -326,7 +326,7 @@ export default function NewsPage() {
                   </div>
                   
                   <Link href={`/publications/news/${article.slug}`}>
-                    <h3 className="font-bold text-gray-900 mb-3 hover:text-indigo-600 transition-colors">
+                    <h3 className="font-bold text-gray-900 mb-3 hover:text-[var(--primary)] transition-colors">
                       {article.title}
                     </h3>
                   </Link>
@@ -339,7 +339,7 @@ export default function NewsPage() {
                     <span className="text-sm text-gray-500">{article.author}</span>
                     <Link
                       href={`/publications/news/${article.slug}`}
-                      className="inline-flex items-center gap-1 text-indigo-600 font-medium text-sm hover:text-indigo-700 transition-colors"
+                      className="inline-flex items-center gap-1 text-[var(--primary)] font-medium text-sm hover:text-[var(--primary)]/80 transition-colors"
                     >
                       Read More
                       <ArrowRight className="h-3 w-3" />
@@ -353,7 +353,7 @@ export default function NewsPage() {
 
         {/* Load More Button */}
         <div className="flex justify-center mt-12">
-          <button className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-2xl hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300 transform hover:-translate-y-1">
+          <button className="px-8 py-4 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white font-medium rounded-2xl hover:shadow-lg hover:shadow-[var(--primary)]/25 transition-all duration-300 transform hover:-translate-y-1">
             Load More Articles
           </button>
         </div>
