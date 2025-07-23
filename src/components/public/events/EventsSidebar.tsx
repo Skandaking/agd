@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search, ChevronRight, Calendar } from 'lucide-react';
+import { Search, ChevronsRight, Calendar } from 'lucide-react';
 
 interface UpcomingEvent {
   id: number;
@@ -58,8 +58,20 @@ export function EventsSidebar({
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <span>{status} ({eventCounts[status] ?? 0})</span>
-                <ChevronRight className="h-4 w-4" />
+                {/* //add the number of events for each status and the count style */}
+                <span>{status}</span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-xs font-bold rounded-full px-2 py-0.5 ${
+                      selectedStatus === status
+                        ? 'bg-white/20 text-white'
+                        : 'bg-[var(--secondary)]/20 text-[var(--secondary)]'
+                    }`}
+                  >
+                    {eventCounts[status] ?? 0}
+                  </span>
+                  <ChevronsRight className="h-4 w-4" />
+                </div>
               </button>
             </li>
           ))}
