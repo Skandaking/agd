@@ -14,6 +14,7 @@ interface EventsSidebarProps {
   selectedStatus: string;
   setSelectedStatus: (status: string) => void;
   eventStatuses: string[];
+  eventCounts: { [key: string]: number };
   upcomingEvents: UpcomingEvent[];
 }
 
@@ -23,6 +24,7 @@ export function EventsSidebar({
   selectedStatus,
   setSelectedStatus,
   eventStatuses,
+  eventCounts,
   upcomingEvents,
 }: EventsSidebarProps) {
   return (
@@ -56,7 +58,7 @@ export function EventsSidebar({
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <span>{status}</span>
+                <span>{status} ({eventCounts[status] ?? 0})</span>
                 <ChevronRight className="h-4 w-4" />
               </button>
             </li>

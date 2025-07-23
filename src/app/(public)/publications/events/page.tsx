@@ -137,6 +137,12 @@ export default function EventsPage() {
   const otherEvents = filteredEvents.filter(event => !event.featured);
   const upcomingEventsForSidebar = events.filter(e => e.status === 'upcoming').slice(0, 3);
 
+  const eventCounts = {
+    'Upcoming': events.filter(e => e.status === 'upcoming').length,
+    'Past': events.filter(e => e.status === 'past').length,
+    'All': events.length,
+  };
+
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
@@ -179,6 +185,7 @@ export default function EventsPage() {
             selectedStatus={selectedStatus}
             setSelectedStatus={setSelectedStatus}
             eventStatuses={eventStatuses}
+            eventCounts={eventCounts}
             upcomingEvents={upcomingEventsForSidebar}
           />
 
