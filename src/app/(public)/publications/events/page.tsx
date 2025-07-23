@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Calendar, Clock, MapPin, Users, Search, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Search } from 'lucide-react';
+import { EventsSidebar } from '@/components/public/events/EventsSidebar';
 
 export default function EventsPage() {
   const events = [
@@ -171,8 +172,38 @@ export default function EventsPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
 
+          {/* Sidebar */}
+          <EventsSidebar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedStatus={selectedStatus}
+            setSelectedStatus={setSelectedStatus}
+            eventStatuses={eventStatuses}
+            upcomingEvents={upcomingEventsForSidebar}
+          />
+
           {/* Main Content Area */}
           <main className="lg:col-span-3">
+            {/* Event Types Filter */}
+            <div className="bg-white rounded-xl shadow-lg p-4 mb-8 border border-gray-100">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-bold text-[var(--accent)] mr-2">Filter by Type:</span>
+                {eventTypes.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setSelectedType(type)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                      selectedType === type
+                        ? "bg-[var(--secondary)] text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {filteredEvents.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center py-16 bg-white rounded-lg shadow-md h-full">
                 <Search className="h-16 w-16 text-gray-300 mb-4" />
@@ -194,7 +225,7 @@ export default function EventsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {featuredEvents.map((event) => (
                         <div key={event.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
-                          <div className="relative h-64 overflow-hidden">
+                          <div className="relative h-56 overflow-hidden">
                             <Image
                               src={event.image}
                               alt={event.title}
@@ -356,84 +387,6 @@ export default function EventsPage() {
               </>
             )}
           </main>
-
-          {/* Sidebar */}
-          <aside className="lg:col-span-1 lg:sticky lg:top-24 self-start space-y-8">
-            {/* Search Card */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-xl font-bold text-[var(--accent)] mb-4">Search Events</h3>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]"
-                />
-              </div>
-            </div>
-
-            {/* Event Status Card */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-xl font-bold text-[var(--accent)] mb-4">Event Status</h3>
-              <ul className="space-y-2">
-                {eventStatuses.map((status) => (
-                  <li key={status}>
-                    <button
-                      onClick={() => setSelectedStatus(status)}
-                      className={`w-full text-left flex justify-between items-center px-4 py-2.5 rounded-lg transition-colors text-sm font-medium ${
-                        selectedStatus === status 
-                          ? 'bg-[var(--primary)] text-white shadow' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      <span>{status}</span>
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Event Types Card */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-xl font-bold text-[var(--accent)] mb-4">Event Types</h3>
-              <div className="flex flex-wrap gap-2">
-                {eventTypes.map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setSelectedType(type)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                      selectedType === type
-                        ? "bg-[var(--secondary)] text-white shadow"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Upcoming Events Card */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-xl font-bold text-[var(--accent)] mb-4">Quick Access</h3>
-              <ul className="space-y-4">
-                {upcomingEventsForSidebar.map(event => (
-                  <li key={event.id}>
-                    <Link href={`/publications/events/${event.slug}`} className="group block p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                      <p className="font-semibold text-gray-800 group-hover:text-[var(--primary)] transition-colors text-sm leading-tight">{event.title}</p>
-                      <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                        <Calendar className="h-3 w-3" />
-                        <span>{event.date}</span>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </aside>
         </div>
       </div>
     </div>
