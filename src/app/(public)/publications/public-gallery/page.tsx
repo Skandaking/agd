@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Camera, Calendar, MapPin, Search, Filter, Eye, Download } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
 export default function PublicGalleryPage() {
@@ -234,7 +234,7 @@ export default function PublicGalleryPage() {
                 <div className="p-6 flex flex-col">
                   <DialogHeader className="mb-4">
                     <DialogTitle className="text-2xl font-bold text-[var(--accent)]">{selectedImage.title}</DialogTitle>
-                    <DialogDescription className="text-sm text-gray-500 !mt-2 space-y-2">
+                    <div className="text-sm text-gray-500 !mt-2 space-y-2">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4"/>
                         <span>{selectedImage.date}</span>
@@ -247,7 +247,7 @@ export default function PublicGalleryPage() {
                         <Camera className="h-4 w-4"/>
                         <span>Part of an album with {selectedImage.albumImageCount} photos</span>
                       </div>
-                    </DialogDescription>
+                    </div>
                   </DialogHeader>
                   <p className="flex-grow text-gray-700 leading-relaxed">{selectedImage.description}</p>
                   <div className="mt-6">
