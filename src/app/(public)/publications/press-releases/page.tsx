@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Calendar, Clock, ArrowRight, Search, Filter, Tag, Megaphone } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Search, Filter, Megaphone } from 'lucide-react';
 
 export default function PressReleasesPage() {
   const pressReleases = [
@@ -354,33 +354,7 @@ export default function PressReleasesPage() {
           </div>
         </section>
 
-        {/* Categories Overview */}
-        <section className="mb-12">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-8 w-1 bg-[var(--secondary)] rounded-full" />
-            <h2 className="text-3xl font-bold text-[var(--accent)]">Browse by Category</h2>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {categories.slice(1).map((category) => (
-              <button
-                key={category}
-                className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 hover:shadow-xl transition-shadow text-center"
-              >
-                <div className="p-3 bg-[var(--primary)]/10 rounded-lg mx-auto w-fit mb-3">
-                  <Tag className="h-6 w-6 text-[var(--primary)]" />
-                </div>
-                <h3 className="font-semibold text-gray-800 text-sm">{category}</h3>
-                <p className="text-xs text-gray-500 mt-1">
-                  {pressReleases.filter(release => release.category === category).length} releases
-                </p>
-              </button>
-            ))}
-          </div>
-        </section>
-
-
-        {/* Pagination */}
+    {/* Pagination */}
         <section className="flex justify-center">
           <div className="flex items-center gap-2">
             <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
