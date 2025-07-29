@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Camera, Calendar, MapPin, Search, Filter, Eye, Download } from 'lucide-react';
+import { Camera, Calendar, MapPin, Search, Filter, Eye, Download, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { AGDStaff } from '@/components/public/shared/AGDStaff';
 
 export default function PublicGalleryPage() {
   const galleryItems = [
@@ -100,6 +101,7 @@ export default function PublicGalleryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedImage, setSelectedImage] = useState<typeof allImages[0] | null>(null);
+  const [currentView, setCurrentView] = useState<'gallery' | 'staff'>('gallery');
 
   const filteredImages = allImages.filter(image => {
     const matchesSearch = image.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -127,9 +129,14 @@ export default function PublicGalleryPage() {
         </div>
 
         <div className="relative w-full max-w-3xl mx-auto text-center z-10">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-white leading-tight">Public Gallery</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-white leading-tight">
+            {currentView === 'gallery' ? 'Public Gallery' : 'AGD Leadership Team'}
+          </h1>
           <p className="text-lg text-white/90 font-medium">
-            Explore moments from AGD events, training, and community engagements.
+            {currentView === 'gallery' 
+              ? 'Explore moments from AGD events, training, and community engagements.'
+              : 'Meet the dedicated professionals leading the Accountant General\'s Department.'
+            }
           </p>
         </div>
       </div>
@@ -137,85 +144,122 @@ export default function PublicGalleryPage() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
         
-        {/* Search and Filter Section */}
-        <section className="bg-white rounded-xl shadow-lg p-4 mb-8 border border-gray-100 sticky top-4 z-20">
-          <div className="flex flex-col md:flex-row gap-4 items-center">
-            <div className="w-full md:w-auto md:flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  type="text"
-                  placeholder="Search by event title or description..."
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+        {/* View Toggle and Search Section */}
+        <section className="bg-white rounded-xl shadow-lg p-3 mb-8 border border-gray-100 sticky top-4 z-20">
+          {/* Main View Toggle */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => setCurrentView('gallery')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                  currentView === 'gallery'
+                    ? "bg-[var(--primary)] text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                <Camera className="h-4 w-4" />
+                Public Gallery
+              </button>
+              <button
+                onClick={() => setCurrentView('staff')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                  currentView === 'staff'
+                    ? "bg-[var(--primary)] text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                <Users className="h-4 w-4" />
+                AGD Staff
+              </button>
             </div>
             
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 -mb-2">
-              <Filter className="h-5 w-5 text-gray-500 flex-shrink-0" />
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex-shrink-0 ${
-                    selectedCategory === category
-                      ? "bg-[var(--primary)] text-white shadow-md"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+            {/* Gallery Filters - Only show when gallery view is active */}
+            {currentView === 'gallery' && (
+              <div className="flex flex-col md:flex-row gap-3 items-center pt-2 border-t border-gray-100">
+                <div className="w-full md:w-auto md:flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <input
+                      type="text"
+                      placeholder="Search by event title or description..."
+                      className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 text-sm"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2 overflow-x-auto">
+                  <Filter className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
+                        selectedCategory === category
+                          ? "bg-[var(--secondary)] text-white shadow-md"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
-        {/* Masonry-like Grid */}
-        {filteredImages.length > 0 ? (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-            {filteredImages.map((image) => (
-              <div key={image.id} className="break-inside-avoid relative rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 group overflow-hidden border border-gray-100">
-                <Image
-                  src={image.src}
-                  alt={image.title}
-                  width={500}
-                  height={500}
-                  className="object-cover w-full h-auto"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                  <h3 className="text-white font-bold text-lg leading-tight drop-shadow-md">{image.title}</h3>
-                  <div className="flex items-center gap-4 mt-4">
-                    <Button
-                      size="sm"
-                      className="bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 flex-1"
-                      onClick={() => setSelectedImage(image)}
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      View
-                    </Button>
-                    <a
-                      href={image.src}
-                      download={getFilenameFromSrc(image.src)}
-                      className="flex-1"
-                    >
-                      <Button size="sm" variant="secondary" className="w-full">
-                        <Download className="mr-2 h-4 w-4" />
-                        Download
+        {/* Main Content Area */}
+        {currentView === 'gallery' ? (
+          /* Gallery View */
+          filteredImages.length > 0 ? (
+            <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+              {filteredImages.map((image) => (
+                <div key={image.id} className="break-inside-avoid relative rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 group overflow-hidden border border-gray-100">
+                  <Image
+                    src={image.src}
+                    alt={image.title}
+                    width={500}
+                    height={500}
+                    className="object-cover w-full h-auto"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                    <h3 className="text-white font-bold text-lg leading-tight drop-shadow-md">{image.title}</h3>
+                    <div className="flex items-center gap-4 mt-4">
+                      <Button
+                        size="sm"
+                        className="bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 flex-1"
+                        onClick={() => setSelectedImage(image)}
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        View
                       </Button>
-                    </a>
+                      <a
+                        href={image.src}
+                        download={getFilenameFromSrc(image.src)}
+                        className="flex-1"
+                      >
+                        <Button size="sm" variant="secondary" className="w-full">
+                          <Download className="mr-2 h-4 w-4" />
+                          Download
+                        </Button>
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <Search className="h-12 w-12 mx-auto text-gray-300" />
+              <h3 className="mt-4 text-xl font-semibold text-gray-700">No Images Found</h3>
+              <p className="mt-2 text-gray-500">Try adjusting your search or filters.</p>
+            </div>
+          )
         ) : (
-          <div className="text-center py-16">
-            <Search className="h-12 w-12 mx-auto text-gray-300" />
-            <h3 className="mt-4 text-xl font-semibold text-gray-700">No Images Found</h3>
-            <p className="mt-2 text-gray-500">Try adjusting your search or filters.</p>
-          </div>
+          /* Staff View */
+          <AGDStaff />
         )}
 
         {/* Image Modal/Dialog */}
