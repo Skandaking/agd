@@ -125,7 +125,7 @@ export function AGDStaff() {
                 {staff.email && (
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-8 h-8 bg-[var(--primary)]/10 rounded-lg flex items-center justify-center">
-                      <Mail className="w-4 h-4 text-[var(--primary)]" />
+                      <Mail className="w-4 w-4 text-[var(--primary)]" />
                     </div>
                     <a
                       href={`mailto:${staff.email}`}
@@ -139,7 +139,7 @@ export function AGDStaff() {
                 {staff.phone && (
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-8 h-8 bg-[var(--secondary)]/10 rounded-lg flex items-center justify-center">
-                      <Phone className="w-4 h-4 text-[var(--secondary)]" />
+                      <Phone className="w-4 w-4 text-[var(--secondary)]" />
                     </div>
                     <a
                       href={`tel:${staff.phone}`}
@@ -152,7 +152,7 @@ export function AGDStaff() {
                 
                 <div className="flex items-center gap-3 text-sm">
                   <div className="w-8 h-8 bg-[var(--accent)]/10 rounded-lg flex items-center justify-center">
-                    <Building className="w-4 h-4 text-[var(--accent)]" />
+                    <Building className="w-4 w-4 text-[var(--accent)]" />
                   </div>
                   <span className="text-gray-600">{staff.department}</span>
                 </div>

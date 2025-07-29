@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Camera, Calendar, MapPin, Search, Filter, Eye, Download, Users } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Camera, Search, Filter, Eye, Download, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AGDStaff } from '@/components/public/shared/AGDStaff';
+import { AGDStaff } from '@/components/public/public-gallery/AGDStaff';
+import { ImageModal } from '@/components/public/public-gallery/ImageModal';
 
 export default function PublicGalleryPage() {
   const galleryItems = [
@@ -112,6 +112,14 @@ export default function PublicGalleryPage() {
 
   const getFilenameFromSrc = (src: string) => src.split('/').pop() || 'download.jpg';
 
+  const handleImageClick = (image: typeof allImages[0]) => {
+    setSelectedImage(image);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedImage(null);
+  };
+
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
@@ -142,7 +150,7 @@ export default function PublicGalleryPage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 ">
         
         {/* View Toggle and Search Section */}
         <section className="bg-white rounded-xl shadow-lg p-3 mb-8 border border-gray-100 sticky top-4 z-20">
@@ -227,14 +235,14 @@ export default function PublicGalleryPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                     <h3 className="text-white font-bold text-lg leading-tight drop-shadow-md">{image.title}</h3>
                     <div className="flex items-center gap-4 mt-4">
-                      <Button
-                        size="sm"
-                        className="bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 flex-1"
-                        onClick={() => setSelectedImage(image)}
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View
-                      </Button>
+                                          <Button
+                      size="sm"
+                      className="bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 flex-1"
+                      onClick={() => handleImageClick(image)}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      View
+                    </Button>
                       <a
                         href={image.src}
                         download={getFilenameFromSrc(image.src)}
@@ -262,54 +270,12 @@ export default function PublicGalleryPage() {
           <AGDStaff />
         )}
 
-        {/* Image Modal/Dialog */}
-        <Dialog open={!!selectedImage} onOpenChange={(isOpen) => !isOpen && setSelectedImage(null)}>
-          <DialogContent className="max-w-4xl p-0">
-            {selectedImage && (
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="relative min-h-[400px] md:min-h-[500px]">
-                  <Image
-                    src={selectedImage.src}
-                    alt={selectedImage.title}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-                <div className="p-6 flex flex-col">
-                  <DialogHeader className="mb-4">
-                    <DialogTitle className="text-2xl font-bold text-[var(--accent)]">{selectedImage.title}</DialogTitle>
-                    <div className="text-sm text-gray-500 !mt-2 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4"/>
-                        <span>{selectedImage.date}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4"/>
-                        <span>{selectedImage.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Camera className="h-4 w-4"/>
-                        <span>Part of an album with {selectedImage.albumImageCount} photos</span>
-                      </div>
-                    </div>
-                  </DialogHeader>
-                  <p className="flex-grow text-gray-700 leading-relaxed">{selectedImage.description}</p>
-                  <div className="mt-6">
-                    <a
-                      href={selectedImage.src}
-                      download={getFilenameFromSrc(selectedImage.src)}
-                    >
-                      <Button className="w-full" size="lg">
-                        <Download className="mr-2 h-4 w-4" />
-                        Download Image
-                      </Button>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+        {/* Image Modal */}
+        <ImageModal 
+          image={selectedImage}
+          isOpen={!!selectedImage}
+          onClose={handleCloseModal}
+        />
 
       </div>
     </div>
