@@ -94,7 +94,7 @@ export const Gallery = () => {
 
       <div className="p-4 border-t bg-white">
         <Link
-          href="/gallery"
+          href="/publications/public-gallery"
           className="flex items-center justify-center gap-2 py-2 px-4 bg-[var(--secondary)]/10 text-[var(--secondary)] font-semibold rounded-lg hover:bg-[var(--primary)]/20 transition-all duration-300"
         >
           View All Gallery

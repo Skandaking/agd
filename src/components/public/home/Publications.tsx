@@ -99,7 +99,7 @@ export function Publications() {
       
       <div className="p-4 border-t bg-white">
         <Link
-          href="/publications"
+          href="/publications/documents"
           className="flex items-center justify-center gap-2 py-2 px-4 bg-[var(--secondary)]/10 text-[var(--secondary)] font-semibold rounded-lg hover:bg-[var(--secondary)]/20 transition-all duration-300"
         >
           View All Publications
