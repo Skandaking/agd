@@ -59,7 +59,7 @@ export default function ServicesPage() {
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
-      <div className="relative h-[300px] flex items-center justify-center overflow-hidden">
+      <div className="relative min-h-[240px] flex items-center justify-center overflow-hidden">
         {/* Background Image with Overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"

@@ -6,7 +6,7 @@ export default function BankingAssetManagementPage() {
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
-      <div className="relative min-h-[260px] flex items-center justify-center overflow-hidden py-8 px-2 sm:px-4 md:py-0 md:h-[300px]">
+      <div className="relative min-h-[240px] flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url(/hero/6.JPG)` }}
