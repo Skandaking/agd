@@ -13,7 +13,7 @@ export default function PublicGalleryPage() {
       title: "Annual Financial Management Conference 2024",
       date: "June 15, 2024",
       location: "Bingu International Convention Centre",
-      category: "Conference",
+      category: "Training",
       images: ["/hero/1.JPG", "/hero/3.jpg", "/hero/6.jpg"],
       description: "Government officials and stakeholders gathered for the annual financial management conference to discuss best practices and innovations in public finance.",
     },
@@ -31,7 +31,7 @@ export default function PublicGalleryPage() {
       title: "Staff Development Program",
       date: "April 30, 2024",
       location: "AGD Main Office",
-      category: "Development",
+      category: "Training",
       images: ["/hero/4.jpg", "/hero/8.JPG", "/hero/9.jpg"],
       description: "Professional development sessions focused on enhancing skills in modern financial management practices.",
     },
@@ -40,7 +40,7 @@ export default function PublicGalleryPage() {
       title: "Community Outreach Program",
       date: "April 10, 2024",
       location: "Various Communities",
-      category: "Outreach",
+      category: "Meeting",
       images: ["/hero/10.jpg", "/images/t1.jpg", "/images/t2.jpg"],
       description: "AGD team visited local communities to educate citizens about public finance management and transparency.",
     },
@@ -67,7 +67,7 @@ export default function PublicGalleryPage() {
       title: "Budget Review Session",
       date: "February 28, 2024",
       location: "AGD Conference Room",
-      category: "Review",
+      category: "Meeting",
       images: ["/images/t9.jpg", "/images/t10.jpg", "/images/t11.jpg"],
       description: "Quarterly budget review session with heads of departments to assess financial performance.",
     },
@@ -76,7 +76,7 @@ export default function PublicGalleryPage() {
       title: "Technology Innovation Showcase",
       date: "February 10, 2024",
       location: "AGD ICT Center",
-      category: "Technology",
+      category: "Meeting",
       images: ["/images/t12.jpg", "/images/t13.jpg", "/images/t14.jpg"],
       description: "Showcase of new technology solutions implemented to improve government financial processes.",
     }
@@ -95,7 +95,7 @@ export default function PublicGalleryPage() {
     }))
   );
 
-  const categories = ["All", "Conference", "Training", "Development", "Outreach", "Meeting", "Team Building", "Review", "Technology"];
+  const categories = ["All", "Training", "Meeting", "Team Building"];
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
