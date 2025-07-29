@@ -15,9 +15,9 @@ import {
   Calendar, 
   FileText, 
   Image, 
-  Settings,
   LogOut,
-  X
+  X,
+  Users
 } from 'lucide-react';
 
 interface NavItem {
@@ -82,9 +82,9 @@ const navigation: NavSection[] = [
     title: 'System',
     items: [
       {
-        title: 'Settings',
-        href: '/dashboard/settings',
-        icon: Settings,
+        title: 'Users',
+        href: '/dashboard/users',
+        icon: Users,
       },
     ],
   },
