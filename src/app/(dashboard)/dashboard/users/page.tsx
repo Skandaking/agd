@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,10 +46,10 @@ interface User {
   role: 'user' | 'administrator';
   is_active: boolean;
   login_attempts: number;
-  locked_until: Date | null;
-  last_login: Date | null;
-  created_at: Date;
-  updated_at: Date;
+  locked_until: string | null;
+  last_login: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface NewUser {
@@ -60,45 +60,60 @@ interface NewUser {
   is_active: boolean;
 }
 
-// Mock data - replace with actual API calls
-const mockUsers: User[] = [
-  {
-    id: 1,
-    email: 'admin@agd.gov.mw',
-    full_name: 'System Administrator',
-    role: 'administrator',
-    is_active: true,
-    login_attempts: 0,
-    locked_until: null,
-    last_login: new Date('2024-01-15T10:30:00'),
-    created_at: new Date('2024-01-01T00:00:00'),
-    updated_at: new Date('2024-01-15T10:30:00'),
-  },
-  {
-    id: 2,
-    email: 'john.doe@agd.gov.mw',
-    full_name: 'John Doe',
-    role: 'user',
-    is_active: true,
-    login_attempts: 1,
-    locked_until: null,
-    last_login: new Date('2024-01-14T15:20:00'),
-    created_at: new Date('2024-01-10T00:00:00'),
-    updated_at: new Date('2024-01-14T15:20:00'),
-  },
-  {
-    id: 3,
-    email: 'jane.smith@agd.gov.mw',
-    full_name: 'Jane Smith',
-    role: 'user',
-    is_active: false,
-    login_attempts: 3,
-    locked_until: new Date('2024-01-20T00:00:00'),
-    last_login: new Date('2024-01-12T09:15:00'),
-    created_at: new Date('2024-01-08T00:00:00'),
-    updated_at: new Date('2024-01-12T09:15:00'),
-  },
-];
+// API functions
+const fetchUsers = async (): Promise<User[]> => {
+  const response = await fetch('/api/users');
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to fetch users');
+  }
+  return data.users;
+};
+
+const createUser = async (userData: NewUser): Promise<User> => {
+  const response = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData),
+  });
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to create user');
+  }
+  return data.user;
+};
+
+const deleteUser = async (userId: number): Promise<void> => {
+  const response = await fetch(`/api/users/${userId}`, {
+    method: 'DELETE',
+  });
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to delete user');
+  }
+};
+
+const unlockUser = async (userId: number): Promise<User> => {
+  const response = await fetch(`/api/users/${userId}/unlock`, {
+    method: 'PUT',
+  });
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to unlock user');
+  }
+  return data.user;
+};
+
+const toggleUserStatus = async (userId: number): Promise<User> => {
+  const response = await fetch(`/api/users/${userId}/toggle-status`, {
+    method: 'PUT',
+  });
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to toggle user status');
+  }
+  return data.user;
+};
 
 const getRoleVariant = (role: User['role']) => {
   switch (role) {
@@ -121,7 +136,8 @@ const getStatusText = (isActive: boolean, isLocked: boolean) => {
 
 export default function UsersPage() {
   const { setPageTitle, setBreadcrumbs, showToast } = useDashboard();
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<User['role'] | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'locked'>('all');
@@ -134,13 +150,35 @@ export default function UsersPage() {
     is_active: true,
   });
 
+  // Load users on component mount
+  const loadUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const fetchedUsers = await fetchUsers();
+      setUsers(fetchedUsers);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      showToast.error(error instanceof Error ? error.message : 'Failed to load users');
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
+
+  // Memoize breadcrumbs to prevent infinite re-renders
+  const breadcrumbs = useMemo(() => [
+    { label: 'Home', href: '/dashboard' },
+    { label: 'Users' },
+  ], []);
+
   useEffect(() => {
     setPageTitle('User Management');
-    setBreadcrumbs([
-      { label: 'Home', href: '/dashboard' },
-      { label: 'Users' },
-    ]);
-  }, [setPageTitle, setBreadcrumbs]);
+    setBreadcrumbs(breadcrumbs);
+  }, [setPageTitle, setBreadcrumbs, breadcrumbs]);
+
+  // Load users separately to avoid dependency issues
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch = 
@@ -150,17 +188,17 @@ export default function UsersPage() {
     
     let matchesStatus = true;
     if (statusFilter === 'active') {
-      matchesStatus = user.is_active && !user.locked_until;
+      matchesStatus = user.is_active && !isUserLocked(user);
     } else if (statusFilter === 'inactive') {
       matchesStatus = !user.is_active;
     } else if (statusFilter === 'locked') {
-      matchesStatus = !!user.locked_until && new Date() < user.locked_until;
+      matchesStatus = isUserLocked(user);
     }
     
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const handleAddUser = (e: React.FormEvent) => {
+  const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
@@ -169,67 +207,70 @@ export default function UsersPage() {
       return;
     }
 
-    // Check if email already exists
-    if (users.some(user => user.email === newUser.email)) {
-      showToast.error('A user with this email already exists');
-      return;
+    try {
+      const createdUser = await createUser(newUser);
+      setUsers([...users, createdUser]);
+      showToast.success('User created successfully');
+      setIsAddUserOpen(false);
+      setNewUser({
+        email: '',
+        password: '',
+        full_name: '',
+        role: 'user',
+        is_active: true,
+      });
+    } catch (error) {
+      console.error('Error creating user:', error);
+      showToast.error(error instanceof Error ? error.message : 'Failed to create user');
     }
-
-    // Create new user
-    const user: User = {
-      id: Math.max(...users.map(u => u.id)) + 1,
-      ...newUser,
-      login_attempts: 0,
-      locked_until: null,
-      last_login: null,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-
-    setUsers([...users, user]);
-    showToast.success('User created successfully');
-    setIsAddUserOpen(false);
-    setNewUser({
-      email: '',
-      password: '',
-      full_name: '',
-      role: 'user',
-      is_active: true,
-    });
   };
 
-  const handleToggleUserStatus = (id: number) => {
-    setUsers(users.map(user => 
-      user.id === id 
-        ? { ...user, is_active: !user.is_active, updated_at: new Date() }
-        : user
-    ));
-    showToast.success('User status updated successfully');
+  const handleToggleUserStatus = async (id: number) => {
+    try {
+      const updatedUser = await toggleUserStatus(id);
+      setUsers(users.map(user => 
+        user.id === id ? updatedUser : user
+      ));
+      showToast.success('User status updated successfully');
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      showToast.error(error instanceof Error ? error.message : 'Failed to update user status');
+    }
   };
 
-  const handleUnlockUser = (id: number) => {
-    setUsers(users.map(user => 
-      user.id === id 
-        ? { ...user, locked_until: null, login_attempts: 0, updated_at: new Date() }
-        : user
-    ));
-    showToast.success('User unlocked successfully');
+  const handleUnlockUser = async (id: number) => {
+    try {
+      const updatedUser = await unlockUser(id);
+      setUsers(users.map(user => 
+        user.id === id ? updatedUser : user
+      ));
+      showToast.success('User unlocked successfully');
+    } catch (error) {
+      console.error('Error unlocking user:', error);
+      showToast.error(error instanceof Error ? error.message : 'Failed to unlock user');
+    }
   };
 
-  const handleDeleteUser = (id: number) => {
-    setUsers(users.filter(user => user.id !== id));
-    showToast.success('User deleted successfully');
+  const handleDeleteUser = async (id: number) => {
+    try {
+      await deleteUser(id);
+      setUsers(users.filter(user => user.id !== id));
+      showToast.success('User deleted successfully');
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      showToast.error(error instanceof Error ? error.message : 'Failed to delete user');
+    }
+  };
+
+  const isUserLocked = (user: User) => {
+    return !!(user.locked_until && new Date() < new Date(user.locked_until));
   };
 
   const stats = {
     total: users.length,
     administrators: users.filter(u => u.role === 'administrator').length,
-    activeUsers: users.filter(u => u.is_active && !u.locked_until).length,
-    lockedUsers: users.filter(u => u.locked_until && new Date() < u.locked_until).length,
-  };
-
-  const isUserLocked = (user: User) => {
-    return !!(user.locked_until && new Date() < user.locked_until);
+    activeUsers: users.filter(u => u.is_active && !isUserLocked(u)).length,
+    lockedUsers: users.filter(u => isUserLocked(u)).length,
   };
 
   return (
@@ -454,7 +495,13 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.length === 0 ? (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Loading users...
+                    </TableCell>
+                  </TableRow>
+                ) : filteredUsers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No users found matching your criteria.
@@ -488,7 +535,7 @@ export default function UsersPage() {
                         {user.last_login ? (
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-muted-foreground" />
-                            {user.last_login.toLocaleDateString()}
+                            {new Date(user.last_login).toLocaleDateString()}
                           </div>
                         ) : (
                           <span className="text-muted-foreground">Never</span>
@@ -505,7 +552,7 @@ export default function UsersPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm">{user.created_at.toLocaleDateString()}</div>
+                        <div className="text-sm">{new Date(user.created_at).toLocaleDateString()}</div>
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
