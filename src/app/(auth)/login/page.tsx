@@ -1,38 +1,16 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Mail, Lock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
 
-// Mock UI components using Tailwind CSS for styling
-// const Card = ({ className, children }: { className?: string, children: React.ReactNode }) => (
-//   <div className={`bg-white rounded-lg border border-gray-200 ${className}`}>{children}</div>
-// );
-// const CardHeader = ({ className, children }: { className?: string, children: React.ReactNode }) => (
-//   <div className={`p-6 ${className}`}>{children}</div>
-// );
-// const CardTitle = ({ className, children }: { className?: string, children: React.ReactNode }) => (
-//   <h3 className={`text-lg font-semibold text-gray-900 ${className}`}>{children}</h3>
-// );
-// const CardDescription = ({ className, children }: { className?: string, children: React.ReactNode }) => (
-//   <p className={`text-sm text-gray-500 ${className}`}>{children}</p>
-// );
-// const CardContent = ({ className, children }: { className?: string, children: React.ReactNode }) => (
-//   <div className={`p-6 ${className}`}>{children}</div>
-// );
-// const CardFooter = ({ className, children }: { className?: string, children: React.ReactNode }) => (
-//   <div className={`p-6 border-t border-gray-200 ${className}`}>{children}</div>
-// );
-const Label = ({ htmlFor, className, children }: { htmlFor?: string, className?: string, children: React.ReactNode }) => (
-  <label htmlFor={htmlFor} className={`block text-sm font-medium text-gray-700 ${className}`}>{children}</label>
-);
-const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <input {...props} className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)] sm:text-sm ${props.className}`} />
-);
 const Alert = ({ className, children }: { variant?: string, className?: string, children: React.ReactNode }) => (
-  // Basic alert styling, destructive variant would add more specific color classes
   <div className={`p-4 mb-4 border rounded-md bg-red-50 border-red-300 text-red-700 ${className}`}>{children}</div>
 );
 const AlertDescription = ({ className, children }: { className?: string, children: React.ReactNode }) => (
@@ -46,21 +24,40 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { login, isLoading, isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setIsLoading(true);
+    
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
     
     try {
-      console.log("Login attempt with:", email);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setError("Login functionality will be implemented by the administrator");
-    } catch {
-      setError("Login failed. Please try again.");
-    } finally {
-      setIsLoading(false);
+      // Trim whitespace from inputs
+      const trimmedEmail = email.trim();
+      const trimmedPassword = password.trim();
+      
+      const result = await login(trimmedEmail, trimmedPassword);
+      
+      if (result.success) {
+        router.push('/dashboard');
+      } else {
+        setError(result.error || "Login failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("An unexpected error occurred. Please try again.");
     }
   };
 
@@ -82,7 +79,9 @@ export default function LoginPage() {
         <Card className="shadow-xl">
           <CardHeader className="pb-4 text-center">
             <CardTitle className="text-2xl text-gray-700">Sign in to your account</CardTitle>
-            <CardDescription className="mt-1">Enter your credentials to access the system.</CardDescription>
+            <CardDescription className="mt-1">
+              Enter your credentials to access the AGD administration system.
+            </CardDescription>
           </CardHeader>
           
           <CardContent className="pt-2 pb-4">
@@ -108,8 +107,8 @@ export default function LoginPage() {
                     type="email"
                     autoComplete="email"
                     required
-                    className="pl-10 py-2.5" // Adjusted padding for icon
-                    placeholder="skanda@agd.gov.mw"
+                    className="pl-10"
+                    placeholder="Enter your email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -136,8 +135,8 @@ export default function LoginPage() {
                     type="password"
                     autoComplete="current-password"
                     required
-                    className="pl-10 py-2.5" // Adjusted padding for icon
-                    placeholder="••••••••"
+                    className="pl-10"
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -146,7 +145,7 @@ export default function LoginPage() {
               
               <Button 
                 type="submit" 
-                className="w-full bg-[var(--primary)] hover:bg-[var(--primary)]/80 text-white font-semibold py-2.5 transition-colors"
+                className="w-full"
                 disabled={isLoading}
               >
                 {isLoading ? "Signing in..." : "Sign in"}

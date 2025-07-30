@@ -1,6 +1,8 @@
 'use client';
 
 import { DashboardProvider, useDashboard } from '@/contexts/DashboardContext';
+import { AuthProvider } from '@/contexts/AuthContext';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Header } from '@/components/dashboard/Header';
 import { Toaster } from '@/components/ui/sonner';
@@ -45,10 +47,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <DashboardProvider>
-      <DashboardLayoutContent>
-        {children}
-      </DashboardLayoutContent>
-    </DashboardProvider>
+    <AuthProvider>
+      <ProtectedRoute>
+        <DashboardProvider>
+          <DashboardLayoutContent>
+            {children}
+          </DashboardLayoutContent>
+        </DashboardProvider>
+      </ProtectedRoute>
+    </AuthProvider>
   );
 } 

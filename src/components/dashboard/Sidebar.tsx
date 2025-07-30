@@ -6,6 +6,7 @@ import NextImage from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/contexts/DashboardContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -97,6 +98,7 @@ export function Sidebar() {
     isMobileSidebarOpen, 
     setMobileSidebarOpen 
   } = useDashboard();
+  const { logout, user } = useAuth();
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -215,11 +217,26 @@ export function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border p-4 space-y-3">
+          {/* User Info */}
+          {!isSidebarCollapsed && user && (
+            <div className="px-3 py-2 bg-muted/50 rounded-lg">
+              <p className="text-sm font-medium text-foreground truncate">{user.full_name}</p>
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              {user.role === 'administrator' && (
+                <Badge variant="secondary" className="mt-1 text-xs">
+                  Admin
+                </Badge>
+              )}
+            </div>
+          )}
+          
+          {/* Logout Button */}
           <Button
             variant="ghost"
+            onClick={logout}
             className={cn(
-              "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
+              "w-full justify-start gap-3 text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive",
               isSidebarCollapsed && "justify-center"
             )}
           >
