@@ -16,9 +16,20 @@ export async function GET() {
     
     const users = await executeQuery(query);
     
+    // Convert MySQL boolean fields (tinyint) to proper booleans
+    const formattedUsers = users.map((user: unknown) => {
+      const userObj = user as Record<string, unknown>;
+      return {
+        ...userObj,
+        is_active: Boolean(userObj.is_active),
+        locked_until: userObj.locked_until || null,
+        last_login: userObj.last_login || null
+      };
+    });
+    
     return NextResponse.json({
       success: true,
-      users
+      users: formattedUsers
     });
   } catch (error) {
     console.error('Error fetching users:', error);

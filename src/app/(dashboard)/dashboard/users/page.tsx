@@ -535,7 +535,12 @@ export default function UsersPage() {
                         {user.last_login ? (
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-muted-foreground" />
-                            {new Date(user.last_login).toLocaleDateString()}
+                            <div className="text-sm">
+                              <div>{new Date(user.last_login).toLocaleDateString()}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {new Date(user.last_login).toLocaleTimeString()}
+                              </div>
+                            </div>
                           </div>
                         ) : (
                           <span className="text-muted-foreground">Never</span>
@@ -552,7 +557,12 @@ export default function UsersPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm">{new Date(user.created_at).toLocaleDateString()}</div>
+                        <div className="text-sm">
+                          <div>{new Date(user.created_at).toLocaleDateString()}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(user.created_at).toLocaleTimeString()}
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
