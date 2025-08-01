@@ -8,6 +8,13 @@ import { Button } from '@/components/ui/button';
 import { UserDialog } from '@/components/dashboard/AddUserDialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Table,
   TableBody,
   TableCell,
@@ -168,6 +175,7 @@ export default function UsersPage() {
   const [statusDialog, setStatusDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
   const [resetAttemptsDialog, setResetAttemptsDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
   const [resetPasswordDialog, setResetPasswordDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
+  const [viewUserDialog, setViewUserDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
 
   // Load users on component mount
   const loadUsers = useCallback(async () => {
@@ -206,6 +214,8 @@ export default function UsersPage() {
       const createdUser = await createUser(userData);
       setUsers([...users, createdUser]);
       showToast.success('User created successfully');
+      // Refresh the users list to ensure data consistency
+      await loadUsers();
     } catch (error) {
       console.error('Error creating user:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to create user');
@@ -230,6 +240,8 @@ export default function UsersPage() {
       const updatedUser = data.user;
       setUsers(users.map(user => user.id === userId ? updatedUser : user));
       showToast.success('User updated successfully');
+      // Refresh the users list to ensure data consistency
+      await loadUsers();
     } catch (error) {
       showToast.error(error instanceof Error ? error.message : 'Failed to update user');
       throw error; // Re-throw to let the dialog handle it
@@ -243,6 +255,8 @@ export default function UsersPage() {
         user.id === id ? updatedUser : user
       ));
       showToast.success('User status updated successfully');
+      // Refresh the users list to ensure data consistency
+      await loadUsers();
     } catch (error) {
       console.error('Error updating user status:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to update user status');
@@ -256,6 +270,8 @@ export default function UsersPage() {
         user.id === id ? updatedUser : user
       ));
       showToast.success('User unlocked successfully');
+      // Refresh the users list to ensure data consistency
+      await loadUsers();
     } catch (error) {
       console.error('Error unlocking user:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to unlock user');
@@ -267,6 +283,8 @@ export default function UsersPage() {
       await deleteUser(id);
       setUsers(users.filter(user => user.id !== id));
       showToast.success('User deleted successfully');
+      // Refresh the users list to ensure data consistency
+      await loadUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to delete user');
@@ -280,6 +298,8 @@ export default function UsersPage() {
         user.id === id ? updatedUser : user
       ));
       showToast.success('Login attempts reset successfully');
+      // Refresh the users list to ensure data consistency
+      await loadUsers();
     } catch (error) {
       console.error('Error resetting login attempts:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to reset login attempts');
@@ -293,6 +313,8 @@ export default function UsersPage() {
         user.id === id ? result.user : user
       ));
       showToast.success(result.message);
+      // Refresh the users list to ensure data consistency
+      await loadUsers();
     } catch (error) {
       console.error('Error resetting password:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to reset password');
@@ -424,7 +446,6 @@ export default function UsersPage() {
                               <Badge variant="outline" className="text-xs">
                                 {user.login_attempts}
                               </Badge>
-                              <span className="text-sm">{user.login_attempts}</span>
                             </>
                           ) : (
                             <span className="text-sm text-muted-foreground">0</span>
@@ -449,7 +470,7 @@ export default function UsersPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setViewUserDialog({ isOpen: true, user })}>
                               <Eye className="mr-2 h-4 w-4" />
                               View Details
                             </DropdownMenuItem>
@@ -521,9 +542,9 @@ export default function UsersPage() {
       <ConfirmationDialog
         isOpen={deleteDialog.isOpen}
         onClose={() => setDeleteDialog({ isOpen: false, user: null })}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (deleteDialog.user) {
-            handleDeleteUser(deleteDialog.user.id);
+            await handleDeleteUser(deleteDialog.user.id);
             setDeleteDialog({ isOpen: false, user: null });
           }
         }}
@@ -537,9 +558,9 @@ export default function UsersPage() {
       <ConfirmationDialog
         isOpen={statusDialog.isOpen}
         onClose={() => setStatusDialog({ isOpen: false, user: null })}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (statusDialog.user) {
-            handleToggleUserStatus(statusDialog.user.id);
+            await handleToggleUserStatus(statusDialog.user.id);
             setStatusDialog({ isOpen: false, user: null });
           }
         }}
@@ -552,9 +573,9 @@ export default function UsersPage() {
       <ConfirmationDialog
         isOpen={resetAttemptsDialog.isOpen}
         onClose={() => setResetAttemptsDialog({ isOpen: false, user: null })}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (resetAttemptsDialog.user) {
-            handleResetLoginAttempts(resetAttemptsDialog.user.id);
+            await handleResetLoginAttempts(resetAttemptsDialog.user.id);
             setResetAttemptsDialog({ isOpen: false, user: null });
           }
         }}
@@ -567,9 +588,9 @@ export default function UsersPage() {
       <ConfirmationDialog
         isOpen={resetPasswordDialog.isOpen}
         onClose={() => setResetPasswordDialog({ isOpen: false, user: null })}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (resetPasswordDialog.user) {
-            handleResetPassword(resetPasswordDialog.user.id);
+            await handleResetPassword(resetPasswordDialog.user.id);
             setResetPasswordDialog({ isOpen: false, user: null });
           }
         }}
@@ -578,6 +599,125 @@ export default function UsersPage() {
         confirmText="Reset"
         cancelText="Cancel"
       />
+
+      {/* View User Details Dialog */}
+      <Dialog open={viewUserDialog.isOpen} onOpenChange={(open) => !open && setViewUserDialog({ isOpen: false, user: null })}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+            <DialogDescription>
+              Complete information about {viewUserDialog.user?.full_name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {viewUserDialog.user && (
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Full Name</label>
+                    <p className="text-sm font-medium">{viewUserDialog.user.full_name}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Email Address</label>
+                    <p className="text-sm">{viewUserDialog.user.email}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Phone Number</label>
+                    <p className="text-sm">{viewUserDialog.user.phone || 'Not provided'}</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Role</label>
+                    <div className="mt-1">
+                      <Badge variant={getRoleVariant(viewUserDialog.user.role)}>
+                        {viewUserDialog.user.role === 'administrator' ? 'Administrator' : 'User'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Account Status</label>
+                    <div className="mt-1">
+                      <Badge variant={getStatusVariant(viewUserDialog.user.is_active, isUserLocked(viewUserDialog.user))}>
+                        {getStatusText(viewUserDialog.user.is_active, isUserLocked(viewUserDialog.user))}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Login Attempts</label>
+                    <div className="flex items-center gap-2 mt-1">
+                      {viewUserDialog.user.login_attempts >= 3 ? (
+                        <>
+                          <Lock className="h-4 w-4 text-red-500" />
+                          <Badge variant="destructive" className="text-xs">
+                            {viewUserDialog.user.login_attempts}
+                          </Badge>
+                          <span className="text-sm text-red-600 font-medium">Account Locked</span>
+                        </>
+                      ) : viewUserDialog.user.login_attempts > 0 ? (
+                        <>
+                          <Badge variant="outline" className="text-xs">
+                            {viewUserDialog.user.login_attempts}
+                          </Badge>
+                          <span className="text-sm">failed attempts</span>
+                        </>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">No failed attempts</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Activity */}
+              <div className="border-t pt-4">
+                <h3 className="text-lg font-medium mb-4">Account Activity</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Last Login</label>
+                    <p className="text-sm">
+                      {viewUserDialog.user.last_login ? (
+                        <>
+                          {new Date(viewUserDialog.user.last_login).toLocaleDateString()} at{' '}
+                          {new Date(viewUserDialog.user.last_login).toLocaleTimeString()}
+                        </>
+                      ) : (
+                        'Never logged in'
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Account Created</label>
+                    <p className="text-sm">
+                      {new Date(viewUserDialog.user.created_at).toLocaleDateString()} at{' '}
+                      {new Date(viewUserDialog.user.created_at).toLocaleTimeString()}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Last Updated</label>
+                    <p className="text-sm">
+                      {new Date(viewUserDialog.user.updated_at).toLocaleDateString()} at{' '}
+                      {new Date(viewUserDialog.user.updated_at).toLocaleTimeString()}
+                    </p>
+                  </div>
+                  {viewUserDialog.user.locked_until && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Locked Until</label>
+                      <p className="text-sm text-red-600">
+                        {new Date(viewUserDialog.user.locked_until).toLocaleDateString()} at{' '}
+                        {new Date(viewUserDialog.user.locked_until).toLocaleTimeString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
