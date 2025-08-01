@@ -5,6 +5,7 @@ import { useDashboard } from '@/contexts/DashboardContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { UserDialog } from '@/components/dashboard/AddUserDialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import {
@@ -43,7 +44,8 @@ import {
   Lock,
   Key,
   RotateCcw,
-  RefreshCw
+  RefreshCw,
+  Search
 } from 'lucide-react';
 
 interface User {
@@ -178,6 +180,7 @@ export default function UsersPage() {
   const [resetPasswordDialog, setResetPasswordDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
   const [viewUserDialog, setViewUserDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Load users on component mount
   const loadUsers = useCallback(async () => {
@@ -252,7 +255,19 @@ export default function UsersPage() {
     return () => window.removeEventListener('focus', handleFocus);
   }, [loadUsers]);
 
-  const filteredUsers = users;
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return users;
+    }
+    
+    const query = searchQuery.toLowerCase().trim();
+    return users.filter(user => 
+      user.full_name.toLowerCase().includes(query) ||
+      user.email.toLowerCase().includes(query) ||
+      user.role.toLowerCase().includes(query) ||
+      (user.phone && user.phone.toLowerCase().includes(query))
+    );
+  }, [users, searchQuery]);
 
   const handleCreateUser = async (userData: NewUser) => {
     try {
@@ -382,24 +397,46 @@ export default function UsersPage() {
             Manage user accounts and permissions for the AGD administration system.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={loadUsers}
-            disabled={loading}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          <UserDialog 
-            mode={editingUser ? "edit" : "add"}
-            existingUser={editingUser}
-            onUserCreate={handleCreateUser}
-            onUserUpdate={handleUpdateUser}
-            onClose={() => setEditingUser(null)}
-          />
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          {/* Search Input */}
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, email, role..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0 hover:bg-muted"
+              >
+                <span className="text-muted-foreground">×</span>
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadUsers}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <UserDialog 
+              mode={editingUser ? "edit" : "add"}
+              existingUser={editingUser}
+              onUserCreate={handleCreateUser}
+              onUserUpdate={handleUpdateUser}
+              onClose={() => setEditingUser(null)}
+            />
+          </div>
         </div>
       </div>
       
@@ -408,9 +445,19 @@ export default function UsersPage() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Users ({filteredUsers.length})</CardTitle>
+              <CardTitle>
+                Users ({filteredUsers.length}
+                {searchQuery && filteredUsers.length !== users.length && (
+                  <span className="text-muted-foreground"> of {users.length}</span>
+                )}
+                )
+              </CardTitle>
               <CardDescription>
-                Manage user accounts and their access permissions.
+                {searchQuery ? (
+                  <>Showing results for &quot;{searchQuery}&quot;</>
+                ) : (
+                  <>Manage user accounts and their access permissions.</>
+                )}
               </CardDescription>
             </div>
             {lastUpdated && (
@@ -445,7 +492,21 @@ export default function UsersPage() {
                 ) : filteredUsers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No users found.
+                      {searchQuery ? (
+                        <div className="space-y-2">
+                          <p>No users found matching &quot;{searchQuery}&quot;</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSearchQuery('')}
+                            className="text-xs"
+                          >
+                            Clear search
+                          </Button>
+                        </div>
+                      ) : (
+                        'No users found.'
+                      )}
                     </TableCell>
                   </TableRow>
                 ) : (
