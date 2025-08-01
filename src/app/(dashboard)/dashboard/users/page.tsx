@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { UserDialog } from '@/components/dashboard/AddUserDialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import {
   Table,
   TableBody,
@@ -31,7 +32,10 @@ import {
   Clock,
   UserCheck,
   UserX,
-  Phone
+  Phone,
+  Lock,
+  Key,
+  RotateCcw
 } from 'lucide-react';
 
 interface User {
@@ -112,6 +116,28 @@ const toggleUserStatus = async (userId: number): Promise<User> => {
   return data.user;
 };
 
+const resetLoginAttempts = async (userId: number): Promise<User> => {
+  const response = await fetch(`/api/users/${userId}/reset-login-attempts`, {
+    method: 'PUT',
+  });
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to reset login attempts');
+  }
+  return data.user;
+};
+
+const resetPassword = async (userId: number): Promise<{ user: User; message: string }> => {
+  const response = await fetch(`/api/users/${userId}/reset-password`, {
+    method: 'PUT',
+  });
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to reset password');
+  }
+  return { user: data.user, message: data.message };
+};
+
 const getRoleVariant = (role: User['role']) => {
   switch (role) {
     case 'administrator':
@@ -136,6 +162,12 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  
+  // Confirmation dialog states
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
+  const [statusDialog, setStatusDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
+  const [resetAttemptsDialog, setResetAttemptsDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
+  const [resetPasswordDialog, setResetPasswordDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
 
   // Load users on component mount
   const loadUsers = useCallback(async () => {
@@ -238,6 +270,32 @@ export default function UsersPage() {
     } catch (error) {
       console.error('Error deleting user:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to delete user');
+    }
+  };
+
+  const handleResetLoginAttempts = async (id: number) => {
+    try {
+      const updatedUser = await resetLoginAttempts(id);
+      setUsers(users.map(user => 
+        user.id === id ? updatedUser : user
+      ));
+      showToast.success('Login attempts reset successfully');
+    } catch (error) {
+      console.error('Error resetting login attempts:', error);
+      showToast.error(error instanceof Error ? error.message : 'Failed to reset login attempts');
+    }
+  };
+
+  const handleResetPassword = async (id: number) => {
+    try {
+      const result = await resetPassword(id);
+      setUsers(users.map(user => 
+        user.id === id ? result.user : user
+      ));
+      showToast.success(result.message);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      showToast.error(error instanceof Error ? error.message : 'Failed to reset password');
     }
   };
 
@@ -353,12 +411,24 @@ export default function UsersPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {user.login_attempts > 0 && (
-                            <Badge variant="outline" className="text-xs">
-                              {user.login_attempts}
-                            </Badge>
+                          {user.login_attempts >= 3 ? (
+                            <>
+                              <Lock className="h-4 w-4 text-red-500" />
+                              <Badge variant="destructive" className="text-xs">
+                                {user.login_attempts}
+                              </Badge>
+                              <span className="text-sm text-red-600 font-medium">Locked</span>
+                            </>
+                          ) : user.login_attempts > 0 ? (
+                            <>
+                              <Badge variant="outline" className="text-xs">
+                                {user.login_attempts}
+                              </Badge>
+                              <span className="text-sm">{user.login_attempts}</span>
+                            </>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">0</span>
                           )}
-                          <span className="text-sm">{user.login_attempts}</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -388,6 +458,21 @@ export default function UsersPage() {
                               Edit User
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
+                            {user.login_attempts > 0 && (
+                              <DropdownMenuItem 
+                                onClick={() => setResetAttemptsDialog({ isOpen: true, user })}
+                              >
+                                <RotateCcw className="mr-2 h-4 w-4" />
+                                Reset Login Attempts
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem 
+                              onClick={() => setResetPasswordDialog({ isOpen: true, user })}
+                            >
+                              <Key className="mr-2 h-4 w-4" />
+                              Reset Password
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             {isUserLocked(user) ? (
                               <DropdownMenuItem 
                                 onClick={() => handleUnlockUser(user.id)}
@@ -397,7 +482,7 @@ export default function UsersPage() {
                               </DropdownMenuItem>
                             ) : (
                               <DropdownMenuItem 
-                                onClick={() => handleToggleUserStatus(user.id)}
+                                onClick={() => setStatusDialog({ isOpen: true, user })}
                               >
                                 {user.is_active ? (
                                   <>
@@ -415,7 +500,7 @@ export default function UsersPage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               className="text-red-600"
-                              onClick={() => handleDeleteUser(user.id)}
+                              onClick={() => setDeleteDialog({ isOpen: true, user })}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
@@ -431,6 +516,68 @@ export default function UsersPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Confirmation Dialogs */}
+      <ConfirmationDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, user: null })}
+        onConfirm={() => {
+          if (deleteDialog.user) {
+            handleDeleteUser(deleteDialog.user.id);
+            setDeleteDialog({ isOpen: false, user: null });
+          }
+        }}
+        title="Delete User"
+        description={`Are you sure you want to delete ${deleteDialog.user?.full_name}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
+
+      <ConfirmationDialog
+        isOpen={statusDialog.isOpen}
+        onClose={() => setStatusDialog({ isOpen: false, user: null })}
+        onConfirm={() => {
+          if (statusDialog.user) {
+            handleToggleUserStatus(statusDialog.user.id);
+            setStatusDialog({ isOpen: false, user: null });
+          }
+        }}
+        title={statusDialog.user?.is_active ? "Deactivate User" : "Activate User"}
+        description={`Are you sure you want to ${statusDialog.user?.is_active ? 'deactivate' : 'activate'} ${statusDialog.user?.full_name}?`}
+        confirmText={statusDialog.user?.is_active ? "Deactivate" : "Activate"}
+        cancelText="Cancel"
+      />
+
+      <ConfirmationDialog
+        isOpen={resetAttemptsDialog.isOpen}
+        onClose={() => setResetAttemptsDialog({ isOpen: false, user: null })}
+        onConfirm={() => {
+          if (resetAttemptsDialog.user) {
+            handleResetLoginAttempts(resetAttemptsDialog.user.id);
+            setResetAttemptsDialog({ isOpen: false, user: null });
+          }
+        }}
+        title="Reset Login Attempts"
+        description={`Are you sure you want to reset login attempts for ${resetAttemptsDialog.user?.full_name}? This will unlock their account if it was locked.`}
+        confirmText="Reset"
+        cancelText="Cancel"
+      />
+
+      <ConfirmationDialog
+        isOpen={resetPasswordDialog.isOpen}
+        onClose={() => setResetPasswordDialog({ isOpen: false, user: null })}
+        onConfirm={() => {
+          if (resetPasswordDialog.user) {
+            handleResetPassword(resetPasswordDialog.user.id);
+            setResetPasswordDialog({ isOpen: false, user: null });
+          }
+        }}
+        title="Reset Password"
+        description={`Are you sure you want to reset the password for ${resetPasswordDialog.user?.full_name}? The password will be reset to the default password.`}
+        confirmText="Reset"
+        cancelText="Cancel"
+      />
     </div>
   );
 } 
