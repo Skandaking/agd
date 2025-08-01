@@ -9,7 +9,7 @@ export async function PUT(
   try {
     const userId = parseInt(params.id);
     const body = await request.json();
-    const { full_name, email, role, is_active } = body;
+    const { full_name, email, phone, role, is_active } = body;
 
     // Validate user exists
     const existingUser = await executeQuerySingle(
@@ -27,16 +27,16 @@ export async function PUT(
     // Update user
     const query = `
       UPDATE users 
-      SET full_name = ?, email = ?, role = ?, is_active = ?, updated_at = NOW()
+      SET full_name = ?, email = ?, phone = ?, role = ?, is_active = ?, updated_at = NOW()
       WHERE id = ?
     `;
 
-    await executeQuery(query, [full_name, email, role, is_active, userId]);
+    await executeQuery(query, [full_name, email, phone || null, role, is_active, userId]);
 
     // Fetch updated user
     const updatedUser = await executeQuerySingle(`
       SELECT 
-        id, email, full_name, role, is_active, 
+        id, email, full_name, phone, role, is_active, 
         login_attempts, locked_until, last_login, 
         created_at, updated_at 
       FROM users 

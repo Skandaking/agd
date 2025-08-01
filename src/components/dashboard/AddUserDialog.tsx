@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
+import { DEFAULT_USER_PASSWORD } from '@/lib/constants';
 
 interface NewUser {
   email: string;
@@ -16,15 +17,36 @@ interface NewUser {
   is_active: boolean;
 }
 
-interface AddUserDialogProps {
-  onUserCreate: (userData: NewUser) => Promise<void>;
+interface ExistingUser {
+  id: number;
+  email: string;
+  full_name: string;
+  phone: string | null;
+  role: 'user' | 'administrator';
+  is_active: boolean;
 }
 
-export function AddUserDialog({ onUserCreate }: AddUserDialogProps) {
+interface UserDialogProps {
+  onUserCreate?: (userData: NewUser) => Promise<void>;
+  onUserUpdate?: (userId: number, userData: Partial<NewUser>) => Promise<void>;
+  onClose?: () => void;
+  existingUser?: ExistingUser | null;
+  mode?: 'add' | 'edit';
+  trigger?: React.ReactNode;
+}
+
+export function UserDialog({ 
+  onUserCreate, 
+  onUserUpdate, 
+  onClose,
+  existingUser, 
+  mode = 'add',
+  trigger 
+}: UserDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [newUser, setNewUser] = useState<NewUser>({
+  const [userData, setUserData] = useState<NewUser>({
     email: '',
-    password: 'AGD@2025', // Default password
+    password: DEFAULT_USER_PASSWORD,
     full_name: '',
     phone: '',
     role: 'user',
@@ -32,59 +54,111 @@ export function AddUserDialog({ onUserCreate }: AddUserDialogProps) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Update form data when existingUser changes or mode changes
+  useEffect(() => {
+    if (mode === 'edit' && existingUser) {
+      setUserData({
+        email: existingUser.email,
+        password: DEFAULT_USER_PASSWORD, // Always use default password
+        full_name: existingUser.full_name,
+        phone: existingUser.phone || '',
+        role: existingUser.role,
+        is_active: existingUser.is_active,
+      });
+      setIsOpen(true); // Auto-open dialog for edit mode
+    } else {
+      // Reset form for add mode
+      setUserData({
+        email: '',
+        password: DEFAULT_USER_PASSWORD,
+        full_name: '',
+        phone: '',
+        role: 'user',
+        is_active: true,
+      });
+    }
+  }, [mode, existingUser]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
-    if (!newUser.email || !newUser.full_name) {
+    if (!userData.email || !userData.full_name) {
       return;
     }
 
     try {
       setIsSubmitting(true);
-      await onUserCreate(newUser);
+      
+      if (mode === 'edit' && existingUser && onUserUpdate) {
+        // For edit mode, we don't send the password as it's not changing
+        const updateData = {
+          email: userData.email,
+          full_name: userData.full_name,
+          phone: userData.phone,
+          role: userData.role,
+          is_active: userData.is_active,
+        };
+        await onUserUpdate(existingUser.id, updateData);
+      } else if (mode === 'add' && onUserCreate) {
+        await onUserCreate(userData);
+      }
       
       // Reset form and close dialog on success
-      setNewUser({
+      setUserData({
         email: '',
-        password: 'AGD@2025',
+        password: DEFAULT_USER_PASSWORD,
         full_name: '',
         phone: '',
         role: 'user',
         is_active: true,
       });
       setIsOpen(false);
+      
+      // Call onClose callback if provided (especially for edit mode)
+      if (onClose) {
+        onClose();
+      }
     } catch (error) {
       // Error handling is done in parent component
-      console.error('Error in AddUserDialog:', error);
+      console.error(`Error in UserDialog (${mode} mode):`, error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleCancel = () => {
-    setNewUser({
+    setUserData({
       email: '',
-      password: 'AGD@2025',
+      password: DEFAULT_USER_PASSWORD,
       full_name: '',
       phone: '',
       role: 'user',
       is_active: true,
     });
     setIsOpen(false);
+    
+    // Call onClose callback if provided (especially for edit mode)
+    if (onClose) {
+      onClose();
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add User
-        </Button>
+        {trigger || (
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add User
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New User</DialogTitle>
+          <DialogTitle>
+            {mode === 'edit' ? 'Edit User' : 'Add New User'}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 gap-4">
@@ -92,8 +166,8 @@ export function AddUserDialog({ onUserCreate }: AddUserDialogProps) {
               <Label htmlFor="full_name">Full Name *</Label>
               <Input
                 id="full_name"
-                value={newUser.full_name}
-                onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
+                value={userData.full_name}
+                onChange={(e) => setUserData({ ...userData, full_name: e.target.value })}
                 placeholder="John Doe"
                 required
                 disabled={isSubmitting}
@@ -104,8 +178,8 @@ export function AddUserDialog({ onUserCreate }: AddUserDialogProps) {
               <Input
                 id="email"
                 type="email"
-                value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                value={userData.email}
+                onChange={(e) => setUserData({ ...userData, email: e.target.value })}
                 placeholder="john.doe@agd.gov.mw"
                 required
                 disabled={isSubmitting}
@@ -116,8 +190,8 @@ export function AddUserDialog({ onUserCreate }: AddUserDialogProps) {
               <Input
                 id="phone"
                 type="tel"
-                value={newUser.phone}
-                onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                value={userData.phone}
+                onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
                 placeholder="+265 123 456 789"
                 disabled={isSubmitting}
               />
@@ -127,22 +201,22 @@ export function AddUserDialog({ onUserCreate }: AddUserDialogProps) {
               <Input
                 id="password"
                 type="password"
-                value={newUser.password}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                value={userData.password}
+                readOnly
                 placeholder="••••••••"
-                required
-                disabled={isSubmitting}
+                disabled
+                className="bg-muted"
               />
               <p className="text-xs text-muted-foreground">
-                Default password: AGD@2025 (User can change after first login)
+                Default password: {DEFAULT_USER_PASSWORD} (User can change after first login)
               </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
               <select
                 id="role"
-                value={newUser.role}
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value as 'user' | 'administrator' })}
+                value={userData.role}
+                onChange={(e) => setUserData({ ...userData, role: e.target.value as 'user' | 'administrator' })}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 disabled={isSubmitting}
               >
@@ -154,8 +228,8 @@ export function AddUserDialog({ onUserCreate }: AddUserDialogProps) {
               <input
                 type="checkbox"
                 id="is_active"
-                checked={newUser.is_active}
-                onChange={(e) => setNewUser({ ...newUser, is_active: e.target.checked })}
+                checked={userData.is_active}
+                onChange={(e) => setUserData({ ...userData, is_active: e.target.checked })}
                 className="h-4 w-4 rounded border-gray-300"
                 disabled={isSubmitting}
               />
@@ -172,7 +246,10 @@ export function AddUserDialog({ onUserCreate }: AddUserDialogProps) {
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Create User'}
+              {isSubmitting 
+                ? (mode === 'edit' ? 'Updating...' : 'Creating...') 
+                : (mode === 'edit' ? 'Update User' : 'Create User')
+              }
             </Button>
           </div>
         </form>
@@ -180,3 +257,6 @@ export function AddUserDialog({ onUserCreate }: AddUserDialogProps) {
     </Dialog>
   );
 }
+
+// Export both UserDialog and AddUserDialog for backward compatibility
+export { UserDialog as AddUserDialog };

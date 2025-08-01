@@ -5,7 +5,7 @@ import { useDashboard } from '@/contexts/DashboardContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AddUserDialog } from '@/components/dashboard/AddUserDialog';
+import { UserDialog } from '@/components/dashboard/AddUserDialog';
 import {
   Table,
   TableBody,
@@ -135,6 +135,7 @@ export default function UsersPage() {
   const { setPageTitle, setBreadcrumbs, showToast } = useDashboard();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   // Load users on component mount
   const loadUsers = useCallback(async () => {
@@ -176,6 +177,27 @@ export default function UsersPage() {
     } catch (error) {
       console.error('Error creating user:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to create user');
+      throw error; // Re-throw to let the dialog handle it
+    }
+  };
+
+  const handleUpdateUser = async (userId: number, userData: Partial<NewUser>) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to update user');
+      }
+      const updatedUser = data.user;
+      setUsers(users.map(user => user.id === userId ? updatedUser : user));
+      showToast.success('User updated successfully');
+    } catch (error) {
+      console.error('Error updating user:', error);
+      showToast.error(error instanceof Error ? error.message : 'Failed to update user');
       throw error; // Re-throw to let the dialog handle it
     }
   };
@@ -233,7 +255,13 @@ export default function UsersPage() {
             Manage user accounts and permissions for the AGD administration system.
           </p>
         </div>
-        <AddUserDialog onUserCreate={handleCreateUser} />
+        <UserDialog 
+          mode={editingUser ? "edit" : "add"}
+          existingUser={editingUser}
+          onUserCreate={handleCreateUser}
+          onUserUpdate={handleUpdateUser}
+          onClose={() => setEditingUser(null)}
+        />
       </div>
       
       {/* Users Table */}
@@ -353,7 +381,7 @@ export default function UsersPage() {
                               <Eye className="mr-2 h-4 w-4" />
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEditingUser(user)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Edit User
                             </DropdownMenuItem>
