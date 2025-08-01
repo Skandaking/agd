@@ -4,12 +4,21 @@ import { executeQuery, executeQuerySingle } from '@/lib/database';
 // PUT /api/users/[id] - Update user
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = parseInt(params.id);
+    const resolvedParams = await params;
+    const userId = parseInt(resolvedParams.id);
     const body = await request.json();
     const { full_name, email, phone, role, is_active } = body;
+
+    // Validate required fields
+    if (!full_name || !email) {
+      return NextResponse.json({
+        success: false,
+        error: 'Full name and email are required'
+      }, { status: 400 });
+    }
 
     // Validate user exists
     const existingUser = await executeQuerySingle(
@@ -48,11 +57,23 @@ export async function PUT(
       user: updatedUser
     });
 
-  } catch (error) {
-    console.error('Error updating user:', error);
+  } catch (error: unknown) {
+    const apiError = error as { code?: string; message?: string };
+    
+    // Provide more specific error messages based on error type
+    let errorMessage = 'Failed to update user';
+    
+    if (apiError.code === 'ER_LOCK_WAIT_TIMEOUT') {
+      errorMessage = 'Database is temporarily busy. Please try again.';
+    } else if (apiError.code === 'ER_DUP_ENTRY') {
+      errorMessage = 'Email address is already in use by another user.';
+    } else if (apiError.message) {
+      errorMessage = apiError.message;
+    }
+    
     return NextResponse.json({
       success: false,
-      error: 'Failed to update user'
+      error: errorMessage
     }, { status: 500 });
   }
 }
@@ -60,10 +81,11 @@ export async function PUT(
 // DELETE /api/users/[id] - Delete user
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = parseInt(params.id);
+    const resolvedParams = await params;
+    const userId = parseInt(resolvedParams.id);
 
     // Validate user exists
     const existingUser = await executeQuerySingle(

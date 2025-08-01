@@ -4,10 +4,11 @@ import { executeQuery, executeQuerySingle } from '@/lib/database';
 // PUT /api/users/[id]/toggle-status - Toggle user active status
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = parseInt(params.id);
+    const resolvedParams = await params;
+    const userId = parseInt(resolvedParams.id);
 
     // Validate user exists and get current status
     const existingUser = await executeQuerySingle<{ id: number; is_active: boolean }>(

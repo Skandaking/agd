@@ -53,6 +53,7 @@ export function UserDialog({
     is_active: true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasAutoOpened, setHasAutoOpened] = useState(false);
 
   // Update form data when existingUser changes or mode changes
   useEffect(() => {
@@ -65,8 +66,13 @@ export function UserDialog({
         role: existingUser.role,
         is_active: existingUser.is_active,
       });
-      setIsOpen(true); // Auto-open dialog for edit mode
-    } else {
+      
+      // Only auto-open if we haven't opened for this user yet
+      if (!hasAutoOpened) {
+        setIsOpen(true);
+        setHasAutoOpened(true);
+      }
+    } else if (mode === 'add') {
       // Reset form for add mode
       setUserData({
         email: '',
@@ -76,8 +82,14 @@ export function UserDialog({
         role: 'user',
         is_active: true,
       });
+      setHasAutoOpened(false);
     }
-  }, [mode, existingUser]);
+  }, [mode, existingUser, hasAutoOpened]);
+
+  // Reset hasAutoOpened when existingUser changes to a different user or becomes null
+  useEffect(() => {
+    setHasAutoOpened(false);
+  }, [existingUser?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,14 +126,15 @@ export function UserDialog({
         is_active: true,
       });
       setIsOpen(false);
+      setHasAutoOpened(false);
       
       // Call onClose callback if provided (especially for edit mode)
       if (onClose) {
         onClose();
       }
     } catch (error) {
-      // Error handling is done in parent component
-      console.error(`Error in UserDialog (${mode} mode):`, error);
+      // Re-throw the error so parent component can handle it and show toast
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
@@ -137,6 +150,7 @@ export function UserDialog({
       is_active: true,
     });
     setIsOpen(false);
+    setHasAutoOpened(false);
     
     // Call onClose callback if provided (especially for edit mode)
     if (onClose) {
@@ -144,8 +158,20 @@ export function UserDialog({
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    
+    // If dialog is being closed, call onClose callback and reset auto-open flag
+    if (!open) {
+      setHasAutoOpened(false);
+      if (onClose) {
+        onClose();
+      }
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button>

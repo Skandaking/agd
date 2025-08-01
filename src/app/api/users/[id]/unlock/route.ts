@@ -4,10 +4,11 @@ import { executeQuery, executeQuerySingle } from '@/lib/database';
 // PUT /api/users/[id]/unlock - Unlock user account
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = parseInt(params.id);
+    const resolvedParams = await params;
+    const userId = parseInt(resolvedParams.id);
 
     // Validate user exists
     const existingUser = await executeQuerySingle(

@@ -188,15 +188,17 @@ export default function UsersPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       });
+      
       const data = await response.json();
+      
       if (!data.success) {
         throw new Error(data.error || 'Failed to update user');
       }
+      
       const updatedUser = data.user;
       setUsers(users.map(user => user.id === userId ? updatedUser : user));
       showToast.success('User updated successfully');
     } catch (error) {
-      console.error('Error updating user:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to update user');
       throw error; // Re-throw to let the dialog handle it
     }
