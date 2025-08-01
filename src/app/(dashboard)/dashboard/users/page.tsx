@@ -42,7 +42,8 @@ import {
   Phone,
   Lock,
   Key,
-  RotateCcw
+  RotateCcw,
+  RefreshCw
 } from 'lucide-react';
 
 interface User {
@@ -176,6 +177,7 @@ export default function UsersPage() {
   const [resetAttemptsDialog, setResetAttemptsDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
   const [resetPasswordDialog, setResetPasswordDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
   const [viewUserDialog, setViewUserDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Load users on component mount
   const loadUsers = useCallback(async () => {
@@ -183,6 +185,7 @@ export default function UsersPage() {
       setLoading(true);
       const fetchedUsers = await fetchUsers();
       setUsers(fetchedUsers);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error loading users:', error);
       showToast.error(error instanceof Error ? error.message : 'Failed to load users');
@@ -205,6 +208,48 @@ export default function UsersPage() {
   // Load users separately to avoid dependency issues
   useEffect(() => {
     loadUsers();
+  }, [loadUsers]);
+
+  // Auto-refresh users data every 2 minutes to keep data synchronized across tabs
+  // Only refresh when the page is visible to save resources
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    const startPolling = () => {
+      interval = setInterval(() => {
+        if (!document.hidden) {
+          loadUsers();
+        }
+      }, 120000); // Refresh every 2 minutes (120 seconds)
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        clearInterval(interval);
+      } else {
+        // Refresh immediately when page becomes visible
+        loadUsers();
+        startPolling();
+      }
+    };
+
+    startPolling();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loadUsers]);
+
+  // Refresh data when the window regains focus (when switching back to this tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadUsers();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [loadUsers]);
 
   const filteredUsers = users;
@@ -337,22 +382,43 @@ export default function UsersPage() {
             Manage user accounts and permissions for the AGD administration system.
           </p>
         </div>
-        <UserDialog 
-          mode={editingUser ? "edit" : "add"}
-          existingUser={editingUser}
-          onUserCreate={handleCreateUser}
-          onUserUpdate={handleUpdateUser}
-          onClose={() => setEditingUser(null)}
-        />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadUsers}
+            disabled={loading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <UserDialog 
+            mode={editingUser ? "edit" : "add"}
+            existingUser={editingUser}
+            onUserCreate={handleCreateUser}
+            onUserUpdate={handleUpdateUser}
+            onClose={() => setEditingUser(null)}
+          />
+        </div>
       </div>
       
       {/* Users Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Users ({filteredUsers.length})</CardTitle>
-          <CardDescription>
-            Manage user accounts and their access permissions.
-          </CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Users ({filteredUsers.length})</CardTitle>
+              <CardDescription>
+                Manage user accounts and their access permissions.
+              </CardDescription>
+            </div>
+            {lastUpdated && (
+              <div className="text-xs text-muted-foreground">
+                Last updated: {lastUpdated.toLocaleTimeString()}
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto rounded-md border">
