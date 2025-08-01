@@ -69,6 +69,7 @@ export interface DatabaseUser {
   email: string;
   password: string;
   full_name: string;
+  phone: string | null;
   role: 'user' | 'administrator';
   is_active: boolean;
   login_attempts: number;

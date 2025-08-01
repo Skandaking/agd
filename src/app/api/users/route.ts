@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const query = `
       SELECT 
-        id, email, full_name, role, is_active, 
+        id, email, full_name, phone, role, is_active, 
         login_attempts, locked_until, last_login, 
         created_at, updated_at 
       FROM users 
@@ -22,6 +22,7 @@ export async function GET() {
       return {
         ...userObj,
         is_active: Boolean(userObj.is_active),
+        phone: userObj.phone || null,
         locked_until: userObj.locked_until || null,
         last_login: userObj.last_login || null
       };
@@ -44,13 +45,14 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    let { email, password, full_name } = body;
+    let { email, password, full_name, phone } = body;
     const { role, is_active } = body;
 
     // Trim whitespace
     email = email?.trim();
     password = password?.trim();
     full_name = full_name?.trim();
+    phone = phone?.trim() || null;
 
     // Validate input
     if (!email || !password || !full_name) {
@@ -79,16 +81,17 @@ export async function POST(request: NextRequest) {
     // Insert new user
     const query = `
       INSERT INTO users (
-        email, password, full_name, role, is_active,
+        email, password, full_name, phone, role, is_active,
         login_attempts, locked_until, last_login,
         created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NOW(), NOW())
+      ) VALUES (?, ?, ?, ?, ?, ?, 0, NULL, NULL, NOW(), NOW())
     `;
 
     await executeQuery(query, [
       email,
       hashedPassword,
       full_name,
+      phone,
       role || 'user',
       is_active !== undefined ? is_active : true
     ]);
@@ -96,7 +99,7 @@ export async function POST(request: NextRequest) {
     // Fetch the created user
     const newUser = await executeQuerySingle(`
       SELECT 
-        id, email, full_name, role, is_active, 
+        id, email, full_name, phone, role, is_active, 
         login_attempts, locked_until, last_login, 
         created_at, updated_at 
       FROM users 
