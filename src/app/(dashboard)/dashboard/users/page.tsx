@@ -392,7 +392,7 @@ export default function UsersPage() {
       {/* Page Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-primary">User Management</h1>
           <p className="text-muted-foreground">
             Manage user accounts and permissions for the AGD administration system.
           </p>
@@ -424,9 +424,9 @@ export default function UsersPage() {
               size="sm"
               onClick={loadUsers}
               disabled={loading}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-primary"
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 text-primary ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
             <UserDialog 

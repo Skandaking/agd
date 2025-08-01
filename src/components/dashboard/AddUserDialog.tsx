@@ -182,14 +182,16 @@ export function UserDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-primary">
             {mode === 'edit' ? 'Edit User' : 'Add New User'}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="full_name">Full Name *</Label>
+              <Label htmlFor="full_name">
+                Full Name <span className="text-secondary">*</span>
+              </Label>
               <Input
                 id="full_name"
                 value={userData.full_name}
@@ -200,7 +202,9 @@ export function UserDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address *</Label>
+              <Label htmlFor="email">
+                Email Address <span className="text-secondary">*</span>
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -223,7 +227,9 @@ export function UserDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password *</Label>
+              <Label htmlFor="password">
+                Password <span className="text-secondary">*</span>
+              </Label>
               <Input
                 id="password"
                 type="password"
