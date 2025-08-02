@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import NextImage from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -9,6 +9,7 @@ import { useDashboard } from '@/contexts/DashboardContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { 
   LayoutDashboard, 
   Newspaper, 
@@ -99,6 +100,7 @@ export function Sidebar() {
     setMobileSidebarOpen 
   } = useDashboard();
   const { logout, user } = useAuth();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -109,6 +111,15 @@ export function Sidebar() {
 
   const handleMobileClose = () => {
     setMobileSidebarOpen(false);
+  };
+
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    logout();
+    setShowLogoutDialog(false);
   };
 
   return (
@@ -234,7 +245,7 @@ export function Sidebar() {
           {/* Logout Button */}
           <Button
             variant="ghost"
-            onClick={logout}
+            onClick={handleLogoutClick}
             className={cn(
             "w-full justify-start gap-3 text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
               isSidebarCollapsed && "justify-center"
@@ -245,6 +256,18 @@ export function Sidebar() {
           </Button>
         </div>
       </aside>
+
+      {/* Logout Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showLogoutDialog}
+        onClose={() => setShowLogoutDialog(false)}
+        onConfirm={handleLogoutConfirm}
+        title="Confirm Logout"
+        description="Are you sure you want to logout? You will need to sign in again to access the administration system."
+        confirmText="Logout"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </>
   );
 } 
