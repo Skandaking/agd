@@ -10,7 +10,7 @@ export async function PUT(
     const resolvedParams = await params;
     const userId = parseInt(resolvedParams.id);
     const body = await request.json();
-    const { full_name, email, phone, role, is_active } = body;
+    const { full_name, email, phone } = body;
 
     // Validate required fields
     if (!full_name || !email) {
@@ -18,6 +18,26 @@ export async function PUT(
         success: false,
         error: 'Full name and email are required'
       }, { status: 400 });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({
+        success: false,
+        error: 'Please enter a valid email address'
+      }, { status: 400 });
+    }
+
+    // Validate phone number format if provided
+    if (phone && phone.trim() !== '') {
+      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+      if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+        return NextResponse.json({
+          success: false,
+          error: 'Please enter a valid phone number'
+        }, { status: 400 });
+      }
     }
 
     // Validate user exists
@@ -33,14 +53,27 @@ export async function PUT(
       }, { status: 404 });
     }
 
-    // Update user
+    // Get current user data to preserve unchanged fields
+    const currentUser = await executeQuerySingle(
+      'SELECT * FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (!currentUser) {
+      return NextResponse.json({
+        success: false,
+        error: 'User not found'
+      }, { status: 404 });
+    }
+
+    // Update user with provided fields, preserving existing values for undefined fields
     const query = `
       UPDATE users 
-      SET full_name = ?, email = ?, phone = ?, role = ?, is_active = ?, updated_at = NOW()
+      SET full_name = ?, email = ?, phone = ?, updated_at = NOW()
       WHERE id = ?
     `;
 
-    await executeQuery(query, [full_name, email, phone || null, role, is_active, userId]);
+    await executeQuery(query, [full_name, email, phone || null, userId]);
 
     // Fetch updated user
     const updatedUser = await executeQuerySingle(`
