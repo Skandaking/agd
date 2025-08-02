@@ -236,7 +236,7 @@ export function Sidebar() {
             variant="ghost"
             onClick={logout}
             className={cn(
-              "w-full justify-start gap-3 text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive",
+            "w-full justify-start gap-3 text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
               isSidebarCollapsed && "justify-center"
             )}
           >
