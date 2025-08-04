@@ -282,17 +282,17 @@ export function NewsDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
+        <DialogHeader className="pb-4">
           <DialogTitle>
             {mode === 'add' ? 'Add New Article' : 'Edit Article'}
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="title">Title *</Label>
               <Input
                 id="title"
@@ -303,7 +303,7 @@ export function NewsDialog({
               />
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="author">Author *</Label>
               <Input
                 id="author"
@@ -314,7 +314,7 @@ export function NewsDialog({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="slug">Slug</Label>
               <Input
                 id="slug"
@@ -325,9 +325,9 @@ export function NewsDialog({
             </div>
           </div>
 
-          {/* Category, Status, and Reading Time */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
+          {/* Category, Status, Reading Time, and Featured */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="space-y-1.5">
               <Label htmlFor="category">Category *</Label>
               <Select value={newsData.category} onValueChange={handleCategoryChange}>
                 <SelectTrigger>
@@ -353,7 +353,7 @@ export function NewsDialog({
               )}
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="status">Status *</Label>
               <Select value={newsData.status} onValueChange={(value: 'draft' | 'published' | 'archived') => 
                 setNewsData(prev => ({ ...prev, status: value }))
@@ -371,8 +371,8 @@ export function NewsDialog({
               </Select>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="reading_time">Reading Time (minutes)</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="reading_time">Reading Time</Label>
               <Input
                 id="reading_time"
                 type="number"
@@ -383,8 +383,8 @@ export function NewsDialog({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Featured Article</Label>
+            <div className="space-y-1.5">
+              <Label>Featured</Label>
               <div className="flex items-center space-x-2 pt-2">
                 <Switch
                   id="featured"
@@ -394,104 +394,104 @@ export function NewsDialog({
                 <Label htmlFor="featured" className="text-sm">Mark as featured</Label>
               </div>
             </div>
-          </div>
 
-          {/* Excerpt */}
-          <div className="space-y-2">
-            <Label htmlFor="excerpt">Excerpt *</Label>
-            <Textarea
-              id="excerpt"
-              value={newsData.excerpt}
-              onChange={(e) => setNewsData(prev => ({ ...prev, excerpt: e.target.value }))}
-              placeholder="Brief summary of the article"
-              rows={3}
-              required
-            />
-          </div>
-
-          {/* Content */}
-          <div className="space-y-2">
-            <Label htmlFor="content">Content *</Label>
-            <Textarea
-              id="content"
-              value={newsData.content}
-              onChange={(e) => setNewsData(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="Full article content"
-              rows={10}
-              required
-            />
-          </div>
-
-          {/* Image Upload */}
-          <div className="space-y-2">
-            <Label>Featured Image</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
+            <div className="space-y-1.5">
+              <Label>Image Upload</Label>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                  disabled={isUploading}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  {isUploading ? 'Uploading...' : 'Upload'}
+                </Button>
+                {newsData.image_url && (
                   <Button
                     type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById('image-upload')?.click()}
-                    disabled={isUploading}
-                    className="flex items-center gap-2"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setNewsData(prev => ({ ...prev, image_url: '' }))}
                   >
-                    <Upload className="h-4 w-4" />
-                    {isUploading ? 'Uploading...' : 'Upload Image'}
+                    Remove
                   </Button>
-                  {newsData.image_url && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setNewsData(prev => ({ ...prev, image_url: '' }))}
-                    >
-                      Remove
-                    </Button>
-                  )}
+                )}
+              </div>
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          {/* Excerpt and Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="excerpt">Excerpt *</Label>
+              <Textarea
+                id="excerpt"
+                value={newsData.excerpt}
+                onChange={(e) => setNewsData(prev => ({ ...prev, excerpt: e.target.value }))}
+                placeholder="Brief summary of the article"
+                rows={3}
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="content">Content *</Label>
+              <Textarea
+                id="content"
+                value={newsData.content}
+                onChange={(e) => setNewsData(prev => ({ ...prev, content: e.target.value }))}
+                placeholder="Full article content"
+                rows={6}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Image Preview and SEO Fields */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Image Preview */}
+            {newsData.image_url && (
+              <div className="space-y-1.5">
+                <Label>Image Preview</Label>
+                <div className="relative w-full h-24 border rounded-md overflow-hidden">
+                  <img
+                    src={newsData.image_url}
+                    alt="Featured image preview"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
+                <Input
+                  value={newsData.image_url}
+                  onChange={(e) => setNewsData(prev => ({ ...prev, image_url: e.target.value }))}
+                  placeholder="Image URL"
+                  className="text-xs"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Supported formats: JPG, PNG, GIF, WebP. Max size: 5MB
+                  Supported: JPG, PNG, GIF, WebP. Max: 5MB
                 </p>
                 {isUploading && (
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 rounded-full h-1">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      className="bg-blue-600 h-1 rounded-full transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
                     ></div>
                   </div>
                 )}
               </div>
-              
-              {newsData.image_url && (
-                <div className="space-y-2">
-                  <Label>Preview</Label>
-                  <div className="relative w-full h-32 border rounded-md overflow-hidden">
-                    <img
-                      src={newsData.image_url}
-                      alt="Featured image preview"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <Input
-                    value={newsData.image_url}
-                    onChange={(e) => setNewsData(prev => ({ ...prev, image_url: e.target.value }))}
-                    placeholder="Image URL"
-                    className="text-xs"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
+            )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
+            {/* SEO Fields */}
+            <div className="space-y-1.5">
               <Label htmlFor="meta_title">Meta Title</Label>
               <Input
                 id="meta_title"
@@ -501,7 +501,7 @@ export function NewsDialog({
               />
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="tags">Tags</Label>
               <Input
                 id="tags"
@@ -512,7 +512,8 @@ export function NewsDialog({
             </div>
           </div>
 
-          <div className="space-y-2">
+          {/* Meta Description */}
+          <div className="space-y-1.5">
             <Label htmlFor="meta_description">Meta Description</Label>
             <Textarea
               id="meta_description"
@@ -526,7 +527,7 @@ export function NewsDialog({
 
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-2 pt-4 border-t">
+          <div className="flex justify-end space-x-2 pt-2 border-t">
             <Button type="button" variant="outline" onClick={handleCancel}>
               <X className="mr-2 h-4 w-4" />
               Cancel
