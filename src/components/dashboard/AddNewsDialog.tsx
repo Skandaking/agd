@@ -282,7 +282,7 @@ export function NewsDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-full max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === 'add' ? 'Add New Article' : 'Edit Article'}
