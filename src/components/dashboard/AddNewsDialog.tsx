@@ -8,8 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Save, X } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Plus, Save, X, Upload } from 'lucide-react';
 import { NewsArticle } from '@/lib/types';
 
 interface NewsDialogProps {
@@ -45,7 +44,6 @@ export function NewsDialog({
   mode = 'add',
   trigger 
 }: NewsDialogProps) {
-  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [newsData, setNewsData] = useState<NewsArticle>({
     title: '',
@@ -66,6 +64,8 @@ export function NewsDialog({
   const [hasAutoOpened, setHasAutoOpened] = useState(false);
   const [customCategory, setCustomCategory] = useState('');
   const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Update form data when existingNews changes or mode changes
   useEffect(() => {
@@ -233,6 +233,45 @@ export function NewsDialog({
     return newsData.tags?.join(', ') || '';
   };
 
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setNewsData(prev => ({ ...prev, image_url: result.url }));
+        setUploadProgress(100);
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      // You can add toast notification here
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -243,7 +282,7 @@ export function NewsDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === 'add' ? 'Add New Article' : 'Edit Article'}
@@ -252,7 +291,7 @@ export function NewsDialog({
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="title">Title *</Label>
               <Input
@@ -274,10 +313,20 @@ export function NewsDialog({
                 required
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="slug">Slug</Label>
+              <Input
+                id="slug"
+                value={newsData.slug}
+                onChange={(e) => setNewsData(prev => ({ ...prev, slug: e.target.value }))}
+                placeholder="URL-friendly version of title"
+              />
+            </div>
           </div>
 
-          {/* Category and Status */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Category, Status, and Reading Time */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
               <Select value={newsData.category} onValueChange={handleCategoryChange}>
@@ -333,6 +382,18 @@ export function NewsDialog({
                 placeholder="Auto-calculated"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label>Featured Article</Label>
+              <div className="flex items-center space-x-2 pt-2">
+                <Switch
+                  id="featured"
+                  checked={newsData.featured}
+                  onCheckedChange={(checked) => setNewsData(prev => ({ ...prev, featured: checked }))}
+                />
+                <Label htmlFor="featured" className="text-sm">Mark as featured</Label>
+              </div>
+            </div>
           </div>
 
           {/* Excerpt */}
@@ -361,26 +422,71 @@ export function NewsDialog({
             />
           </div>
 
-          {/* SEO and Metadata */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
-              <Input
-                id="slug"
-                value={newsData.slug}
-                onChange={(e) => setNewsData(prev => ({ ...prev, slug: e.target.value }))}
-                placeholder="URL-friendly version of title"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="image_url">Featured Image URL</Label>
-              <Input
-                id="image_url"
-                value={newsData.image_url}
-                onChange={(e) => setNewsData(prev => ({ ...prev, image_url: e.target.value }))}
-                placeholder="https://example.com/image.jpg"
-              />
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <Label>Featured Image</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('image-upload')?.click()}
+                    disabled={isUploading}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {isUploading ? 'Uploading...' : 'Upload Image'}
+                  </Button>
+                  {newsData.image_url && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setNewsData(prev => ({ ...prev, image_url: '' }))}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Supported formats: JPG, PNG, GIF, WebP. Max size: 5MB
+                </p>
+                {isUploading && (
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    ></div>
+                  </div>
+                )}
+              </div>
+              
+              {newsData.image_url && (
+                <div className="space-y-2">
+                  <Label>Preview</Label>
+                  <div className="relative w-full h-32 border rounded-md overflow-hidden">
+                    <img
+                      src={newsData.image_url}
+                      alt="Featured image preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <Input
+                    value={newsData.image_url}
+                    onChange={(e) => setNewsData(prev => ({ ...prev, image_url: e.target.value }))}
+                    placeholder="Image URL"
+                    className="text-xs"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
@@ -417,15 +523,7 @@ export function NewsDialog({
             />
           </div>
 
-          {/* Featured Toggle */}
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="featured"
-              checked={newsData.featured}
-              onCheckedChange={(checked) => setNewsData(prev => ({ ...prev, featured: checked }))}
-            />
-            <Label htmlFor="featured">Featured Article</Label>
-          </div>
+
 
           {/* Form Actions */}
           <div className="flex justify-end space-x-2 pt-4 border-t">
