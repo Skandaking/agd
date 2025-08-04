@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
+import { NewsDialog } from '@/components/dashboard/AddNewsDialog';
+import { NewsArticle } from '@/lib/types';
 import {
   Table,
   TableBody,
@@ -25,31 +26,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { 
-  Plus,
   Search,
   MoreHorizontal,
   Eye,
   Edit,
   Trash2,
   Calendar,
-  User,
-  TrendingUp
+  User
 } from 'lucide-react';
-
-interface NewsArticle {
-  id: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  category: 'announcement' | 'update' | 'report' | 'event' | 'policy';
-  status: 'draft' | 'published' | 'archived';
-  author: string;
-  publishedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  views: number;
-  featured: boolean;
-}
 
 const mockNews: NewsArticle[] = [
   {
@@ -65,6 +49,7 @@ const mockNews: NewsArticle[] = [
     updatedAt: new Date('2024-01-15'),
     views: 1247,
     featured: true,
+    reading_time_minutes: 5,
   },
   {
     id: '2',
@@ -79,6 +64,7 @@ const mockNews: NewsArticle[] = [
     updatedAt: new Date('2024-01-10'),
     views: 892,
     featured: false,
+    reading_time_minutes: 8,
   },
   {
     id: '3',
@@ -93,6 +79,7 @@ const mockNews: NewsArticle[] = [
     updatedAt: new Date('2024-01-08'),
     views: 0,
     featured: false,
+    reading_time_minutes: 3,
   },
 ];
 
@@ -140,8 +127,7 @@ export default function NewsPage() {
   const { setPageTitle, setBreadcrumbs, showToast } = useDashboard();
   const [news, setNews] = useState<NewsArticle[]>(mockNews);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<NewsArticle['status'] | 'all'>('all');
-  const [categoryFilter, setCategoryFilter] = useState<NewsArticle['category'] | 'all'>('all');
+  const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
 
   useEffect(() => {
     setPageTitle('News Management');
@@ -155,10 +141,8 @@ export default function NewsPage() {
     const matchesSearch = 
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || article.status === statusFilter;
-    const matchesCategory = categoryFilter === 'all' || article.category === categoryFilter;
     
-    return matchesSearch && matchesStatus && matchesCategory;
+    return matchesSearch;
   });
 
   const handleDelete = (id: string) => {
@@ -179,16 +163,38 @@ export default function NewsPage() {
     showToast.success(`Article status changed to ${newStatus}`);
   };
 
-  const stats = {
-    total: news.length,
-    published: news.filter(n => n.status === 'published').length,
-    drafts: news.filter(n => n.status === 'draft').length,
-    totalViews: news.reduce((sum, n) => sum + n.views, 0),
+  const handleCreateNews = async (newsData: NewsArticle) => {
+    const newNews: NewsArticle = {
+      ...newsData,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      publishedAt: newsData.status === 'published' ? new Date() : null,
+      views: 0,
+    };
+    setNews([newNews, ...news]);
+    showToast.success('Article created successfully');
   };
+
+  const handleUpdateNews = async (newsId: string, newsData: Partial<NewsArticle>) => {
+    setNews(news.map(article => 
+      article.id === newsId 
+        ? { 
+            ...article, 
+            ...newsData,
+            updatedAt: new Date(),
+            publishedAt: newsData.status === 'published' ? new Date() : article.publishedAt
+          }
+        : article
+    ));
+    showToast.success('Article updated successfully');
+  };
+
+
 
   return (
     <div className="space-y-6 w-full">
-      {/* Page Header */}
+      {/* Page Header with Stats */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">News Management</h1>
@@ -196,142 +202,69 @@ export default function NewsPage() {
             Create, manage, and publish news articles and announcements.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/news/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Article
-          </Link>
-        </Button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Articles</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              All articles in system
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Published</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.published}</div>
-            <p className="text-xs text-muted-foreground">
-              Live articles
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Drafts</CardTitle>
-            <Edit className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.drafts}</div>
-            <p className="text-xs text-muted-foreground">
-              Work in progress
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Views</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              All time views
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filter Articles</CardTitle>
-          <CardDescription>
-            Use the filters below to find specific articles.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4 md:flex-row md:items-end">
-            <div className="flex-1">
-              <Label htmlFor="search">Search</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="search"
-                  placeholder="Search articles..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div className="w-full md:w-48">
-              <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as NewsArticle['status'] | 'all')}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          {/* Search Input */}
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search articles..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0 hover:bg-muted"
               >
-                <option value="all">All Status</option>
-                <option value="published">Published</option>
-                <option value="draft">Draft</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-            <div className="w-full md:w-48">
-              <Label htmlFor="category">Category</Label>
-              <select
-                id="category"
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value as NewsArticle['category'] | 'all')}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              >
-                <option value="all">All Categories</option>
-                <option value="announcement">Announcement</option>
-                <option value="update">System Update</option>
-                <option value="report">Report</option>
-                <option value="event">Event</option>
-                <option value="policy">Policy</option>
-              </select>
-            </div>
+                <span className="text-muted-foreground">×</span>
+              </Button>
+            )}
           </div>
-        </CardContent>
-      </Card>
-
+          <NewsDialog 
+            mode={editingNews ? "edit" : "add"}
+            existingNews={editingNews}
+            onNewsCreate={handleCreateNews}
+            onNewsUpdate={handleUpdateNews}
+            onClose={() => setEditingNews(null)}
+          />
+        </div>
+      </div>
       {/* Articles Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Articles ({filteredNews.length})</CardTitle>
-          <CardDescription>
-            Manage your news articles and their publication status.
-          </CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>
+                Articles ({filteredNews.length}
+                {searchQuery && filteredNews.length !== news.length && (
+                  <span className="text-muted-foreground"> of {news.length}</span>
+                )}
+                )
+              </CardTitle>
+              <CardDescription>
+                {searchQuery ? (
+                  <>Showing results for &quot;{searchQuery}&quot;</>
+                ) : (
+                  <>Manage your news articles and their publication status.</>
+                )}
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto rounded-md border">
             <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Article</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Author</TableHead>
-                  <TableHead>Published</TableHead>
-                  <TableHead>Views</TableHead>
+                  <TableHead className="w-[40%]">Article</TableHead>
+                  <TableHead className="w-[12%]">Category</TableHead>
+                  <TableHead className="w-[12%]">Status</TableHead>
+                  <TableHead className="w-[15%]">Author</TableHead>
+                  <TableHead className="w-[12%]">Published</TableHead>
+                  <TableHead className="w-[9%]">Views</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -348,14 +281,14 @@ export default function NewsPage() {
                       <TableCell>
                         <div className="space-y-1">
                           <div className="font-medium flex items-center gap-2">
-                            {article.title}
+                            <span className="truncate">{article.title}</span>
                             {article.featured && (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="secondary" className="text-xs shrink-0">
                                 Featured
                               </Badge>
                             )}
                           </div>
-                          <div className="text-sm text-muted-foreground line-clamp-2">
+                          <div className="text-sm text-muted-foreground line-clamp-1">
                             {article.excerpt}
                           </div>
                         </div>
@@ -372,24 +305,24 @@ export default function NewsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          {article.author}
+                          <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span className="truncate">{article.author}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         {article.publishedAt ? (
                           <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            {article.publishedAt.toLocaleDateString()}
+                            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="text-sm">{article.publishedAt.toLocaleDateString()}</span>
                           </div>
                         ) : (
-                          <span className="text-muted-foreground">Not published</span>
+                          <span className="text-muted-foreground text-sm">Not published</span>
                         )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                          {article.views.toLocaleString()}
+                          <Eye className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span className="text-sm">{(article.views || 0).toLocaleString()}</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -403,28 +336,26 @@ export default function NewsPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem asChild>
-                              <Link href={`/dashboard/news/${article.id}`}>
+                              <Link href={`/dashboard/news/${article.id || ''}`}>
                                 <Eye className="mr-2 h-4 w-4" />
                                 View
                               </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link href={`/dashboard/news/${article.id}/edit`}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </Link>
+                            <DropdownMenuItem onClick={() => setEditingNews(article)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {article.status === 'draft' && (
                               <DropdownMenuItem 
-                                onClick={() => handleStatusChange(article.id, 'published')}
+                                onClick={() => handleStatusChange(article.id || '', 'published')}
                               >
                                 Publish
                               </DropdownMenuItem>
                             )}
                             {article.status === 'published' && (
                               <DropdownMenuItem 
-                                onClick={() => handleStatusChange(article.id, 'draft')}
+                                onClick={() => handleStatusChange(article.id || '', 'draft')}
                               >
                                 Unpublish
                               </DropdownMenuItem>
@@ -432,7 +363,7 @@ export default function NewsPage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               className="text-red-600"
-                              onClick={() => handleDelete(article.id)}
+                              onClick={() => handleDelete(article.id || '')}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
