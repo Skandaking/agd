@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Plus, Save, X, Upload } from 'lucide-react';
 import { NewsArticle } from '@/lib/types';
+import Image from 'next/image';
 
 interface NewsDialogProps {
   onNewsCreate?: (newsData: NewsArticle) => Promise<void>;
@@ -137,14 +138,14 @@ export function NewsDialog({
         .trim();
       setNewsData(prev => ({ ...prev, slug }));
     }
-  }, [newsData.title]);
+  }, [newsData.title, newsData.slug]);
 
   // Auto-generate meta title from title
   useEffect(() => {
     if (newsData.title && !newsData.meta_title) {
       setNewsData(prev => ({ ...prev, meta_title: newsData.title }));
     }
-  }, [newsData.title]);
+  }, [newsData.title, newsData.meta_title]);
 
   // Auto-generate meta description from excerpt
   useEffect(() => {
@@ -154,7 +155,7 @@ export function NewsDialog({
         : newsData.excerpt;
       setNewsData(prev => ({ ...prev, meta_description: metaDesc }));
     }
-  }, [newsData.excerpt]);
+  }, [newsData.excerpt, newsData.meta_description]);
 
   // Calculate reading time based on content length
   useEffect(() => {
@@ -284,7 +285,7 @@ export function NewsDialog({
       </DialogTrigger>
       <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
         <DialogHeader className="pb-4">
-          <DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-primary">
             {mode === 'add' ? 'Add New Article' : 'Edit Article'}
           </DialogTitle>
         </DialogHeader>
@@ -293,7 +294,7 @@ export function NewsDialog({
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title">Title <span className="text-secondary">*</span></Label>
               <Input
                 id="title"
                 value={newsData.title}
@@ -304,7 +305,7 @@ export function NewsDialog({
             </div>
             
             <div className="space-y-1.5">
-              <Label htmlFor="author">Author *</Label>
+              <Label htmlFor="author">Author <span className="text-secondary">*</span></Label>
               <Input
                 id="author"
                 value={newsData.author}
@@ -328,7 +329,7 @@ export function NewsDialog({
           {/* Category, Status, Reading Time, and Featured */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="category">Category *</Label>
+              <Label htmlFor="category">Category <span className="text-secondary">*</span></Label>
               <Select value={newsData.category} onValueChange={handleCategoryChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
@@ -354,7 +355,7 @@ export function NewsDialog({
             </div>
             
             <div className="space-y-1.5">
-              <Label htmlFor="status">Status *</Label>
+              <Label htmlFor="status">Status <span className="text-secondary">*</span></Label>
               <Select value={newsData.status} onValueChange={(value: 'draft' | 'published' | 'archived') => 
                 setNewsData(prev => ({ ...prev, status: value }))
               }>
@@ -433,7 +434,7 @@ export function NewsDialog({
           {/* Excerpt and Content */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="excerpt">Excerpt *</Label>
+              <Label htmlFor="excerpt">Excerpt <span className="text-secondary">*</span></Label>
               <Textarea
                 id="excerpt"
                 value={newsData.excerpt}
@@ -445,7 +446,7 @@ export function NewsDialog({
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="content">Content *</Label>
+              <Label htmlFor="content">Content <span className="text-secondary">*</span></Label>
               <Textarea
                 id="content"
                 value={newsData.content}
@@ -463,13 +464,14 @@ export function NewsDialog({
             {newsData.image_url && (
               <div className="space-y-1.5">
                 <Label>Image Preview</Label>
-                <div className="relative w-full h-24 border rounded-md overflow-hidden">
-                  <img
-                    src={newsData.image_url}
-                    alt="Featured image preview"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                                 <div className="relative w-full h-24 border rounded-md overflow-hidden">
+                   <Image
+                     src={newsData.image_url}
+                     alt="Featured image preview"
+                     fill
+                     className="object-cover"
+                   />
+                 </div>
                 <Input
                   value={newsData.image_url}
                   onChange={(e) => setNewsData(prev => ({ ...prev, image_url: e.target.value }))}
