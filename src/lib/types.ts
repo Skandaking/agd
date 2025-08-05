@@ -42,4 +42,6 @@ export interface DatabaseNewsArticle {
   image_url: string | null;
   reading_time_minutes: number;
   updated_by: number;
+  created_by_name?: string;
+  updated_by_name?: string;
 } 

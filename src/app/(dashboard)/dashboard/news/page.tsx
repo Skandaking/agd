@@ -35,54 +35,6 @@ import {
   User
 } from 'lucide-react';
 
-const mockNews: NewsArticle[] = [
-  {
-    id: '1',
-    title: 'AGD Launches New Financial Management System',
-    excerpt: 'The Accountant General\'s Department has successfully launched a new financial management system to enhance transparency and efficiency in government financial operations.',
-    content: 'Full article content here...',
-    category: 'announcement',
-    status: 'published',
-    author: 'Admin User',
-    publishedAt: new Date('2024-01-15'),
-    createdAt: new Date('2024-01-14'),
-    updatedAt: new Date('2024-01-15'),
-    views: 1247,
-    featured: true,
-    reading_time_minutes: 5,
-  },
-  {
-    id: '2',
-    title: 'Annual Public Sector Financial Report Released',
-    excerpt: 'The AGD has released the comprehensive annual financial report for the public sector, highlighting key achievements and financial performance metrics.',
-    content: 'Full article content here...',
-    category: 'report',
-    status: 'published',
-    author: 'John Doe',
-    publishedAt: new Date('2024-01-10'),
-    createdAt: new Date('2024-01-09'),
-    updatedAt: new Date('2024-01-10'),
-    views: 892,
-    featured: false,
-    reading_time_minutes: 8,
-  },
-  {
-    id: '3',
-    title: 'Training Workshop for Government Accountants',
-    excerpt: 'Over 200 government accountants participated in a comprehensive capacity building workshop organized by the AGD to enhance financial management skills.',
-    content: 'Full article content here...',
-    category: 'event',
-    status: 'draft',
-    author: 'Jane Smith',
-    publishedAt: null,
-    createdAt: new Date('2024-01-08'),
-    updatedAt: new Date('2024-01-08'),
-    views: 0,
-    featured: false,
-    reading_time_minutes: 3,
-  },
-];
-
 const categoryLabels: Record<NewsArticle['category'], string> = {
   announcement: 'Announcement',
   update: 'System Update',
@@ -125,9 +77,10 @@ const getCategoryVariant = (category: NewsArticle['category']) => {
 
 export default function NewsPage() {
   const { setPageTitle, setBreadcrumbs, showToast } = useDashboard();
-  const [news, setNews] = useState<NewsArticle[]>(mockNews);
+  const [news, setNews] = useState<NewsArticle[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setPageTitle('News Management');
@@ -135,7 +88,27 @@ export default function NewsPage() {
       { label: 'Home', href: '/dashboard' },
       { label: 'News' },
     ]);
+    fetchNews();
   }, [setPageTitle, setBreadcrumbs]);
+
+  const fetchNews = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/news');
+      const result = await response.json();
+      
+      if (result.success) {
+        setNews(result.news);
+      } else {
+        showToast.error('Failed to fetch news articles');
+      }
+    } catch (error) {
+      console.error('Error fetching news:', error);
+      showToast.error('Failed to fetch news articles');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredNews = news.filter((article) => {
     const matchesSearch = 
@@ -145,49 +118,100 @@ export default function NewsPage() {
     return matchesSearch;
   });
 
-  const handleDelete = (id: string) => {
-    setNews(news.filter(article => article.id !== id));
-    showToast.success('Article deleted successfully');
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/news/${id}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setNews(news.filter(article => article.id !== id));
+        showToast.success('Article deleted successfully');
+      } else {
+        showToast.error(result.error || 'Failed to delete article');
+      }
+    } catch (error) {
+      console.error('Error deleting news:', error);
+      showToast.error('Failed to delete article');
+    }
   };
 
-  const handleStatusChange = (id: string, newStatus: NewsArticle['status']) => {
-    setNews(news.map(article => 
-      article.id === id 
-        ? { 
-            ...article, 
-            status: newStatus,
-            publishedAt: newStatus === 'published' ? new Date() : article.publishedAt
-          }
-        : article
-    ));
-    showToast.success(`Article status changed to ${newStatus}`);
+  const handleStatusChange = async (id: string, newStatus: NewsArticle['status']) => {
+    try {
+      const response = await fetch(`/api/news/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setNews(news.map(article => 
+          article.id === id ? result.news : article
+        ));
+        showToast.success(`Article status changed to ${newStatus}`);
+      } else {
+        showToast.error(result.error || 'Failed to update article status');
+      }
+    } catch (error) {
+      console.error('Error updating news status:', error);
+      showToast.error('Failed to update article status');
+    }
   };
 
   const handleCreateNews = async (newsData: NewsArticle) => {
-    const newNews: NewsArticle = {
-      ...newsData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      publishedAt: newsData.status === 'published' ? new Date() : null,
-      views: 0,
-    };
-    setNews([newNews, ...news]);
-    showToast.success('Article created successfully');
+    try {
+      const response = await fetch('/api/news', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newsData),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setNews([result.news, ...news]);
+        showToast.success('Article created successfully');
+      } else {
+        showToast.error(result.error || 'Failed to create article');
+      }
+    } catch (error) {
+      console.error('Error creating news:', error);
+      showToast.error('Failed to create article');
+    }
   };
 
   const handleUpdateNews = async (newsId: string, newsData: Partial<NewsArticle>) => {
-    setNews(news.map(article => 
-      article.id === newsId 
-        ? { 
-            ...article, 
-            ...newsData,
-            updatedAt: new Date(),
-            publishedAt: newsData.status === 'published' ? new Date() : article.publishedAt
-          }
-        : article
-    ));
-    showToast.success('Article updated successfully');
+    try {
+      const response = await fetch(`/api/news/${newsId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newsData),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setNews(news.map(article => 
+          article.id === newsId ? result.news : article
+        ));
+        showToast.success('Article updated successfully');
+      } else {
+        showToast.error(result.error || 'Failed to update article');
+      }
+    } catch (error) {
+      console.error('Error updating news:', error);
+      showToast.error('Failed to update article');
+    }
   };
 
 
@@ -269,7 +293,13 @@ export default function NewsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredNews.length === 0 ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Loading articles...
+                    </TableCell>
+                  </TableRow>
+                ) : filteredNews.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No articles found matching your criteria.
