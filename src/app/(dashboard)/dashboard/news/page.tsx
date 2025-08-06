@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { NewsDialog } from '@/components/dashboard/AddNewsDialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { NewsArticle } from '@/lib/types';
 import {
   Table,
@@ -33,7 +34,11 @@ import {
   Edit,
   Trash2,
   Calendar,
-  User
+  User,
+  Clock,
+  Tag,
+  FileText,
+  ExternalLink
 } from 'lucide-react';
 
 const categoryLabels: Record<NewsArticle['category'], string> = {
@@ -85,6 +90,9 @@ export default function NewsPage() {
   
   // Confirmation dialog state for delete
   const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; article: NewsArticle | null }>({ isOpen: false, article: null });
+  
+  // View dialog state for viewing article details
+  const [viewDialog, setViewDialog] = useState<{ isOpen: boolean; article: NewsArticle | null }>({ isOpen: false, article: null });
 
   useEffect(() => {
     setPageTitle('News Management');
@@ -145,6 +153,10 @@ export default function NewsPage() {
 
   const handleDeleteClick = (article: NewsArticle) => {
     setDeleteDialog({ isOpen: true, article });
+  };
+
+  const handleViewClick = (article: NewsArticle) => {
+    setViewDialog({ isOpen: true, article });
   };
 
   const handleStatusChange = async (id: string, newStatus: NewsArticle['status']) => {
@@ -381,11 +393,12 @@ export default function NewsPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem asChild>
-                              <Link href={`/dashboard/news/${article.id || ''}`}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View
-                              </Link>
+                            <DropdownMenuItem 
+                              onClick={() => handleViewClick(article)}
+                              className="cursor-pointer"
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => setEditingNews(article)}
@@ -445,6 +458,159 @@ export default function NewsPage() {
         cancelText="Cancel"
         variant="destructive"
       />
+
+      {/* View Article Dialog */}
+      <Dialog open={viewDialog.isOpen} onOpenChange={(open) => setViewDialog({ isOpen: open, article: viewDialog.article })}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Article Details
+            </DialogTitle>
+            <DialogDescription>
+              View complete information about the selected article
+            </DialogDescription>
+          </DialogHeader>
+          
+          {viewDialog.article && (
+            <div className="space-y-6">
+              {/* Article Header */}
+              <div className="space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <h2 className="text-2xl font-bold">{viewDialog.article.title}</h2>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <User className="h-4 w-4" />
+                        <span>{viewDialog.article.author}</span>
+                      </div>
+                      {viewDialog.article.publishedAt && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>{new Date(viewDialog.article.publishedAt).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span>{viewDialog.article.readingTime || '5'} min read</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant={getCategoryVariant(viewDialog.article.category)}>
+                      {categoryLabels[viewDialog.article.category]}
+                    </Badge>
+                    <Badge variant={getStatusVariant(viewDialog.article.status)}>
+                      {statusLabels[viewDialog.article.status]}
+                    </Badge>
+                    {viewDialog.article.featured && (
+                      <Badge variant="secondary">Featured</Badge>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Excerpt */}
+                {viewDialog.article.excerpt && (
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Excerpt</h3>
+                    <p className="text-muted-foreground leading-relaxed">{viewDialog.article.excerpt}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Article Image */}
+              {viewDialog.article.imageUrl && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Featured Image</h3>
+                  <div className="relative aspect-video rounded-lg overflow-hidden border">
+                    <img
+                      src={viewDialog.article.imageUrl}
+                      alt={viewDialog.article.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Article Content */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Content</h3>
+                <div className="prose prose-sm max-w-none">
+                  <div 
+                    className="text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: viewDialog.article.content }}
+                  />
+                </div>
+              </div>
+
+              {/* SEO Information */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">SEO Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Meta Title</label>
+                    <p className="text-sm text-muted-foreground">{viewDialog.article.metaTitle || 'Not set'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Meta Description</label>
+                    <p className="text-sm text-muted-foreground">{viewDialog.article.metaDescription || 'Not set'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Slug</label>
+                    <p className="text-sm text-muted-foreground font-mono">{viewDialog.article.slug}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Views</label>
+                    <p className="text-sm text-muted-foreground">{(viewDialog.article.views || 0).toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tags */}
+              {viewDialog.article.tags && viewDialog.article.tags.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Tags</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {viewDialog.article.tags.map((tag, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        <Tag className="mr-1 h-3 w-3" />
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setViewDialog({ isOpen: false, article: null })}
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    setViewDialog({ isOpen: false, article: null });
+                    setEditingNews(viewDialog.article);
+                  }}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Article
+                </Button>
+                {viewDialog.article.status === 'published' && (
+                  <Button variant="outline" asChild>
+                    <Link href={`/news/${viewDialog.article.slug}`} target="_blank">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      View Public
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
