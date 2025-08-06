@@ -98,6 +98,7 @@ export default function NewsPage() {
       const result = await response.json();
       
       if (result.success) {
+        console.log('API Response:', result.news);
         setNews(result.news);
       } else {
         showToast.error('Failed to fetch news articles');
@@ -348,7 +349,9 @@ export default function NewsPage() {
                         {article.publishedAt ? (
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <span className="text-sm">{article.publishedAt.toLocaleDateString()}</span>
+                            <span className="text-sm">
+                              {new Date(article.publishedAt).toLocaleDateString()}
+                            </span>
                           </div>
                         ) : (
                           <span className="text-muted-foreground text-sm">Not published</span>
