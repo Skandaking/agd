@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { NewsDialog } from '@/components/dashboard/AddNewsDialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { NewsArticle } from '@/lib/types';
 import {
   Table,
@@ -81,6 +82,9 @@ export default function NewsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Confirmation dialog state for delete
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; article: NewsArticle | null }>({ isOpen: false, article: null });
 
   useEffect(() => {
     setPageTitle('News Management');
@@ -137,6 +141,10 @@ export default function NewsPage() {
       console.error('Error deleting news:', error);
       showToast.error('Failed to delete article');
     }
+  };
+
+  const handleDeleteClick = (article: NewsArticle) => {
+    setDeleteDialog({ isOpen: true, article });
   };
 
   const handleStatusChange = async (id: string, newStatus: NewsArticle['status']) => {
@@ -404,7 +412,7 @@ export default function NewsPage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               className="text-red-600"
-                              onClick={() => handleDelete(article.id || '')}
+                              onClick={() => handleDeleteClick(article)}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
@@ -420,6 +428,23 @@ export default function NewsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Confirmation Dialog for Delete */}
+      <ConfirmationDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, article: null })}
+        onConfirm={async () => {
+          if (deleteDialog.article) {
+            await handleDelete(deleteDialog.article.id || '');
+            setDeleteDialog({ isOpen: false, article: null });
+          }
+        }}
+        title="Delete Article"
+        description={`Are you sure you want to delete "${deleteDialog.article?.title}"? This action cannot be undone and will also delete the associated image file.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 } 

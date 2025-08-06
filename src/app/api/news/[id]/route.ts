@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery, executeQuerySingle } from '@/lib/database';
 import { DatabaseNewsArticle } from '@/lib/types';
 import { getCurrentUserId } from '@/lib/auth-utils';
+import { unlink } from 'fs/promises';
+import { join } from 'path';
+import { existsSync } from 'fs';
 
 // GET /api/news/[id] - Fetch single news article
 export async function GET(
@@ -227,9 +230,9 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // Check if news article exists
-    const existingNews = await executeQuerySingle(
-      'SELECT id FROM news WHERE id = ?',
+    // Check if news article exists and get image URL
+    const existingNews = await executeQuerySingle<DatabaseNewsArticle>(
+      'SELECT id, image_url FROM news WHERE id = ?',
       [id]
     );
 
@@ -238,6 +241,29 @@ export async function DELETE(
         success: false,
         error: 'News article not found'
       }, { status: 404 });
+    }
+
+    // Delete the associated image file if it exists
+    if (existingNews.image_url) {
+      try {
+        // Extract filename from the URL (e.g., "/uploads/news/1234567890_image.jpg")
+        const urlPath = existingNews.image_url;
+        if (urlPath.startsWith('/uploads/news/')) {
+          const fileName = urlPath.replace('/uploads/news/', '');
+          const filePath = join(process.cwd(), 'public', 'uploads', 'news', fileName);
+          
+          // Check if file exists before trying to delete
+          if (existsSync(filePath)) {
+            await unlink(filePath);
+            console.log(`Deleted image file: ${filePath}`);
+          } else {
+            console.log(`Image file not found: ${filePath}`);
+          }
+        }
+      } catch (imageError) {
+        console.error('Error deleting image file:', imageError);
+        // Continue with article deletion even if image deletion fails
+      }
     }
 
     // Delete the news article
