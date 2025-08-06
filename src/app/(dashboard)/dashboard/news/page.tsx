@@ -190,6 +190,8 @@ export default function NewsPage() {
 
   const handleUpdateNews = async (newsId: string, newsData: Partial<NewsArticle>) => {
     try {
+      console.log('Updating news:', { newsId, newsData });
+      
       const response = await fetch(`/api/news/${newsId}`, {
         method: 'PUT',
         headers: {
@@ -199,6 +201,7 @@ export default function NewsPage() {
       });
 
       const result = await response.json();
+      console.log('Update response:', result);
       
       if (result.success) {
         setNews(news.map(article => 
@@ -252,7 +255,9 @@ export default function NewsPage() {
             existingNews={editingNews}
             onNewsCreate={handleCreateNews}
             onNewsUpdate={handleUpdateNews}
-            onClose={() => setEditingNews(null)}
+            onClose={() => {
+              setEditingNews(null);
+            }}
           />
         </div>
       </div>
@@ -371,9 +376,12 @@ export default function NewsPage() {
                                 View
                               </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEditingNews(article)}>
+                            <DropdownMenuItem 
+                              onClick={() => setEditingNews(article)}
+                              className="cursor-pointer"
+                            >
                               <Edit className="mr-2 h-4 w-4" />
-                              Edit
+                              Edit Article
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {article.status === 'draft' && (

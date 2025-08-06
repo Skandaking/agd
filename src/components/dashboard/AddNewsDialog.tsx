@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Save, X, Upload } from 'lucide-react';
+import { Plus, Save, X, Upload, Edit } from 'lucide-react';
 import { NewsArticle } from '@/lib/types';
 import Image from 'next/image';
 
@@ -62,11 +62,11 @@ export function NewsDialog({
     reading_time_minutes: 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasAutoOpened, setHasAutoOpened] = useState(false);
   const [customCategory, setCustomCategory] = useState('');
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // Update form data when existingNews changes or mode changes
   useEffect(() => {
@@ -92,13 +92,13 @@ export function NewsDialog({
       if (!DEFAULT_CATEGORIES.includes(existingNews.category)) {
         setCustomCategory(existingNews.category);
         setShowCustomCategory(true);
+      } else {
+        setCustomCategory('');
+        setShowCustomCategory(false);
       }
       
-      // Only auto-open if we haven't opened for this news yet
-      if (!hasAutoOpened) {
-        setIsOpen(true);
-        setHasAutoOpened(true);
-      }
+      // Auto-open for edit mode
+      setIsOpen(true);
     } else if (mode === 'add') {
       // Reset form for add mode
       setNewsData({
@@ -118,14 +118,10 @@ export function NewsDialog({
       });
       setCustomCategory('');
       setShowCustomCategory(false);
-      setHasAutoOpened(false);
     }
-  }, [mode, existingNews, hasAutoOpened]);
+  }, [mode, existingNews]);
 
-  // Reset hasAutoOpened when existingNews changes to a different news or becomes null
-  useEffect(() => {
-    setHasAutoOpened(false);
-  }, [existingNews?.id]);
+
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -170,18 +166,48 @@ export function NewsDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Clear previous validation errors
+    setValidationErrors([]);
+    
     // Validate form
-    if (!newsData.title || !newsData.excerpt || !newsData.content || !newsData.author) {
+    const errors: string[] = [];
+    if (!newsData.title?.trim()) errors.push('Title is required');
+    if (!newsData.excerpt?.trim()) errors.push('Excerpt is required');
+    if (!newsData.content?.trim()) errors.push('Content is required');
+    if (!newsData.author?.trim()) errors.push('Author is required');
+    
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      console.error('Form validation failed:', { newsData, errors });
       return;
     }
+
+    // Ensure required fields are present
+    const submitData = {
+      ...newsData,
+      title: newsData.title.trim(),
+      excerpt: newsData.excerpt.trim(),
+      content: newsData.content.trim(),
+      author: newsData.author.trim(),
+      category: newsData.category || 'announcement',
+      status: newsData.status || 'draft',
+      featured: Boolean(newsData.featured),
+      reading_time_minutes: newsData.reading_time_minutes || 0,
+    };
 
     setIsSubmitting(true);
     
     try {
+      console.log('Submitting news:', { mode, submitData, existingNews });
+      
       if (mode === 'add' && onNewsCreate) {
-        await onNewsCreate(newsData);
+        await onNewsCreate(submitData);
+        console.log('Article created successfully');
       } else if (mode === 'edit' && existingNews?.id && onNewsUpdate) {
-        await onNewsUpdate(existingNews.id, newsData);
+        await onNewsUpdate(existingNews.id, submitData);
+        console.log('Article updated successfully');
+      } else {
+        console.error('Invalid mode or missing callbacks:', { mode, hasCreate: !!onNewsCreate, hasUpdate: !!onNewsUpdate, existingNewsId: existingNews?.id });
       }
       
       handleClose();
@@ -198,6 +224,26 @@ export function NewsDialog({
 
   const handleClose = () => {
     setIsOpen(false);
+    // Reset form when closing
+    if (mode === 'add') {
+      setNewsData({
+        title: '',
+        excerpt: '',
+        content: '',
+        category: 'announcement',
+        status: 'draft',
+        author: '',
+        featured: false,
+        slug: '',
+        meta_title: '',
+        meta_description: '',
+        tags: [],
+        image_url: '',
+        reading_time_minutes: 0,
+      });
+      setCustomCategory('');
+      setShowCustomCategory(false);
+    }
     if (onClose) {
       onClose();
     }
@@ -207,6 +253,9 @@ export function NewsDialog({
     setIsOpen(open);
     if (!open) {
       handleClose();
+    } else if (mode === 'edit' && !existingNews) {
+      // If opening in edit mode but no existing news, close the dialog
+      setIsOpen(false);
     }
   };
 
@@ -278,8 +327,17 @@ export function NewsDialog({
       <DialogTrigger asChild>
         {trigger || (
           <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            {mode === 'add' ? 'Add News' : 'Edit News'}
+            {mode === 'add' ? (
+              <>
+                <Plus className="mr-2 h-4 w-4" />
+                Add News
+              </>
+            ) : (
+              <>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit News
+              </>
+            )}
           </Button>
         )}
       </DialogTrigger>
@@ -288,9 +346,26 @@ export function NewsDialog({
           <DialogTitle className="text-2xl font-bold text-primary">
             {mode === 'add' ? 'Add New Article' : 'Edit Article'}
           </DialogTitle>
+          {mode === 'edit' && existingNews && (
+            <p className="text-sm text-muted-foreground">
+              Editing: {existingNews.title}
+            </p>
+          )}
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Validation Errors */}
+          {validationErrors.length > 0 && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+              <h4 className="text-sm font-medium text-red-800 mb-2">Please fix the following errors:</h4>
+              <ul className="text-sm text-red-700 space-y-1">
+                {validationErrors.map((error, index) => (
+                  <li key={index}>• {error}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
@@ -301,6 +376,7 @@ export function NewsDialog({
                 onChange={(e) => setNewsData(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="Enter article title"
                 required
+                className={!newsData.title ? 'border-red-300 focus:border-red-500' : ''}
               />
             </div>
             
@@ -312,6 +388,7 @@ export function NewsDialog({
                 onChange={(e) => setNewsData(prev => ({ ...prev, author: e.target.value }))}
                 placeholder="e.g., Accountant General, John Smith"
                 required
+                className={!newsData.author ? 'border-red-300 focus:border-red-500' : ''}
               />
             </div>
 
@@ -442,6 +519,7 @@ export function NewsDialog({
                 placeholder="Brief summary of the article"
                 rows={3}
                 required
+                className={!newsData.excerpt ? 'border-red-300 focus:border-red-500' : ''}
               />
             </div>
 
@@ -454,6 +532,7 @@ export function NewsDialog({
                 placeholder="Full article content"
                 rows={6}
                 required
+                className={!newsData.content ? 'border-red-300 focus:border-red-500' : ''}
               />
             </div>
           </div>
