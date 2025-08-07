@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -94,16 +95,7 @@ export default function NewsPage() {
   // View dialog state for viewing article details
   const [viewDialog, setViewDialog] = useState<{ isOpen: boolean; article: NewsArticle | null }>({ isOpen: false, article: null });
 
-  useEffect(() => {
-    setPageTitle('News Management');
-    setBreadcrumbs([
-      { label: 'Home', href: '/dashboard' },
-      { label: 'News' },
-    ]);
-    fetchNews();
-  }, [setPageTitle, setBreadcrumbs]);
-
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/news');
@@ -121,7 +113,16 @@ export default function NewsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    setPageTitle('News Management');
+    setBreadcrumbs([
+      { label: 'Home', href: '/dashboard' },
+      { label: 'News' },
+    ]);
+    fetchNews();
+  }, [setPageTitle, setBreadcrumbs, fetchNews]);
 
   const filteredNews = news.filter((article) => {
     const matchesSearch = 
@@ -492,7 +493,7 @@ export default function NewsPage() {
                       )}
                       <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        <span>{viewDialog.article.readingTime || '5'} min read</span>
+                        <span>{viewDialog.article.reading_time_minutes || '5'} min read</span>
                       </div>
                     </div>
                   </div>
@@ -519,14 +520,15 @@ export default function NewsPage() {
               </div>
 
               {/* Article Image */}
-              {viewDialog.article.imageUrl && (
+              {viewDialog.article.image_url && (
                 <div className="space-y-2">
                   <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Featured Image</h3>
                   <div className="relative aspect-video rounded-lg overflow-hidden border">
-                    <img
-                      src={viewDialog.article.imageUrl}
+                    <Image
+                      src={viewDialog.article.image_url}
                       alt={viewDialog.article.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   </div>
                 </div>
@@ -549,11 +551,11 @@ export default function NewsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Meta Title</label>
-                    <p className="text-sm text-muted-foreground">{viewDialog.article.metaTitle || 'Not set'}</p>
+                    <p className="text-sm text-muted-foreground">{viewDialog.article.meta_title || 'Not set'}</p>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Meta Description</label>
-                    <p className="text-sm text-muted-foreground">{viewDialog.article.metaDescription || 'Not set'}</p>
+                    <p className="text-sm text-muted-foreground">{viewDialog.article.meta_description || 'Not set'}</p>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Slug</label>
