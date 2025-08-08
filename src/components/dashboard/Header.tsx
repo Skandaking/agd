@@ -41,8 +41,24 @@ export function Header() {
     setSidebarCollapsed,
   } = useDashboard();
   const { user, logout } = useAuth();
+  
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Memoize user initials to prevent unnecessary re-renders
+  const userInitials = React.useMemo(() => {
+    if (!user) return '';
+    return getInitials(user.full_name);
+  }, [user?.full_name]);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -59,15 +75,6 @@ export function Header() {
   const handleLogoutConfirm = () => {
     logout();
     setShowLogoutDialog(false);
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   return (
@@ -159,7 +166,7 @@ export function Header() {
                   <div className="h-10 w-10 rounded-full bg-[var(--primary)] flex items-center justify-center">
                     {user ? (
                       <span className="text-sm font-medium text-[var(--primary-foreground)]">
-                        {getInitials(user.full_name)}
+                        {userInitials}
                       </span>
                     ) : (
                       <User className="h-5 w-5 text-[var(--primary-foreground)]" />

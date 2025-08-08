@@ -125,8 +125,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Sonner toast functions
-  const showToast = {
+  // Sonner toast functions - memoized to prevent infinite re-renders
+  const showToast = React.useMemo(() => ({
     success: (message: string, description?: string) => {
       toast.success(message, {
         description,
@@ -161,31 +161,39 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     ) => {
       toast.promise(promise, options);
     },
-  };
+  }), []);
+
+  // Memoize setter functions to prevent unnecessary re-renders
+  const setSidebarCollapsedMemo = React.useCallback(setSidebarCollapsed, []);
+  const setMobileSidebarOpenMemo = React.useCallback(setMobileSidebarOpen, []);
+  const setThemeMemo = React.useCallback(setTheme, []);
+  const setCompactModeMemo = React.useCallback(setCompactMode, []);
+  const setPageTitleMemo = React.useCallback(setPageTitle, []);
+  const setBreadcrumbsMemo = React.useCallback(setBreadcrumbs, []);
 
   const value: DashboardContextType = {
     // Sidebar state
     isSidebarCollapsed,
-    setSidebarCollapsed,
+    setSidebarCollapsed: setSidebarCollapsedMemo,
     isMobileSidebarOpen,
-    setMobileSidebarOpen,
+    setMobileSidebarOpen: setMobileSidebarOpenMemo,
     
     // Theme and appearance
     theme,
-    setTheme,
+    setTheme: setThemeMemo,
     
     // User preferences
     compactMode,
-    setCompactMode,
+    setCompactMode: setCompactModeMemo,
     
     // Toast notifications
     showToast,
     
     // Page state
     pageTitle,
-    setPageTitle,
+    setPageTitle: setPageTitleMemo,
     breadcrumbs,
-    setBreadcrumbs,
+    setBreadcrumbs: setBreadcrumbsMemo,
   };
 
   return (

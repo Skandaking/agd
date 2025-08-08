@@ -67,6 +67,7 @@ export function NewsDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [autoComputeReadingTime, setAutoComputeReadingTime] = useState(mode === 'add');
 
   // Update form data when existingNews changes or mode changes
   useEffect(() => {
@@ -87,6 +88,8 @@ export function NewsDialog({
         image_url: existingNews.image_url || '',
         reading_time_minutes: existingNews.reading_time_minutes,
       });
+      // Keep saved reading time on initial open in edit mode
+      setAutoComputeReadingTime(false);
       
       // Check if category is custom
       if (!DEFAULT_CATEGORIES.includes(existingNews.category)) {
@@ -118,6 +121,7 @@ export function NewsDialog({
       });
       setCustomCategory('');
       setShowCustomCategory(false);
+      setAutoComputeReadingTime(true);
     }
   }, [mode, existingNews]);
 
@@ -153,15 +157,26 @@ export function NewsDialog({
     }
   }, [newsData.excerpt, newsData.meta_description]);
 
-  // Calculate reading time based on content length
+  // Calculate reading time based on visible text content
   useEffect(() => {
-    if (newsData.content) {
-      const wordsPerMinute = 200;
-      const wordCount = newsData.content.split(/\s+/).length;
-      const readingTime = Math.ceil(wordCount / wordsPerMinute);
-      setNewsData(prev => ({ ...prev, reading_time_minutes: readingTime }));
+    if (!autoComputeReadingTime) return;
+    const raw = newsData.content || '';
+    const text = raw
+      .replace(/<[^>]*>/g, ' ') // strip HTML tags
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (text.length === 0) {
+      setNewsData(prev => ({ ...prev, reading_time_minutes: 0 }));
+      return;
     }
-  }, [newsData.content]);
+
+    const wordsPerMinute = 200;
+    const wordCount = text.split(' ').length;
+    const readingTime = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+    setNewsData(prev => ({ ...prev, reading_time_minutes: readingTime }));
+  }, [newsData.content, autoComputeReadingTime]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -456,7 +471,11 @@ export function NewsDialog({
                 type="number"
                 min="0"
                 value={newsData.reading_time_minutes}
-                onChange={(e) => setNewsData(prev => ({ ...prev, reading_time_minutes: parseInt(e.target.value) || 0 }))}
+                onChange={(e) => {
+                  setNewsData(prev => ({ ...prev, reading_time_minutes: parseInt(e.target.value) || 0 }));
+                  // User manually changed reading time; stop auto-calculation
+                  setAutoComputeReadingTime(false);
+                }}
                 placeholder="Auto-calculated"
               />
             </div>
@@ -528,7 +547,11 @@ export function NewsDialog({
               <Textarea
                 id="content"
                 value={newsData.content}
-                onChange={(e) => setNewsData(prev => ({ ...prev, content: e.target.value }))}
+                onChange={(e) => {
+                  setNewsData(prev => ({ ...prev, content: e.target.value }));
+                  // Re-enable auto-calc when content changes
+                  setAutoComputeReadingTime(true);
+                }}
                 placeholder="Full article content"
                 rows={6}
                 required

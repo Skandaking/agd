@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 // User interface for authentication (without password)
 interface User {
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuth();
   }, []);
 
-  const checkAuth = () => {
+  const checkAuth = React.useCallback(() => {
     try {
       const savedUser = localStorage.getItem('agd_user');
       const sessionExpiry = localStorage.getItem('agd_session_expiry');
@@ -47,18 +47,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(JSON.parse(savedUser));
         } else {
           // Session expired
-          logout();
+          localStorage.removeItem('agd_user');
+          localStorage.removeItem('agd_session_expiry');
+          setUser(null);
+          router.push('/login');
         }
       }
     } catch (error) {
       console.error('Error checking auth:', error);
-      logout();
+      localStorage.removeItem('agd_user');
+      localStorage.removeItem('agd_session_expiry');
+      setUser(null);
+      router.push('/login');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = React.useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     
     try {
@@ -97,22 +103,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = React.useCallback(() => {
     localStorage.removeItem('agd_user');
     localStorage.removeItem('agd_session_expiry');
     setUser(null);
     router.push('/login');
-  };
+  }, [router]);
 
-  const updateUser = (userData: Partial<User>) => {
+  const updateUser = React.useCallback((userData: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
       localStorage.setItem('agd_user', JSON.stringify(updatedUser));
     }
-  };
+  }, [user]);
 
   const value: AuthContextType = {
     user,

@@ -122,7 +122,7 @@ export default function NewsPage() {
       { label: 'News' },
     ]);
     fetchNews();
-  }, [setPageTitle, setBreadcrumbs, fetchNews]);
+  }, [setPageTitle, setBreadcrumbs]); // Removed fetchNews from dependencies to prevent infinite loop
 
   const filteredNews = news.filter((article) => {
     const matchesSearch = 
