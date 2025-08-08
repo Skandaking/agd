@@ -19,6 +19,8 @@ export interface NewsArticle {
   tags?: string[];
   image_url?: string;
   reading_time_minutes: number;
+  created_by_name?: string;
+  updated_by_name?: string;
 }
 
 export interface DatabaseNewsArticle {

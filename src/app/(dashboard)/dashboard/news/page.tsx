@@ -545,6 +545,41 @@ export default function NewsPage() {
                 </div>
               </div>
 
+              {/* Article Metadata */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Metadata</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Created by</label>
+                    <p className="text-sm text-muted-foreground">{viewDialog.article.created_by_name || 'Unknown'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Created at</label>
+                    <p className="text-sm text-muted-foreground">
+                      {viewDialog.article.createdAt ? (
+                        <>
+                          {new Date(viewDialog.article.createdAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.article.createdAt as unknown as string).toLocaleTimeString()}
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Last updated</label>
+                    <p className="text-sm text-muted-foreground">
+                      {viewDialog.article.updatedAt ? (
+                        <>
+                          {new Date(viewDialog.article.updatedAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.article.updatedAt as unknown as string).toLocaleTimeString()}
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* SEO Information */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">SEO Information</h3>
