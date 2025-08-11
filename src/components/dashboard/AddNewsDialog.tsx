@@ -307,6 +307,7 @@ export function NewsDialog({
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('folder', 'news');
 
       const response = await fetch('/api/upload', {
         method: 'POST',
