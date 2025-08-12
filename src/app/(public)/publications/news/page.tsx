@@ -50,25 +50,60 @@ export default function NewsPage() {
 
   return (
     <div className="min-h-screen bg-white">{/* compact, full-width layout [[memory:2824884]] */}
-      <div className="w-full px-4 md:px-6 lg:px-8 py-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Latest News</h1>
-            <p className="text-gray-600 mt-2">Updates and announcements from the Accountant General&apos;s Department</p>
-          </div>
+      {/* Hero Section */}
+      <div className="relative min-h-[260px] flex items-center justify-center overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(/hero/6.JPG)` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/70 to-[var(--secondary)]/70" />
+        </div>
 
-          <div className="mb-8">
-            <div className="relative max-w-xl mx-auto">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search news..."
-                className="w-full pl-9 pr-3 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-              />
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-0 w-16 h-16 bg-[var(--accent)]/5 rounded-br-full" />
+          <div className="absolute bottom-0 right-0 w-20 h-20 bg-[var(--secondary)]/5 rounded-tl-full" />
+          <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-[var(--primary)]/5 rounded-full -translate-y-1/2" />
+          <div className="absolute top-1/3 right-1/3 w-8 h-8 bg-[var(--accent)]/5 rounded-full" />
+        </div>
+
+        <div className="relative w-full px-4 md:px-6 lg:px-8 z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-white">News & Updates</h1>
+            <p className="text-white/90 mt-2">
+              Official updates and announcements from the Accountant General&apos;s Department
+            </p>
+
+            <div className="mt-6">
+              <div className="relative max-w-xl mx-auto">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/80 h-4 w-4" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search news..."
+                  className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-white/95 focus:bg-white text-gray-900 placeholder:text-gray-500 outline-none focus:ring-4 focus:ring-[var(--primary)]/25 transition"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-center gap-3 text-xs text-white/90">
+              <span className="bg-white/10 rounded-full px-3 py-1">Articles: {articles.length}</span>
+              <span className="bg-white/10 rounded-full px-3 py-1">Updated regularly</span>
+            </div>
+
+            <div className="mt-5 flex justify-center gap-2">
+              <div className="h-1 w-10 bg-[var(--accent)] rounded-full" />
+              <div className="h-1 w-10 bg-[var(--secondary)] rounded-full" />
+              <div className="h-1 w-10 bg-[var(--primary)] rounded-full" />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="w-full px-4 md:px-6 lg:px-8 py-10">
+        <div className="max-w-6xl mx-auto">
+          
 
           {loading ? (
             <div className="text-center text-gray-500 py-10">Loading news...</div>
@@ -103,13 +138,13 @@ export default function NewsPage() {
                             <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{featuredArticles[0].reading_time_minutes || 1} min read</span>
                             <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" />{(featuredArticles[0].views || 0).toLocaleString()}</span>
                           </div>
-                          <Link href="#">
+                          <Link href={`/news/${featuredArticles[0].slug || featuredArticles[0].id}`}>
                             <h3 className="text-2xl font-bold hover:text-[var(--primary)]">{featuredArticles[0].title}</h3>
                           </Link>
                           <p className="text-gray-600">{featuredArticles[0].excerpt}</p>
                           <div className="flex items-center justify-between pt-2 text-sm text-gray-600">
                             <span>By {featuredArticles[0].author}</span>
-                            <Link href="#" className="inline-flex items-center gap-1 text-[var(--primary)]">
+                            <Link href={`/news/${featuredArticles[0].slug || featuredArticles[0].id}`} className="inline-flex items-center gap-1 text-[var(--primary)]">
                               Read More
                               <ArrowRight className="h-4 w-4" />
                             </Link>
@@ -124,7 +159,7 @@ export default function NewsPage() {
                             <Image src={a.image_url || '/images/t2.jpg'} alt={a.title} fill className="object-cover" sizes="96px" />
                           </div>
                           <div className="min-w-0">
-                            <Link href="#" className="font-medium hover:text-[var(--primary)] line-clamp-2">{a.title}</Link>
+                            <Link href={`/news/${a.slug || a.id}`} className="font-medium hover:text-[var(--primary)] line-clamp-2">{a.title}</Link>
                             <div className="mt-1 text-xs text-gray-500 flex items-center gap-2">
                               <span>{formatDate(a.publishedAt || a.createdAt)}</span>
                               <span>· {a.reading_time_minutes || 1} min</span>
@@ -153,11 +188,11 @@ export default function NewsPage() {
                           <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(a.publishedAt || a.createdAt)}</span>
                           <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{a.reading_time_minutes || 1} min</span>
                         </div>
-                        <Link href="#" className="font-semibold hover:text-[var(--primary)] line-clamp-2">{a.title}</Link>
+                        <Link href={`/news/${a.slug || a.id}`} className="font-semibold hover:text-[var(--primary)] line-clamp-2">{a.title}</Link>
                         <p className="text-sm text-gray-600 line-clamp-3">{a.excerpt}</p>
                         <div className="pt-2 text-sm text-gray-600 flex items-center justify-between">
                           <span>By {a.author}</span>
-                          <Link href="#" className="inline-flex items-center gap-1 text-[var(--primary)]">
+                          <Link href={`/news/${a.slug || a.id}`} className="inline-flex items-center gap-1 text-[var(--primary)]">
                             Read More
                             <ArrowRight className="h-4 w-4" />
                           </Link>
