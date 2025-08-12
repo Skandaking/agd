@@ -475,7 +475,7 @@ export default function NewsPage() {
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-primary text-2xl font-bold">
-              <FileText className="h-5 w-5" />
+              <FileText className="h-5 w-5 text-secondary" />
               Article Details
             </DialogTitle>
             <DialogDescription>

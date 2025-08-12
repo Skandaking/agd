@@ -505,10 +505,10 @@ export default function PressReleasesPage() {
 
       {/* View Press Release Dialog */}
       <Dialog open={viewDialog.isOpen} onOpenChange={(open) => setViewDialog({ isOpen: open, release: viewDialog.release })}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Megaphone className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-primary text-2xl font-bold">
+              <Megaphone className="h-5 w-5 text-secondary" />
               Press Release Details
             </DialogTitle>
             <DialogDescription>
@@ -562,104 +562,111 @@ export default function PressReleasesPage() {
                 )}
               </div>
 
-              {/* Press Release Image */}
-              {viewDialog.release.image_url && (
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Featured Image</h3>
-                  <div className="relative aspect-video rounded-lg overflow-hidden border">
-                    <Image
-                      src={viewDialog.release.image_url}
-                      alt={viewDialog.release.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-              )}
+              {/* Two-column layout for large screens */}
+              <div className="grid gap-6 lg:grid-cols-3">
+                {/* Main content */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Press Release Image */}
+                  {viewDialog.release.image_url && (
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Featured Image</h3>
+                      <div className="relative aspect-video rounded-lg overflow-hidden border">
+                        <Image
+                          src={viewDialog.release.image_url}
+                          alt={viewDialog.release.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    </div>
+                  )}
 
-              {/* Press Release Content */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Content</h3>
-                <div className="prose prose-sm max-w-none">
-                  <div 
-                    className="text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: viewDialog.release.content }}
-                  />
+                  {/* Press Release Content */}
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Content</h3>
+                    <div className="prose prose-sm max-w-none">
+                      <div 
+                        className="text-sm leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: viewDialog.release.content }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  {viewDialog.release.tags && viewDialog.release.tags.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Tags</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {viewDialog.release.tags.map((tag, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            <Tag className="mr-1 h-3 w-3" />
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sidebar */}
+                <div className="space-y-6">
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">Metadata</h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Created by</label>
+                        <p className="text-sm">{viewDialog.release.created_by_name || 'Unknown'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Created at</label>
+                        <p className="text-sm">
+                          {viewDialog.release.createdAt ? (
+                            <>
+                              {new Date(viewDialog.release.createdAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.release.createdAt as unknown as string).toLocaleTimeString()}
+                            </>
+                          ) : (
+                            '—'
+                          )}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Last updated</label>
+                        <p className="text-sm">
+                          {viewDialog.release.updatedAt ? (
+                            <>
+                              {new Date(viewDialog.release.updatedAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.release.updatedAt as unknown as string).toLocaleTimeString()}
+                            </>
+                          ) : (
+                            '—'
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">SEO Information</h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Meta Title</label>
+                        <p className="text-sm">{viewDialog.release.meta_title || 'Not set'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Meta Description</label>
+                        <p className="text-sm">{viewDialog.release.meta_description || 'Not set'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Slug</label>
+                        <p className="text-sm font-mono">{viewDialog.release.slug}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Views</label>
+                        <p className="text-sm">{(viewDialog.release.views || 0).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* Press Release Metadata */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Metadata</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Created by</label>
-                    <p className="text-sm text-muted-foreground">{viewDialog.release.created_by_name || 'Unknown'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Created at</label>
-                    <p className="text-sm text-muted-foreground">
-                      {viewDialog.release.createdAt ? (
-                        <>
-                          {new Date(viewDialog.release.createdAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.release.createdAt as unknown as string).toLocaleTimeString()}
-                        </>
-                      ) : (
-                        '—'
-                      )}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Last updated</label>
-                    <p className="text-sm text-muted-foreground">
-                      {viewDialog.release.updatedAt ? (
-                        <>
-                          {new Date(viewDialog.release.updatedAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.release.updatedAt as unknown as string).toLocaleTimeString()}
-                        </>
-                      ) : (
-                        '—'
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* SEO Information */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">SEO Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Meta Title</label>
-                    <p className="text-sm text-muted-foreground">{viewDialog.release.meta_title || 'Not set'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Meta Description</label>
-                    <p className="text-sm text-muted-foreground">{viewDialog.release.meta_description || 'Not set'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Slug</label>
-                    <p className="text-sm text-muted-foreground font-mono">{viewDialog.release.slug}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Views</label>
-                    <p className="text-sm text-muted-foreground">{(viewDialog.release.views || 0).toLocaleString()}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tags */}
-              {viewDialog.release.tags && viewDialog.release.tags.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {viewDialog.release.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        <Tag className="mr-1 h-3 w-3" />
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Action Buttons */}
               <div className="flex justify-end gap-2 pt-4 border-t">
