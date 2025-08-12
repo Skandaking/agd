@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, Clock, User, Eye, ArrowLeft } from 'lucide-react';
-// import { useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
 interface Article {
   id?: string;
@@ -27,8 +27,9 @@ interface Article {
   reading_time_minutes: number;
 }
 
-export default function NewsDetailPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default function NewsDetailPage() {
+  const params = useParams<{ slug: string }>();
+  const slug = params?.slug as string;
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
