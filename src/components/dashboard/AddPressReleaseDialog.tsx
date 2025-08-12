@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Megaphone, Upload, X } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Save, X, Upload, Edit } from 'lucide-react';
+import Image from 'next/image';
 
 interface PressRelease {
   id?: string;
@@ -42,21 +43,23 @@ interface PressReleaseDialogProps {
   trigger?: React.ReactNode;
 }
 
-const categories = [
-  { value: 'announcement', label: 'Announcement' },
-  { value: 'update', label: 'System Update' },
-  { value: 'policy', label: 'Policy' },
-  { value: 'event', label: 'Event' },
-  { value: 'achievement', label: 'Achievement' },
-  { value: 'partnership', label: 'Partnership' },
-  { value: 'technology', label: 'Technology' },
-  { value: 'financial', label: 'Financial' },
+// Default categories
+const DEFAULT_CATEGORIES = [
+  'announcement',
+  'update', 
+  'policy',
+  'event',
+  'achievement',
+  'partnership',
+  'technology',
+  'financial'
 ];
 
-const statusOptions = [
+// Default statuses
+const STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
   { value: 'published', label: 'Published' },
-  { value: 'archived', label: 'Archived' },
+  { value: 'archived', label: 'Archived' }
 ];
 
 export function PressReleaseDialog({ 
@@ -68,10 +71,7 @@ export function PressReleaseDialog({
   trigger 
 }: PressReleaseDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  
-  const [formData, setFormData] = useState<Partial<PressRelease>>({
+  const [releaseData, setReleaseData] = useState<PressRelease>({
     title: '',
     excerpt: '',
     content: '',
@@ -84,32 +84,52 @@ export function PressReleaseDialog({
     meta_description: '',
     tags: [],
     image_url: '',
-    reading_time_minutes: 1,
+    reading_time_minutes: 0,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [autoComputeReadingTime, setAutoComputeReadingTime] = useState(mode === 'add');
 
-  const [tagsInput, setTagsInput] = useState('');
-
+  // Update form data when existingRelease changes or mode changes
   useEffect(() => {
-    if (existingRelease && mode === 'edit') {
-      setFormData({
-        title: existingRelease.title || '',
-        excerpt: existingRelease.excerpt || '',
-        content: existingRelease.content || '',
-        category: existingRelease.category || 'announcement',
-        status: existingRelease.status || 'draft',
-        author: existingRelease.author || '',
-        featured: existingRelease.featured || false,
+    if (mode === 'edit' && existingRelease) {
+      setReleaseData({
+        id: existingRelease.id,
+        title: existingRelease.title,
+        excerpt: existingRelease.excerpt,
+        content: existingRelease.content,
+        category: existingRelease.category,
+        status: existingRelease.status,
+        author: existingRelease.author,
+        featured: existingRelease.featured,
         slug: existingRelease.slug || '',
         meta_title: existingRelease.meta_title || '',
         meta_description: existingRelease.meta_description || '',
         tags: existingRelease.tags || [],
         image_url: existingRelease.image_url || '',
-        reading_time_minutes: existingRelease.reading_time_minutes || 1,
+        reading_time_minutes: existingRelease.reading_time_minutes,
       });
-      setTagsInput(existingRelease.tags?.join(', ') || '');
-    } else {
-      // Reset form for new release
-      setFormData({
+      // Keep saved reading time on initial open in edit mode
+      setAutoComputeReadingTime(false);
+      
+      // Check if category is custom
+      if (!DEFAULT_CATEGORIES.includes(existingRelease.category)) {
+        setCustomCategory(existingRelease.category);
+        setShowCustomCategory(true);
+      } else {
+        setCustomCategory('');
+        setShowCustomCategory(false);
+      }
+      
+      // Auto-open for edit mode
+      setIsOpen(true);
+    } else if (mode === 'add') {
+      // Reset form for add mode
+      setReleaseData({
         title: '',
         excerpt: '',
         content: '',
@@ -122,37 +142,106 @@ export function PressReleaseDialog({
         meta_description: '',
         tags: [],
         image_url: '',
-        reading_time_minutes: 1,
+        reading_time_minutes: 0,
       });
-      setTagsInput('');
+      setCustomCategory('');
+      setShowCustomCategory(false);
+      setAutoComputeReadingTime(true);
     }
-  }, [existingRelease, mode, isOpen]);
+  }, [mode, existingRelease]);
+
+  // Auto-generate slug from title
+  useEffect(() => {
+    if (releaseData.title && !releaseData.slug) {
+      const slug = releaseData.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+      setReleaseData(prev => ({ ...prev, slug }));
+    }
+  }, [releaseData.title, releaseData.slug]);
+
+  // Auto-generate meta title from title
+  useEffect(() => {
+    if (releaseData.title && !releaseData.meta_title) {
+      setReleaseData(prev => ({ ...prev, meta_title: releaseData.title }));
+    }
+  }, [releaseData.title, releaseData.meta_title]);
+
+  // Auto-generate meta description from excerpt
+  useEffect(() => {
+    if (releaseData.excerpt && !releaseData.meta_description) {
+      const metaDesc = releaseData.excerpt.length > 160 
+        ? releaseData.excerpt.substring(0, 157) + '...'
+        : releaseData.excerpt;
+      setReleaseData(prev => ({ ...prev, meta_description: metaDesc }));
+    }
+  }, [releaseData.excerpt, releaseData.meta_description]);
+
+  // Calculate reading time based on visible text content
+  useEffect(() => {
+    if (!autoComputeReadingTime) return;
+    const raw = releaseData.content || '';
+    const text = raw
+      .replace(/<[^>]*>/g, ' ') // strip HTML tags
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (text.length === 0) {
+      setReleaseData(prev => ({ ...prev, reading_time_minutes: 0 }));
+      return;
+    }
+
+    const wordsPerMinute = 200;
+    const wordCount = text.split(' ').length;
+    const readingTime = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+    setReleaseData(prev => ({ ...prev, reading_time_minutes: readingTime }));
+  }, [releaseData.content, autoComputeReadingTime]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.excerpt || !formData.content || !formData.author) {
-      alert('Please fill in all required fields');
+    // Clear previous validation errors
+    setValidationErrors([]);
+    
+    // Validate form
+    const errors: string[] = [];
+    if (!releaseData.title?.trim()) errors.push('Title is required');
+    if (!releaseData.excerpt?.trim()) errors.push('Excerpt is required');
+    if (!releaseData.content?.trim()) errors.push('Content is required');
+    if (!releaseData.author?.trim()) errors.push('Author is required');
+    
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      console.error('Form validation failed:', { releaseData, errors });
       return;
     }
+
+    // Ensure required fields are present
+    const finalReleaseData: PressRelease = {
+      ...releaseData,
+      title: releaseData.title?.trim() || '',
+      excerpt: releaseData.excerpt?.trim() || '',
+      content: releaseData.content?.trim() || '',
+      author: releaseData.author?.trim() || '',
+      category: showCustomCategory ? customCategory : releaseData.category,
+    };
 
     setIsSubmitting(true);
 
     try {
-      const releaseData: PressRelease = {
-        ...formData,
-        tags: tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
-      } as PressRelease;
-
       if (mode === 'edit' && existingRelease?.id) {
-        await onReleaseUpdate?.(existingRelease.id, releaseData);
+        await onReleaseUpdate?.(existingRelease.id, finalReleaseData);
       } else {
-        await onReleaseCreate?.(releaseData);
+        await onReleaseCreate?.(finalReleaseData);
       }
-
       handleClose();
     } catch (error) {
       console.error('Error saving press release:', error);
+      // Error handling is done by parent component via toast
     } finally {
       setIsSubmitting(false);
     }
@@ -165,24 +254,8 @@ export function PressReleaseDialog({
   const handleClose = () => {
     setIsOpen(false);
     onClose?.();
-    
-    // Reset form
-    setFormData({
-      title: '',
-      excerpt: '',
-      content: '',
-      category: 'announcement',
-      status: 'draft',
-      author: '',
-      featured: false,
-      slug: '',
-      meta_title: '',
-      meta_description: '',
-      tags: [],
-      image_url: '',
-      reading_time_minutes: 1,
-    });
-    setTagsInput('');
+    setValidationErrors([]);
+    setUploadProgress(0);
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -192,13 +265,39 @@ export function PressReleaseDialog({
     }
   };
 
+  const handleCategoryChange = (value: string) => {
+    if (value === 'custom') {
+      setShowCustomCategory(true);
+      setReleaseData(prev => ({ ...prev, category: customCategory || '' }));
+    } else {
+      setShowCustomCategory(false);
+      setReleaseData(prev => ({ ...prev, category: value }));
+    }
+  };
+
+  const handleCustomCategoryChange = (value: string) => {
+    setCustomCategory(value);
+    setReleaseData(prev => ({ ...prev, category: value }));
+  };
+
+  const handleTagsChange = (value: string) => {
+    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    setReleaseData(prev => ({ ...prev, tags }));
+  };
+
+  const getTagsDisplay = () => {
+    return releaseData.tags?.join(', ') || '';
+  };
+
   const handleImageUpload = async (file: File) => {
     if (!file) return;
 
-    setUploadingImage(true);
+    setIsUploading(true);
+    setUploadProgress(0);
+
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('type', 'press-release');
+    formData.append('folder', 'press-releases');
 
     try {
       const response = await fetch('/api/upload', {
@@ -209,7 +308,8 @@ export function PressReleaseDialog({
       const result = await response.json();
       
       if (result.success) {
-        setFormData(prev => ({ ...prev, image_url: result.url }));
+        setReleaseData(prev => ({ ...prev, image_url: result.url }));
+        setUploadProgress(100);
       } else {
         console.error('Upload failed:', result.error);
         alert('Failed to upload image. Please try again.');
@@ -218,7 +318,8 @@ export function PressReleaseDialog({
       console.error('Upload error:', error);
       alert('Failed to upload image. Please try again.');
     } finally {
-      setUploadingImage(false);
+      setIsUploading(false);
+      setTimeout(() => setUploadProgress(0), 500);
     }
   };
 
@@ -229,252 +330,306 @@ export function PressReleaseDialog({
     }
   };
 
-  const handleRemoveImage = () => {
-    setFormData(prev => ({ ...prev, image_url: '' }));
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button>
-            <Megaphone className="mr-2 h-4 w-4" />
-            Add Press Release
+            {mode === 'add' ? (
+              <>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Press Release
+              </>
+            ) : (
+              <>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Press Release
+              </>
+            )}
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'edit' ? 'Edit Press Release' : 'Create New Press Release'}
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-2xl font-bold text-primary">
+            {mode === 'add' ? 'Create New Press Release' : 'Edit Press Release'}
           </DialogTitle>
-          <DialogDescription>
-            {mode === 'edit' 
-              ? 'Update the press release information below.' 
-              : 'Fill in the information to create a new press release.'
-            }
-          </DialogDescription>
+          {mode === 'edit' && existingRelease && (
+            <p className="text-sm text-muted-foreground">
+              Editing: {existingRelease.title}
+            </p>
+          )}
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Enter press release title"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="author">Author *</Label>
-                <Input
-                  id="author"
-                  value={formData.author}
-                  onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
-                  placeholder="Enter author name"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select 
-                  value={formData.category} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        {category.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select 
-                  value={formData.status} 
-                  onValueChange={(value: 'draft' | 'published' | 'archived') => setFormData(prev => ({ ...prev, status: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map((status) => (
-                      <SelectItem key={status.value} value={status.value}>
-                        {status.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="featured"
-                  checked={formData.featured}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
-                />
-                <Label htmlFor="featured">Featured Press Release</Label>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="reading_time">Reading Time (minutes)</Label>
-                <Input
-                  id="reading_time"
-                  type="number"
-                  min="1"
-                  value={formData.reading_time_minutes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, reading_time_minutes: parseInt(e.target.value) || 1 }))}
-                />
-              </div>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Validation Errors */}
+          {validationErrors.length > 0 && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+              <h4 className="text-sm font-medium text-red-800 mb-2">Please fix the following errors:</h4>
+              <ul className="text-sm text-red-700 space-y-1">
+                {validationErrors.map((error, index) => (
+                  <li key={index}>• {error}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {/* Basic Information */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="title">Title <span className="text-secondary">*</span></Label>
+              <Input
+                id="title"
+                value={releaseData.title}
+                onChange={(e) => setReleaseData(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter press release title"
+                required
+                className={!releaseData.title ? 'border-red-300 focus:border-red-500' : ''}
+              />
+            </div>
+            
+            <div className="space-y-1.5">
+              <Label htmlFor="author">Author <span className="text-secondary">*</span></Label>
+              <Input
+                id="author"
+                value={releaseData.author}
+                onChange={(e) => setReleaseData(prev => ({ ...prev, author: e.target.value }))}
+                placeholder="e.g., Accountant General, John Smith"
+                required
+                className={!releaseData.author ? 'border-red-300 focus:border-red-500' : ''}
+              />
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug</Label>
-                <Input
-                  id="slug"
-                  value={formData.slug}
-                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                  placeholder="url-friendly-slug"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="meta_title">Meta Title (SEO)</Label>
-                <Input
-                  id="meta_title"
-                  value={formData.meta_title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
-                  placeholder="SEO optimized title"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="meta_description">Meta Description (SEO)</Label>
-                <Textarea
-                  id="meta_description"
-                  value={formData.meta_description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
-                  placeholder="Brief description for search engines"
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input
-                  id="tags"
-                  value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
-                  placeholder="tag1, tag2, tag3"
-                />
-              </div>
-
-              {/* Image Upload */}
-              <div className="space-y-2">
-                <Label htmlFor="image">Featured Image</Label>
-                <div className="space-y-2">
-                  {formData.image_url ? (
-                    <div className="relative">
-                      <img
-                        src={formData.image_url}
-                        alt="Preview"
-                        className="w-full h-32 object-cover rounded-md border"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={handleRemoveImage}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="border-2 border-dashed border-gray-300 rounded-md p-4">
-                      <div className="text-center">
-                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="mt-2">
-                          <label htmlFor="image-upload" className="cursor-pointer">
-                            <span className="mt-2 block text-sm font-medium text-gray-900">
-                              Upload an image
-                            </span>
-                            <input
-                              id="image-upload"
-                              type="file"
-                              accept="image/*"
-                              onChange={handleFileChange}
-                              disabled={uploadingImage}
-                              className="hidden"
-                            />
-                          </label>
-                        </div>
-                        <p className="mt-1 text-xs text-gray-500">
-                          PNG, JPG, GIF up to 10MB
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {uploadingImage && (
-                    <p className="text-sm text-blue-600">Uploading image...</p>
-                  )}
-                </div>
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="slug">Slug</Label>
+              <Input
+                id="slug"
+                value={releaseData.slug}
+                onChange={(e) => setReleaseData(prev => ({ ...prev, slug: e.target.value }))}
+                placeholder="url-friendly-slug"
+              />
             </div>
           </div>
 
-          {/* Full Width Fields */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="excerpt">Excerpt *</Label>
+          {/* Category, Status, Reading Time, and Featured */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="category">Category <span className="text-secondary">*</span></Label>
+              <Select value={releaseData.category} onValueChange={handleCategoryChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DEFAULT_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom">Custom Category</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {showCustomCategory && (
+                <Input
+                  value={customCategory}
+                  onChange={(e) => handleCustomCategoryChange(e.target.value)}
+                  placeholder="Enter custom category"
+                  className="mt-2"
+                />
+              )}
+            </div>
+            
+            <div className="space-y-1.5">
+              <Label htmlFor="status">Status <span className="text-secondary">*</span></Label>
+              <Select value={releaseData.status} onValueChange={(value: 'draft' | 'published' | 'archived') => 
+                setReleaseData(prev => ({ ...prev, status: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-1.5">
+              <Label htmlFor="reading_time">Reading Time</Label>
+              <Input
+                id="reading_time"
+                type="number"
+                min="0"
+                value={releaseData.reading_time_minutes}
+                onChange={(e) => {
+                  setReleaseData(prev => ({ ...prev, reading_time_minutes: parseInt(e.target.value) || 0 }));
+                  // User manually changed reading time; stop auto-calculation
+                  setAutoComputeReadingTime(false);
+                }}
+                placeholder="Auto-calculated"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Featured</Label>
+              <div className="flex items-center space-x-2 pt-2">
+                <Switch
+                  id="featured"
+                  checked={releaseData.featured}
+                  onCheckedChange={(checked) => setReleaseData(prev => ({ ...prev, featured: checked }))}
+                />
+                <Label htmlFor="featured" className="text-sm">Mark as featured</Label>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Image Upload</Label>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                  disabled={isUploading}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  {isUploading ? 'Uploading...' : 'Upload'}
+                </Button>
+                {releaseData.image_url && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setReleaseData(prev => ({ ...prev, image_url: '' }))}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          {/* Excerpt and Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="excerpt">Excerpt <span className="text-secondary">*</span></Label>
               <Textarea
                 id="excerpt"
-                value={formData.excerpt}
-                onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
+                value={releaseData.excerpt}
+                onChange={(e) => setReleaseData(prev => ({ ...prev, excerpt: e.target.value }))}
                 placeholder="Brief summary of the press release"
                 rows={3}
                 required
+                className={!releaseData.excerpt ? 'border-red-300 focus:border-red-500' : ''}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="content">Content *</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="content">Content <span className="text-secondary">*</span></Label>
               <Textarea
                 id="content"
-                value={formData.content}
-                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                placeholder="Full press release content (HTML allowed)"
-                rows={10}
+                value={releaseData.content}
+                onChange={(e) => {
+                  setReleaseData(prev => ({ ...prev, content: e.target.value }));
+                  // Re-enable auto-calc when content changes
+                  setAutoComputeReadingTime(true);
+                }}
+                placeholder="Full press release content"
+                rows={6}
                 required
+                className={!releaseData.content ? 'border-red-300 focus:border-red-500' : ''}
               />
             </div>
           </div>
 
+          {/* Image Preview and SEO Fields */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Image Preview */}
+            {releaseData.image_url && (
+              <div className="space-y-1.5">
+                <Label>Image Preview</Label>
+                <div className="relative w-full h-24 border rounded-md overflow-hidden">
+                  <Image
+                    src={releaseData.image_url}
+                    alt="Featured image preview"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <Input
+                  value={releaseData.image_url}
+                  onChange={(e) => setReleaseData(prev => ({ ...prev, image_url: e.target.value }))}
+                  placeholder="Image URL"
+                  className="text-xs"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Supported: JPG, PNG, GIF, WebP. Max: 5MB
+                </p>
+                {isUploading && (
+                  <div className="w-full bg-gray-200 rounded-full h-1">
+                    <div 
+                      className="bg-blue-600 h-1 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    ></div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SEO Fields */}
+            <div className="space-y-1.5">
+              <Label htmlFor="meta_title">Meta Title (SEO)</Label>
+              <Input
+                id="meta_title"
+                value={releaseData.meta_title}
+                onChange={(e) => setReleaseData(prev => ({ ...prev, meta_title: e.target.value }))}
+                placeholder="SEO optimized title"
+              />
+            </div>
+            
+            <div className="space-y-1.5">
+              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Input
+                id="tags"
+                value={getTagsDisplay()}
+                onChange={(e) => handleTagsChange(e.target.value)}
+                placeholder="tag1, tag2, tag3"
+              />
+            </div>
+          </div>
+
+          {/* Meta Description */}
+          <div className="space-y-1.5">
+            <Label htmlFor="meta_description">Meta Description (SEO)</Label>
+            <Textarea
+              id="meta_description"
+              value={releaseData.meta_description}
+              onChange={(e) => setReleaseData(prev => ({ ...prev, meta_description: e.target.value }))}
+              placeholder="Brief description for search engines"
+              rows={2}
+            />
+          </div>
+
           {/* Form Actions */}
-          <div className="flex justify-end gap-2 pt-4 border-t">
+          <div className="flex justify-end space-x-2 pt-2 border-t">
             <Button type="button" variant="outline" onClick={handleCancel}>
+              <X className="mr-2 h-4 w-4" />
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting 
-                ? (mode === 'edit' ? 'Updating...' : 'Creating...') 
-                : (mode === 'edit' ? 'Update Press Release' : 'Create Press Release')
-              }
+              <Save className="mr-2 h-4 w-4" />
+              {isSubmitting ? 'Saving...' : mode === 'add' ? 'Create Press Release' : 'Update Press Release'}
             </Button>
           </div>
         </form>
