@@ -162,12 +162,22 @@ export default function NewsPage() {
 
   const handleStatusChange = async (id: string, newStatus: NewsArticle['status']) => {
     try {
+      // Find the current article so we can send complete payload expected by the API
+      const current = news.find(a => a.id === id);
+      if (!current) {
+        showToast.error('Article not found');
+        return;
+      }
+
       const response = await fetch(`/api/news/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({
+          ...current,
+          status: newStatus,
+        }),
       });
 
       const result = await response.json();
@@ -462,9 +472,9 @@ export default function NewsPage() {
 
       {/* View Article Dialog */}
       <Dialog open={viewDialog.isOpen} onOpenChange={(open) => setViewDialog({ isOpen: open, article: viewDialog.article })}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-primary text-2xl font-bold">
               <FileText className="h-5 w-5" />
               Article Details
             </DialogTitle>
@@ -519,104 +529,111 @@ export default function NewsPage() {
                 )}
               </div>
 
-              {/* Article Image */}
-              {viewDialog.article.image_url && (
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Featured Image</h3>
-                  <div className="relative aspect-video rounded-lg overflow-hidden border">
-                    <Image
-                      src={viewDialog.article.image_url}
-                      alt={viewDialog.article.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-              )}
+              {/* Two-column layout for large screens */}
+              <div className="grid gap-6 lg:grid-cols-3">
+                {/* Main content */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Article Image */}
+                  {viewDialog.article.image_url && (
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Featured Image</h3>
+                      <div className="relative aspect-video rounded-lg overflow-hidden border">
+                        <Image
+                          src={viewDialog.article.image_url}
+                          alt={viewDialog.article.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    </div>
+                  )}
 
-              {/* Article Content */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Content</h3>
-                <div className="prose prose-sm max-w-none">
-                  <div 
-                    className="text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: viewDialog.article.content }}
-                  />
+                  {/* Article Content */}
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Content</h3>
+                    <div className="prose prose-sm max-w-none">
+                      <div 
+                        className="text-sm leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: viewDialog.article.content }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  {viewDialog.article.tags && viewDialog.article.tags.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Tags</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {viewDialog.article.tags.map((tag, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            <Tag className="mr-1 h-3 w-3" />
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sidebar */}
+                <div className="space-y-6">
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">Metadata</h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Created by</label>
+                        <p className="text-sm">{viewDialog.article.created_by_name || 'Unknown'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Created at</label>
+                        <p className="text-sm">
+                          {viewDialog.article.createdAt ? (
+                            <>
+                              {new Date(viewDialog.article.createdAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.article.createdAt as unknown as string).toLocaleTimeString()}
+                            </>
+                          ) : (
+                            '—'
+                          )}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Last updated</label>
+                        <p className="text-sm">
+                          {viewDialog.article.updatedAt ? (
+                            <>
+                              {new Date(viewDialog.article.updatedAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.article.updatedAt as unknown as string).toLocaleTimeString()}
+                            </>
+                          ) : (
+                            '—'
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border rounded-md p-4">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">SEO Information</h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Meta Title</label>
+                        <p className="text-sm">{viewDialog.article.meta_title || 'Not set'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Meta Description</label>
+                        <p className="text-sm">{viewDialog.article.meta_description || 'Not set'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Slug</label>
+                        <p className="text-sm font-mono">{viewDialog.article.slug}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Views</label>
+                        <p className="text-sm">{(viewDialog.article.views || 0).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* Article Metadata */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Metadata</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Created by</label>
-                    <p className="text-sm text-muted-foreground">{viewDialog.article.created_by_name || 'Unknown'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Created at</label>
-                    <p className="text-sm text-muted-foreground">
-                      {viewDialog.article.createdAt ? (
-                        <>
-                          {new Date(viewDialog.article.createdAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.article.createdAt as unknown as string).toLocaleTimeString()}
-                        </>
-                      ) : (
-                        '—'
-                      )}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Last updated</label>
-                    <p className="text-sm text-muted-foreground">
-                      {viewDialog.article.updatedAt ? (
-                        <>
-                          {new Date(viewDialog.article.updatedAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.article.updatedAt as unknown as string).toLocaleTimeString()}
-                        </>
-                      ) : (
-                        '—'
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* SEO Information */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">SEO Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Meta Title</label>
-                    <p className="text-sm text-muted-foreground">{viewDialog.article.meta_title || 'Not set'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Meta Description</label>
-                    <p className="text-sm text-muted-foreground">{viewDialog.article.meta_description || 'Not set'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Slug</label>
-                    <p className="text-sm text-muted-foreground font-mono">{viewDialog.article.slug}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Views</label>
-                    <p className="text-sm text-muted-foreground">{(viewDialog.article.views || 0).toLocaleString()}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tags */}
-              {viewDialog.article.tags && viewDialog.article.tags.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {viewDialog.article.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        <Tag className="mr-1 h-3 w-3" />
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Action Buttons */}
               <div className="flex justify-end gap-2 pt-4 border-t">
