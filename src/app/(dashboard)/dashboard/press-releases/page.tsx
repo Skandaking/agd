@@ -193,12 +193,23 @@ export default function PressReleasesPage() {
 
   const handleStatusChange = async (id: string, newStatus: PressRelease['status']) => {
     try {
+      // Find the current release to get all its data
+      const currentRelease = releases.find(release => release.id === id);
+      if (!currentRelease) {
+        showToast.error('Release not found');
+        return;
+      }
+
+      // Send complete release data with updated status
       const response = await fetch(`/api/press-releases/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({
+          ...currentRelease,
+          status: newStatus
+        }),
       });
 
       const result = await response.json();
@@ -442,6 +453,7 @@ export default function PressReleasesPage() {
                             {release.status === 'draft' && (
                               <DropdownMenuItem 
                                 onClick={() => handleStatusChange(release.id || '', 'published')}
+                                className="cursor-pointer"
                               >
                                 Publish
                               </DropdownMenuItem>
@@ -449,6 +461,7 @@ export default function PressReleasesPage() {
                             {release.status === 'published' && (
                               <DropdownMenuItem 
                                 onClick={() => handleStatusChange(release.id || '', 'draft')}
+                                className="cursor-pointer"
                               >
                                 Unpublish
                               </DropdownMenuItem>
@@ -572,6 +585,64 @@ export default function PressReleasesPage() {
                     className="text-sm leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: viewDialog.release.content }}
                   />
+                </div>
+              </div>
+
+              {/* Press Release Metadata */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Metadata</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Created by</label>
+                    <p className="text-sm text-muted-foreground">{viewDialog.release.created_by_name || 'Unknown'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Created at</label>
+                    <p className="text-sm text-muted-foreground">
+                      {viewDialog.release.createdAt ? (
+                        <>
+                          {new Date(viewDialog.release.createdAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.release.createdAt as unknown as string).toLocaleTimeString()}
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Last updated</label>
+                    <p className="text-sm text-muted-foreground">
+                      {viewDialog.release.updatedAt ? (
+                        <>
+                          {new Date(viewDialog.release.updatedAt as unknown as string).toLocaleDateString()} at {new Date(viewDialog.release.updatedAt as unknown as string).toLocaleTimeString()}
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* SEO Information */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">SEO Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Meta Title</label>
+                    <p className="text-sm text-muted-foreground">{viewDialog.release.meta_title || 'Not set'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Meta Description</label>
+                    <p className="text-sm text-muted-foreground">{viewDialog.release.meta_description || 'Not set'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Slug</label>
+                    <p className="text-sm text-muted-foreground font-mono">{viewDialog.release.slug}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Views</label>
+                    <p className="text-sm text-muted-foreground">{(viewDialog.release.views || 0).toLocaleString()}</p>
+                  </div>
                 </div>
               </div>
 
