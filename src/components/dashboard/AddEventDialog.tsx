@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Calendar, MapPin, Plus, Save, Upload, X } from 'lucide-react';
+import { Plus, Save, Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { EventItem } from '@/lib/types';
 
@@ -61,10 +61,6 @@ export function EventDialog({ onEventCreate, onEventUpdate, onClose, existingEve
     max_attendees: null,
     current_attendees: 0,
     featured: false,
-    slug: '',
-    meta_title: '',
-    meta_description: '',
-    tags: [],
     image_url: '',
   });
 
@@ -91,22 +87,7 @@ export function EventDialog({ onEventCreate, onEventUpdate, onClose, existingEve
     }
   }, [mode, existingEvent]);
 
-  // auto slug, meta
-  useEffect(() => {
-    if (data.title && !data.slug) {
-      const slug = data.title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
-      setData((p) => ({ ...p, slug }));
-    }
-  }, [data.title, data.slug]);
-  useEffect(() => {
-    if (data.title && !data.meta_title) setData((p) => ({ ...p, meta_title: data.title }));
-  }, [data.title, data.meta_title]);
-  useEffect(() => {
-    if (data.excerpt && !data.meta_description) {
-      const meta = data.excerpt.length > 160 ? data.excerpt.substring(0, 157) + '...' : data.excerpt;
-      setData((p) => ({ ...p, meta_description: meta }));
-    }
-  }, [data.excerpt, data.meta_description]);
+  // no SEO auto-generation needed
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,12 +128,7 @@ export function EventDialog({ onEventCreate, onEventUpdate, onClose, existingEve
     else { setShowCustomType(false); setData((p) => ({ ...p, type: value })); }
   };
 
-  const handleTagsChange = (value: string) => {
-    const tags = value.split(',').map((t) => t.trim()).filter((t) => t);
-    setData((p) => ({ ...p, tags }));
-  };
-
-  const getTagsDisplay = () => data.tags?.join(', ') || '';
+  // no tags handling
 
   const handleImageUpload = async (file: File) => {
     if (!file) return;
@@ -222,10 +198,7 @@ export function EventDialog({ onEventCreate, onEventUpdate, onClose, existingEve
                 <Input value={customType} onChange={(e) => setCustomType(e.target.value)} placeholder="Enter custom type" className="mt-2" />
               )}
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="slug">Slug</Label>
-              <Input id="slug" value={data.slug || ''} onChange={(e) => setData((p) => ({ ...p, slug: e.target.value }))} placeholder="url-friendly-slug" />
-            </div>
+            {/* Slug removed */}
           </div>
 
           {/* Scheduling + Status */}
@@ -298,7 +271,7 @@ export function EventDialog({ onEventCreate, onEventUpdate, onClose, existingEve
             </div>
           </div>
 
-          {/* Preview + SEO + Registration */}
+          {/* Preview + Registration */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {data.image_url && (
               <div className="space-y-1.5">
@@ -310,16 +283,8 @@ export function EventDialog({ onEventCreate, onEventUpdate, onClose, existingEve
                 {isUploading && (<div className="w-full bg-gray-200 rounded-full h-1"><div className="bg-blue-600 h-1 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div></div>)}
               </div>
             )}
-            <div className="space-y-1.5">
-              <Label htmlFor="meta_title">Meta Title</Label>
-              <Input id="meta_title" value={data.meta_title || ''} onChange={(e) => setData((p) => ({ ...p, meta_title: e.target.value }))} />
-              <Label htmlFor="tags" className="mt-2">Tags</Label>
-              <Input id="tags" value={getTagsDisplay()} onChange={(e) => handleTagsChange(e.target.value)} placeholder="tag1, tag2" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="meta_description">Meta Description</Label>
-              <Textarea id="meta_description" value={data.meta_description || ''} onChange={(e) => setData((p) => ({ ...p, meta_description: e.target.value }))} rows={2} />
-              <div className="mt-3 space-y-2">
+            <div className="space-y-1.5 lg:col-span-2">
+              <div className="mt-1 space-y-2">
                 <div className="flex items-center gap-2"><Switch id="reg_required" checked={data.registration_required} onCheckedChange={(c) => setData((p) => ({ ...p, registration_required: c }))} /><Label htmlFor="reg_required" className="text-sm">Registration required</Label></div>
                 <Input placeholder="Registration URL" value={data.registration_url || ''} onChange={(e) => setData((p) => ({ ...p, registration_url: e.target.value }))} />
                 <Input placeholder="Registration deadline (YYYY-MM-DD HH:MM)" value={data.registration_deadline || ''} onChange={(e) => setData((p) => ({ ...p, registration_deadline: e.target.value }))} />

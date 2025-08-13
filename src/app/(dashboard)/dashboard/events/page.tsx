@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
+// import Link from 'next/link';
 import Image from 'next/image';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,8 +35,7 @@ import {
   Calendar as CalendarIcon,
   MapPin,
   Clock,
-  Tag,
-  ExternalLink,
+  // ExternalLink,
 } from 'lucide-react';
 import { EventDialog } from '@/components/dashboard/AddEventDialog';
 import { EventItem } from '@/lib/types';
@@ -346,12 +345,7 @@ export default function EventsPage() {
                       <div className="text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: viewDialog.item.content }} />
                     </div>
                   </div>
-                  {viewDialog.item.tags && viewDialog.item.tags.length > 0 && (
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Tags</h3>
-                      <div className="flex flex-wrap gap-2">{viewDialog.item.tags.map((t, i) => (<Badge key={i} variant="outline" className="text-xs"><Tag className="mr-1 h-3 w-3" />{t}</Badge>))}</div>
-                    </div>
-                  )}
+                  {/* Tags removed */}
                 </div>
                 <div className="space-y-6">
                   <div className="border rounded-md p-4">
@@ -362,25 +356,13 @@ export default function EventsPage() {
                       <div><label className="text-xs font-medium text-muted-foreground">Last updated</label><p className="text-sm">{viewDialog.item.updatedAt ? `${new Date(viewDialog.item.updatedAt as unknown as string).toLocaleDateString()} at ${new Date(viewDialog.item.updatedAt as unknown as string).toLocaleTimeString()}` : '—'}</p></div>
                     </div>
                   </div>
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">SEO Information</h3>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div><label className="text-xs font-medium text-muted-foreground">Meta Title</label><p className="text-sm">{viewDialog.item.meta_title || 'Not set'}</p></div>
-                      <div><label className="text-xs font-medium text-muted-foreground">Meta Description</label><p className="text-sm">{viewDialog.item.meta_description || 'Not set'}</p></div>
-                      <div><label className="text-xs font-medium text-muted-foreground">Slug</label><p className="text-sm font-mono">{viewDialog.item.slug}</p></div>
-                      <div><label className="text-xs font-medium text-muted-foreground">Views</label><p className="text-sm">{(viewDialog.item.views || 0).toLocaleString()}</p></div>
-                    </div>
-                  </div>
+                  {/* SEO panel removed */}
                 </div>
               </div>
 
               <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button variant="outline" onClick={() => setViewDialog({ isOpen: false, item: null })}>Close</Button>
-                {viewDialog.item.status === 'published' && (
-                  <Button variant="outline" asChild>
-                    <Link href={`/events/${viewDialog.item.slug}`} target="_blank"><ExternalLink className="mr-2 h-4 w-4" />View Public</Link>
-                  </Button>
-                )}
+                {/* Public link via slug removed */}
                 <Button onClick={() => { setViewDialog({ isOpen: false, item: null }); setEditing(viewDialog.item); }}><Edit className="mr-2 h-4 w-4" />Edit Event</Button>
               </div>
             </div>

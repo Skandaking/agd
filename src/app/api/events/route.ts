@@ -58,10 +58,7 @@ export async function GET(request: NextRequest) {
       updatedAt: e.updated_at.toISOString(),
       views: e.views,
       featured: Boolean(e.featured),
-      slug: e.slug,
-      meta_title: e.meta_title,
-      meta_description: e.meta_description,
-      tags: e.tags ? JSON.parse(e.tags) : [],
+      // no slug/meta/tags
       image_url: e.image_url,
       created_by_name: e.created_by_name,
       updated_by_name: e.updated_by_name,
@@ -95,10 +92,6 @@ export async function POST(request: NextRequest) {
       max_attendees,
       current_attendees,
       featured,
-      slug,
-      meta_title,
-      meta_description,
-      tags,
       image_url,
     } = body;
 
@@ -115,13 +108,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Title, excerpt, content, type, start date/time, and location are required' }, { status: 400 });
     }
 
-    // unique slug (optional)
-    if (slug) {
-      const existing = await executeQuerySingle('SELECT id FROM events WHERE slug = ?', [slug]);
-      if (existing) return NextResponse.json({ success: false, error: 'An event with this slug already exists' }, { status: 400 });
-    }
-
-    const tagsJson = tags && Array.isArray(tags) ? JSON.stringify(tags) : null;
+    // no slug/tags
 
     const publishedAt = status === 'published' ? new Date() : null;
     const initialState = state || 'upcoming';
@@ -132,9 +119,9 @@ export async function POST(request: NextRequest) {
         start_at, end_at, location, venue,
         registration_required, registration_deadline, registration_url,
         max_attendees, current_attendees,
-        image_url, featured, views, slug, meta_title, meta_description, tags,
+        image_url, featured, views,
         created_by, updated_by, published_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)
     `;
 
     await executeQuery(insert, [
@@ -155,10 +142,6 @@ export async function POST(request: NextRequest) {
       current_attendees ?? 0,
       image_url || null,
       featured ? 1 : 0,
-      slug || null,
-      meta_title || null,
-      meta_description || null,
-      tagsJson,
       userId,
       userId,
       publishedAt,
@@ -199,10 +182,7 @@ export async function POST(request: NextRequest) {
       updatedAt: created.updated_at.toISOString(),
       views: created.views,
       featured: Boolean(created.featured),
-      slug: created.slug,
-      meta_title: created.meta_title,
-      meta_description: created.meta_description,
-      tags: created.tags ? JSON.parse(created.tags) : [],
+      // no slug/meta/tags
       image_url: created.image_url,
       created_by_name: created.created_by_name,
       updated_by_name: created.updated_by_name,

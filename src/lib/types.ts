@@ -71,10 +71,6 @@ export interface EventItem {
   updatedAt?: Date;
   views?: number;
   featured: boolean;
-  slug?: string | null;
-  meta_title?: string | null;
-  meta_description?: string | null;
-  tags?: string[];
   image_url?: string | null;
   created_by_name?: string;
   updated_by_name?: string;
@@ -102,10 +98,6 @@ export interface DatabaseEventItem {
   updated_at: Date;
   views: number;
   featured: boolean;
-  slug: string | null;
-  meta_title: string | null;
-  meta_description: string | null;
-  tags: string | null;
   image_url: string | null;
   created_by: number;
   updated_by: number;

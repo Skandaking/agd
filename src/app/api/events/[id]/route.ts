@@ -42,10 +42,7 @@ export async function GET(
       updatedAt: row.updated_at.toISOString(),
       views: row.views,
       featured: Boolean(row.featured),
-      slug: row.slug,
-      meta_title: row.meta_title,
-      meta_description: row.meta_description,
-      tags: row.tags ? JSON.parse(row.tags) : [],
+      // no slug/meta/tags
       image_url: row.image_url,
       created_by_name: row.created_by_name,
       updated_by_name: row.updated_by_name,
@@ -83,10 +80,6 @@ export async function PUT(
       max_attendees,
       current_attendees,
       featured,
-      slug,
-      meta_title,
-      meta_description,
-      tags,
       image_url,
     } = body;
 
@@ -97,13 +90,7 @@ export async function PUT(
     const exists = await executeQuerySingle('SELECT id, status FROM events WHERE id = ?', [id]);
     if (!exists) return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 });
 
-    // unique slug if changed
-    if (slug) {
-      const dup = await executeQuerySingle('SELECT id FROM events WHERE slug = ? AND id != ?', [slug, id]);
-      if (dup) return NextResponse.json({ success: false, error: 'An event with this slug already exists' }, { status: 400 });
-    }
-
-    const tagsJson = tags && Array.isArray(tags) ? JSON.stringify(tags) : null;
+    // no slug/tags
 
     // published_at logic
     const current = await executeQuerySingle<DatabaseEventItem>('SELECT status, published_at FROM events WHERE id = ?', [id]);
@@ -120,7 +107,7 @@ export async function PUT(
         start_at=?, end_at=?, location=?, venue=?,
         registration_required=?, registration_deadline=?, registration_url=?,
         max_attendees=?, current_attendees=?,
-        image_url=?, featured=?, slug=?, meta_title=?, meta_description=?, tags=?,
+        image_url=?, featured=?,
         published_at=?, updated_by=?
       WHERE id=?
     `;
@@ -143,10 +130,6 @@ export async function PUT(
       current_attendees ?? 0,
       image_url || null,
       featured ? 1 : 0,
-      slug || null,
-      meta_title || null,
-      meta_description || null,
-      tagsJson,
       publishedAt,
       userId,
       id,
@@ -185,10 +168,7 @@ export async function PUT(
       updatedAt: updated.updated_at.toISOString(),
       views: updated.views,
       featured: Boolean(updated.featured),
-      slug: updated.slug,
-      meta_title: updated.meta_title,
-      meta_description: updated.meta_description,
-      tags: updated.tags ? JSON.parse(updated.tags) : [],
+      // no slug/meta/tags
       image_url: updated.image_url,
       created_by_name: updated.created_by_name,
       updated_by_name: updated.updated_by_name,
