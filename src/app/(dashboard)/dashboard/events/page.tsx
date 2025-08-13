@@ -335,7 +335,7 @@ export default function EventsPage() {
                     <div className="space-y-2">
                       <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Image</h3>
                       <div className="relative aspect-video rounded-lg overflow-hidden border">
-                        <Image src={viewDialog.item.image_url} alt={viewDialog.item.title} fill className="object-cover" />
+                        <Image src={viewDialog.item.image_url} alt={viewDialog.item.title} fill className="object-cover" unoptimized sizes="(max-width: 1024px) 100vw, 66vw" />
                       </div>
                     </div>
                   )}

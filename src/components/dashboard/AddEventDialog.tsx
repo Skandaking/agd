@@ -44,7 +44,7 @@ export function EventDialog({ onEventCreate, onEventUpdate, onClose, existingEve
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [data, setData] = useState<EventItem>({
+  const getInitialData = (): EventItem => ({
     title: '',
     excerpt: '',
     content: '',
@@ -63,6 +63,7 @@ export function EventDialog({ onEventCreate, onEventUpdate, onClose, existingEve
     featured: false,
     image_url: '',
   });
+  const [data, setData] = useState<EventItem>(getInitialData());
 
   useEffect(() => {
     if (mode === 'edit' && existingEvent) {
@@ -115,6 +116,13 @@ export function EventDialog({ onEventCreate, onEventUpdate, onClose, existingEve
 
   const handleClose = () => {
     setIsOpen(false);
+    // reset form back to initial when closing
+    setData(getInitialData());
+    setCustomType('');
+    setShowCustomType(false);
+    setValidationErrors([]);
+    setUploadProgress(0);
+    setIsUploading(false);
     onClose?.();
   };
 
@@ -277,7 +285,7 @@ export function EventDialog({ onEventCreate, onEventUpdate, onClose, existingEve
               <div className="space-y-1.5">
                 <Label>Image Preview</Label>
                 <div className="relative w-full h-24 border rounded-md overflow-hidden">
-                  <Image src={data.image_url} alt="Event image" fill className="object-cover" />
+                  <Image src={data.image_url} alt="Event image" fill className="object-cover" unoptimized sizes="(max-width: 768px) 100vw, 33vw" />
                 </div>
                 <Input value={data.image_url} onChange={(e) => setData((p) => ({ ...p, image_url: e.target.value }))} className="text-xs" />
                 {isUploading && (<div className="w-full bg-gray-200 rounded-full h-1"><div className="bg-blue-600 h-1 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div></div>)}
