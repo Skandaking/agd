@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     let userId: number;
     try {
       userId = await getCurrentUserId();
-    } catch (err) {
+    } catch {
       return NextResponse.json({ success: false, error: 'Authentication failed. Please log in again.' }, { status: 401 });
     }
 
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
         max_attendees, current_attendees,
         image_url, featured, views,
         created_by, updated_by, published_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     await executeQuery(insert, [
@@ -142,6 +142,7 @@ export async function POST(request: NextRequest) {
       current_attendees ?? 0,
       image_url || null,
       featured ? 1 : 0,
+      0, // views
       userId,
       userId,
       publishedAt,
