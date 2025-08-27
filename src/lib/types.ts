@@ -104,3 +104,51 @@ export interface DatabaseEventItem {
   created_by_name?: string;
   updated_by_name?: string;
 }
+
+export interface DocumentItem {
+  id?: string;
+  title: string;
+  summary?: string | null;
+  category: string;
+  department?: string | null;
+  status: 'draft' | 'published' | 'archived';
+  author?: string | null;
+  year?: number | null;
+  file_name: string;
+  file_url: string;
+  file_mime: string;
+  file_size_bytes: number;
+  publishedAt?: Date | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+  views?: number;
+  downloads?: number;
+  tags?: string[];
+  created_by_name?: string;
+  updated_by_name?: string;
+}
+
+export interface DatabaseDocumentItem {
+  id: number;
+  title: string;
+  summary: string | null;
+  category: string;
+  department: string | null;
+  status: 'draft' | 'published' | 'archived';
+  author: string | null;
+  year: number | null;
+  file_name: string;
+  file_url: string;
+  file_mime: string;
+  file_size_bytes: number;
+  created_by: number;
+  updated_by: number;
+  published_at: Date | null;
+  created_at: Date;
+  updated_at: Date;
+  views: number;
+  downloads: number;
+  tags: string | null;
+  created_by_name?: string;
+  updated_by_name?: string;
+}

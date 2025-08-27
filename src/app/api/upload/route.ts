@@ -9,6 +9,7 @@ const allowedFolders = [
   'news',
   'gallery',
   'publications',
+  'documents', // Added for document uploads
   'events',
   'press-releases',
   'avatars',
@@ -44,20 +45,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    // Validate file type based on folder
+    let allowedTypes: string[];
+    let maxSize: number;
+    let resourceType: 'image' | 'raw' = 'image';
+
+    if (folder === 'documents') {
+      // Allow document types for documents folder
+      allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv',
+        'text/plain'
+      ];
+      maxSize = 20 * 1024 * 1024; // 20MB for documents
+      resourceType = 'raw'; // Use 'raw' for non-image files in Cloudinary
+    } else {
+      // Default to images for other folders
+      allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      maxSize = 5 * 1024 * 1024; // 5MB for images
+      resourceType = 'image';
+    }
+
     if (!allowedTypes.includes(file.type)) {
+      const fileTypeLabel = folder === 'documents' ? 'documents (PDF, Word, Excel, CSV, Text)' : 'images';
       return NextResponse.json(
-        { success: false, error: 'Invalid file type. Only images are allowed.' },
+        { success: false, error: `Invalid file type. Only ${fileTypeLabel} are allowed.` },
         { status: 400 }
       );
     }
 
-    // Validate file size (5MB limit)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size
     if (file.size > maxSize) {
+      const sizeLabel = folder === 'documents' ? '20MB' : '5MB';
       return NextResponse.json(
-        { success: false, error: 'File too large. Maximum size is 5MB.' },
+        { success: false, error: `File too large. Maximum size is ${sizeLabel}.` },
         { status: 400 }
       );
     }
@@ -74,12 +99,20 @@ export async function POST(request: NextRequest) {
       type CloudinaryUploadResult = { secure_url: string; public_id: string };
       const result = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
         const upload = cloudinary.uploader.upload_stream(
-          { folder: folderPath, resource_type: 'image' },
+          { folder: folderPath, resource_type: resourceType },
           (error: unknown, res: unknown) => (error ? reject(error as Error) : resolve(res as CloudinaryUploadResult))
         );
         upload.end(buffer);
       });
-      return NextResponse.json({ success: true, url: result.secure_url, public_id: result.public_id, provider: 'cloudinary' });
+      return NextResponse.json({ 
+        success: true, 
+        url: result.secure_url, 
+        public_id: result.public_id, 
+        provider: 'cloudinary',
+        file_name: file.name,
+        file_size: file.size,
+        file_mime: file.type
+      });
     }
 
     // Fallback: save locally
@@ -95,7 +128,15 @@ export async function POST(request: NextRequest) {
     await writeFile(filePath, buffer);
 
     const publicUrl = `/uploads/${folder}/${fileName}`;
-    return NextResponse.json({ success: true, url: publicUrl, provider: 'local', folder });
+    return NextResponse.json({ 
+      success: true, 
+      url: publicUrl, 
+      provider: 'local', 
+      folder,
+      file_name: file.name,
+      file_size: file.size,
+      file_mime: file.type
+    });
 
   } catch (error) {
     console.error('Upload error:', error);
