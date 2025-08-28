@@ -296,7 +296,7 @@ export function DocumentDialog({
               <div className="space-y-2">
                 <Label htmlFor="summary">Summary</Label>
                 <Textarea
-                  id="summary"
+                  id="summary" 
                   value={formData.summary || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
                   placeholder="Brief description of the document"
