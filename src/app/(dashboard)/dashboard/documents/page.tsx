@@ -271,6 +271,46 @@ export default function DocumentsPage() {
     return '📎';
   };
 
+  const getFileTypeName = (mime: string, fileName: string) => {
+    // Get file extension from filename as backup
+    const extension = fileName.split('.').pop()?.toLowerCase() || '';
+    
+    // Map MIME types to user-friendly names
+    const mimeTypeMap: Record<string, string> = {
+      'application/pdf': 'PDF',
+      'application/msword': 'Word Document',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word Document',
+      'application/vnd.ms-excel': 'Excel Spreadsheet',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel Spreadsheet',
+      'text/csv': 'CSV File',
+      'text/plain': 'Text File',
+      'text/txt': 'Text File',
+    };
+
+    // First try to match exact MIME type
+    if (mimeTypeMap[mime]) {
+      return mimeTypeMap[mime];
+    }
+
+    // Fallback to extension-based mapping
+    const extensionMap: Record<string, string> = {
+      'pdf': 'PDF',
+      'doc': 'Word Document',
+      'docx': 'Word Document', 
+      'xls': 'Excel Spreadsheet',
+      'xlsx': 'Excel Spreadsheet',
+      'csv': 'CSV File',
+      'txt': 'Text File',
+    };
+
+    if (extensionMap[extension]) {
+      return extensionMap[extension];
+    }
+
+    // Final fallback - use extension or generic
+    return extension ? extension.toUpperCase() : 'Document';
+  };
+
   const handleDownload = (document: DocumentItem) => {
     if (document.id) {
       window.open(`/api/documents/${document.id}/download`, '_blank');
@@ -399,7 +439,7 @@ export default function DocumentsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {document.file_mime.split('/')[1]?.toUpperCase() || 'FILE'}
+                          {getFileTypeName(document.file_mime, document.file_name)}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -595,7 +635,7 @@ export default function DocumentsPage() {
                         </div>
                         <div>
                           <label className="text-xs font-medium text-muted-foreground">File Type</label>
-                          <p className="text-sm">{viewDialog.document.file_mime}</p>
+                          <p className="text-sm">{getFileTypeName(viewDialog.document.file_mime, viewDialog.document.file_name)}</p>
                         </div>
                         <div>
                           <label className="text-xs font-medium text-muted-foreground">Downloads</label>

@@ -254,6 +254,46 @@ export function DocumentDialog({
     return '📎';
   };
 
+  const getFileTypeName = (mime: string, fileName: string) => {
+    // Get file extension from filename as backup
+    const extension = fileName.split('.').pop()?.toLowerCase() || '';
+    
+    // Map MIME types to user-friendly names
+    const mimeTypeMap: Record<string, string> = {
+      'application/pdf': 'PDF',
+      'application/msword': 'Word Document',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word Document',
+      'application/vnd.ms-excel': 'Excel Spreadsheet',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel Spreadsheet',
+      'text/csv': 'CSV File',
+      'text/plain': 'Text File',
+      'text/txt': 'Text File',
+    };
+
+    // First try to match exact MIME type
+    if (mimeTypeMap[mime]) {
+      return mimeTypeMap[mime];
+    }
+
+    // Fallback to extension-based mapping
+    const extensionMap: Record<string, string> = {
+      'pdf': 'PDF',
+      'doc': 'Word Document',
+      'docx': 'Word Document', 
+      'xls': 'Excel Spreadsheet',
+      'xlsx': 'Excel Spreadsheet',
+      'csv': 'CSV File',
+      'txt': 'Text File',
+    };
+
+    if (extensionMap[extension]) {
+      return extensionMap[extension];
+    }
+
+    // Final fallback - use extension or generic
+    return extension ? extension.toUpperCase() : 'Document';
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -392,7 +432,7 @@ export function DocumentDialog({
                         <div className="text-left">
                           <div className="font-medium text-sm">{formData.file_name}</div>
                           <div className="text-xs text-muted-foreground">
-                            {formatFileSize(formData.file_size_bytes)} • {formData.file_mime}
+                            {formatFileSize(formData.file_size_bytes)} • {getFileTypeName(formData.file_mime, formData.file_name)}
                           </div>
                         </div>
                       </div>
