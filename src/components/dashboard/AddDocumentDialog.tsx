@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Upload, FileText } from 'lucide-react';
+import { Plus, Upload, FileText, File as FileIcon, FileSpreadsheet } from 'lucide-react';
 import { DocumentItem } from '@/lib/types';
 
 interface DocumentDialogProps {
@@ -247,11 +247,10 @@ export function DocumentDialog({
   };
 
   const getFileIcon = (mime: string) => {
-    if (mime.includes('pdf')) return '📄';
-    if (mime.includes('word')) return '📝';
-    if (mime.includes('excel') || mime.includes('sheet')) return '📊';
-    if (mime.includes('csv')) return '📋';
-    return '📎';
+    if (mime.includes('pdf')) return <FileText className="h-4 w-4 text-red-600" />;
+    if (mime.includes('word')) return <FileText className="h-4 w-4 text-blue-600" />;
+    if (mime.includes('excel') || mime.includes('sheet') || mime.includes('csv')) return <FileSpreadsheet className="h-4 w-4 text-green-600" />;
+    return <FileIcon className="h-4 w-4 text-muted-foreground" />;
   };
 
   const getFileTypeName = (mime: string, fileName: string) => {

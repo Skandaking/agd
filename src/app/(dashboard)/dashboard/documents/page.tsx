@@ -38,6 +38,7 @@ import {
   Tag,
   Building
 } from 'lucide-react';
+import { File as FileIcon, FileSpreadsheet } from 'lucide-react';
 import { DocumentItem } from '@/lib/types';
 
 const categoryLabels: Record<string, string> = {
@@ -264,11 +265,10 @@ export default function DocumentsPage() {
   };
 
   const getFileIcon = (mime: string) => {
-    if (mime.includes('pdf')) return '📄';
-    if (mime.includes('word')) return '📝';
-    if (mime.includes('excel') || mime.includes('sheet')) return '📊';
-    if (mime.includes('csv')) return '📋';
-    return '📎';
+    if (mime.includes('pdf')) return <FileText className="h-4 w-4 text-red-600" />;
+    if (mime.includes('word')) return <FileText className="h-4 w-4 text-blue-600" />;
+    if (mime.includes('excel') || mime.includes('sheet') || mime.includes('csv')) return <FileSpreadsheet className="h-4 w-4 text-green-600" />;
+    return <FileIcon className="h-4 w-4 text-muted-foreground" />;
   };
 
   const getFileTypeName = (mime: string, fileName: string) => {
