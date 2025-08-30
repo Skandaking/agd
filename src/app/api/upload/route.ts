@@ -91,7 +91,33 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Prefer Cloudinary when credentials exist
+    // Always save documents locally, use Cloudinary only for images
+    if (folder === 'documents') {
+      // Force local storage for documents
+      const uploadsDir = join(process.cwd(), 'public', 'uploads', folder);
+      if (!existsSync(uploadsDir)) {
+        await mkdir(uploadsDir, { recursive: true });
+      }
+
+      const timestamp = Date.now();
+      const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const fileName = `${timestamp}_${originalName}`;
+      const filePath = join(uploadsDir, fileName);
+      await writeFile(filePath, buffer);
+
+      const publicUrl = `/uploads/${folder}/${fileName}`;
+      return NextResponse.json({ 
+        success: true, 
+        url: publicUrl, 
+        provider: 'local', 
+        folder,
+        file_name: file.name,
+        file_size: file.size,
+        file_mime: file.type
+      });
+    }
+
+    // Use Cloudinary for images when credentials exist
     if (hasCloudinaryCreds) {
       const root = process.env.CLOUDINARY_UPLOAD_ROOT || 'agd';
       const folderPath = `${root}/${folder}`;
@@ -115,7 +141,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Fallback: save locally
+    // Fallback: save locally for images when Cloudinary is not available
     const uploadsDir = join(process.cwd(), 'public', 'uploads', folder);
     if (!existsSync(uploadsDir)) {
       await mkdir(uploadsDir, { recursive: true });
