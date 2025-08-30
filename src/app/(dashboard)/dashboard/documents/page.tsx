@@ -99,6 +99,7 @@ export default function DocumentsPage() {
   
   // View dialog state for viewing document details
   const [viewDialog, setViewDialog] = useState<{ isOpen: boolean; document: DocumentItem | null }>({ isOpen: false, document: null });
+  const [previewDialog, setPreviewDialog] = useState<{ isOpen: boolean; document: DocumentItem | null }>({ isOpen: false, document: null });
 
   const fetchDocuments = useCallback(async () => {
     try {
@@ -164,6 +165,10 @@ export default function DocumentsPage() {
 
   const handleViewClick = (document: DocumentItem) => {
     setViewDialog({ isOpen: true, document });
+  };
+
+  const handlePreviewClick = (document: DocumentItem) => {
+    setPreviewDialog({ isOpen: true, document });
   };
 
   const handleStatusChange = async (id: string, newStatus: DocumentItem['status']) => {
@@ -309,6 +314,25 @@ export default function DocumentsPage() {
 
     // Final fallback - use extension or generic
     return extension ? extension.toUpperCase() : 'Document';
+  };
+
+  const getAbsoluteUrl = (relativeOrAbsoluteUrl: string) => {
+    if (relativeOrAbsoluteUrl.startsWith('http')) return relativeOrAbsoluteUrl;
+    if (typeof window === 'undefined') return relativeOrAbsoluteUrl;
+    return `${window.location.origin}${relativeOrAbsoluteUrl}`;
+  };
+
+  const canPreviewFile = (mime: string) => {
+    // Only PDFs and text files can be previewed directly in localhost
+    return mime.includes('pdf') || mime.startsWith('text/') || mime.includes('csv');
+  };
+
+  const getPreviewIframeSrc = (mime: string, fileUrl: string) => {
+    const url = getAbsoluteUrl(fileUrl);
+    if (mime.includes('pdf') || mime.startsWith('text/') || mime.includes('csv')) {
+      return url; // Browser can preview PDFs and text/csv directly
+    }
+    return url; // Fallback to direct URL
   };
 
   const handleDownload = (document: DocumentItem) => {
@@ -484,6 +508,13 @@ export default function DocumentsPage() {
                             >
                               <Eye className="mr-2 h-4 w-4" />
                               View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handlePreviewClick(document)}
+                              className="cursor-pointer"
+                            >
+                              <FileText className="mr-2 h-4 w-4" />
+                              Preview
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => handleDownload(document)}
@@ -741,6 +772,69 @@ export default function DocumentsPage() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Document Dialog */}
+      <Dialog open={previewDialog.isOpen} onOpenChange={(open) => setPreviewDialog({ isOpen: open, document: previewDialog.document })}>
+        <DialogContent className="max-w-5xl w-[95vw] h-[85vh] p-0 overflow-hidden">
+          <div className="h-full flex flex-col">
+            <div className="px-4 py-3 border-b flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-secondary" />
+                <div className="font-semibold">Preview: {previewDialog.document?.title}</div>
+              </div>
+              <div className="text-xs text-muted-foreground pr-1">
+                {previewDialog.document && getFileTypeName(previewDialog.document.file_mime, previewDialog.document.file_name)}
+              </div>
+            </div>
+            <div className="flex-1 bg-white">
+              {previewDialog.document ? (
+                canPreviewFile(previewDialog.document.file_mime) ? (
+                  <iframe
+                    title="Document Preview"
+                    src={getPreviewIframeSrc(previewDialog.document.file_mime, previewDialog.document.file_url)}
+                    className="w-full h-full"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                    <div className="text-6xl mb-4">
+                      <div className="flex justify-center">
+                        {previewDialog.document.file_mime.includes('pdf') ? (
+                          <FileText className="h-16 w-16 text-red-600" />
+                        ) : previewDialog.document.file_mime.includes('word') ? (
+                          <FileText className="h-16 w-16 text-blue-600" />
+                        ) : previewDialog.document.file_mime.includes('excel') || previewDialog.document.file_mime.includes('sheet') || previewDialog.document.file_mime.includes('csv') ? (
+                          <FileSpreadsheet className="h-16 w-16 text-green-600" />
+                        ) : (
+                          <FileIcon className="h-16 w-16 text-muted-foreground" />
+                        )}
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">Preview Not Available</h3>
+                    <p className="text-muted-foreground mb-6 max-w-md">
+                      {previewDialog.document.file_mime.includes('word') || previewDialog.document.file_mime.includes('excel') ? 
+                        'Word and Excel documents cannot be previewed directly. Please download the file to view it.' :
+                        'This file type cannot be previewed directly. Please download the file to view it.'
+                      }
+                    </p>
+                    <div className="space-x-3">
+                      <Button onClick={() => handleDownload(previewDialog.document!)}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download File
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setPreviewDialog({ isOpen: false, document: null })}
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  </div>
+                )
+              ) : null}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

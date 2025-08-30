@@ -90,7 +90,10 @@ export function DocumentDialog({
       if (existingDocument.department && !departments.includes(existingDocument.department)) {
         setCustomDepartment(existingDocument.department);
       }
-    } else {
+      
+      // Open dialog when editing
+      setOpen(true);
+    } else if (!existingDocument && mode === 'add') {
       // Reset form for add mode
       setFormData({
         title: '',
@@ -110,7 +113,7 @@ export function DocumentDialog({
       setCustomCategory('');
       setCustomDepartment('');
     }
-  }, [existingDocument, mode, open]);
+  }, [existingDocument, mode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
