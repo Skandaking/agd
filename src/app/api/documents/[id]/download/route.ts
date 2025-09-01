@@ -28,8 +28,12 @@ export async function GET(
       [id]
     );
 
-    // Redirect to file URL
-    return NextResponse.redirect(document.file_url);
+    // Redirect to file URL (convert to absolute URL if relative)
+    const fileUrl = document.file_url.startsWith('http') 
+      ? document.file_url 
+      : `${request.nextUrl.origin}${document.file_url}`;
+    
+    return NextResponse.redirect(fileUrl);
 
   } catch (error) {
     console.error('Error tracking download:', error);
