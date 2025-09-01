@@ -13,6 +13,7 @@ const allowedFolders = [
   'events',
   'press-releases',
   'avatars',
+  'media', // Added for media uploads
 ];
 
 // Configure Cloudinary if credentials are provided
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
     // Validate file type based on folder
     let allowedTypes: string[];
     let maxSize: number;
-    let resourceType: 'image' | 'raw' = 'image';
+    let resourceType: 'image' | 'video' | 'raw' = 'image';
 
     if (folder === 'documents') {
       // Allow document types for documents folder
@@ -63,6 +64,14 @@ export async function POST(request: NextRequest) {
       ];
       maxSize = 20 * 1024 * 1024; // 20MB for documents
       resourceType = 'raw'; // Use 'raw' for non-image files in Cloudinary
+    } else if (folder === 'media') {
+      // Allow both images and videos for media folder
+      allowedTypes = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+        'video/mp4', 'video/mov', 'video/avi', 'video/wmv', 'video/webm', 'video/quicktime'
+      ];
+      maxSize = 50 * 1024 * 1024; // 50MB for media (videos can be large)
+      resourceType = file.type.startsWith('video/') ? 'video' : 'image';
     } else {
       // Default to images for other folders
       allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -71,7 +80,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (!allowedTypes.includes(file.type)) {
-      const fileTypeLabel = folder === 'documents' ? 'documents (PDF, Word, Excel, CSV, Text)' : 'images';
+      let fileTypeLabel: string;
+      if (folder === 'documents') {
+        fileTypeLabel = 'documents (PDF, Word, Excel, CSV, Text)';
+      } else if (folder === 'media') {
+        fileTypeLabel = 'images and videos (JPEG, PNG, GIF, WebP, MP4, MOV, AVI, WebM)';
+      } else {
+        fileTypeLabel = 'images';
+      }
       return NextResponse.json(
         { success: false, error: `Invalid file type. Only ${fileTypeLabel} are allowed.` },
         { status: 400 }
@@ -80,7 +96,14 @@ export async function POST(request: NextRequest) {
 
     // Validate file size
     if (file.size > maxSize) {
-      const sizeLabel = folder === 'documents' ? '20MB' : '5MB';
+      let sizeLabel: string;
+      if (folder === 'documents') {
+        sizeLabel = '20MB';
+      } else if (folder === 'media') {
+        sizeLabel = '50MB';
+      } else {
+        sizeLabel = '5MB';
+      }
       return NextResponse.json(
         { success: false, error: `File too large. Maximum size is ${sizeLabel}.` },
         { status: 400 }
@@ -117,12 +140,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Use Cloudinary for images when credentials exist
+    // Use Cloudinary for media files when credentials exist
     if (hasCloudinaryCreds) {
       const root = process.env.CLOUDINARY_UPLOAD_ROOT || 'agd';
       const folderPath = `${root}/${folder}`;
 
-      type CloudinaryUploadResult = { secure_url: string; public_id: string };
+      type CloudinaryUploadResult = { 
+        secure_url: string; 
+        public_id: string; 
+        width?: number; 
+        height?: number; 
+        duration?: number; 
+      };
       const result = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
         const upload = cloudinary.uploader.upload_stream(
           { folder: folderPath, resource_type: resourceType },
@@ -130,6 +159,7 @@ export async function POST(request: NextRequest) {
         );
         upload.end(buffer);
       });
+      
       return NextResponse.json({ 
         success: true, 
         url: result.secure_url, 
@@ -137,7 +167,10 @@ export async function POST(request: NextRequest) {
         provider: 'cloudinary',
         file_name: file.name,
         file_size: file.size,
-        file_mime: file.type
+        file_mime: file.type,
+        width: result.width || null,
+        height: result.height || null,
+        duration: result.duration || null,
       });
     }
 
@@ -161,7 +194,10 @@ export async function POST(request: NextRequest) {
       folder,
       file_name: file.name,
       file_size: file.size,
-      file_mime: file.type
+      file_mime: file.type,
+      width: null,
+      height: null,
+      duration: null,
     });
 
   } catch (error) {

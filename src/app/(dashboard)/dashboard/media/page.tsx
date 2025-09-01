@@ -40,13 +40,7 @@ import { MediaItem } from '@/lib/types';
 
 const categoryLabels: Record<string, string> = {
   photo: 'Photo',
-  illustration: 'Illustration',
-  logo: 'Logo',
-  banner: 'Banner',
-  document: 'Document',
   video: 'Video',
-  audio: 'Audio',
-  other: 'Other',
 };
 
 const statusLabels: Record<MediaItem['status'], string> = {
@@ -67,20 +61,10 @@ const getCategoryVariant = (category: string) => {
   switch (category) {
     case 'photo':
       return 'default';
-    case 'illustration':
-      return 'secondary';
-    case 'logo':
-      return 'outline';
-    case 'banner':
-      return 'secondary';
-    case 'document':
-      return 'outline';
     case 'video':
-      return 'default';
-    case 'audio':
       return 'secondary';
     default:
-      return 'secondary';
+      return 'outline';
   }
 };
 
@@ -408,7 +392,7 @@ export default function MediaPage() {
                   <Upload className="mx-auto h-12 w-12 text-muted-foreground/50" />
                   <div>
                     <h3 className="text-lg font-medium">No media files yet</h3>
-                    <p className="text-sm">Upload your first image, video, or document to get started.</p>
+                    <p className="text-sm">Upload your first photo or video to get started.</p>
                   </div>
                 </div>
               ) : (

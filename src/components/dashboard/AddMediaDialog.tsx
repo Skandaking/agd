@@ -24,13 +24,7 @@ interface MediaDialogProps {
 
 const categoryOptions = [
   { value: 'photo', label: 'Photo' },
-  { value: 'illustration', label: 'Illustration' },
-  { value: 'logo', label: 'Logo' },
-  { value: 'banner', label: 'Banner' },
-  { value: 'document', label: 'Document' },
   { value: 'video', label: 'Video' },
-  { value: 'audio', label: 'Audio' },
-  { value: 'other', label: 'Other' },
 ];
 
 export function MediaDialog({ 
@@ -144,7 +138,7 @@ export function MediaDialog({
       if (selectedFile) {
         const uploadFormData = new FormData();
         uploadFormData.append('file', selectedFile);
-        uploadFormData.append('type', 'media');
+        uploadFormData.append('folder', 'media');
 
         const uploadResponse = await fetch('/api/upload', {
           method: 'POST',
@@ -159,12 +153,12 @@ export function MediaDialog({
 
         fileData = {
           file_name: uploadResult.file_name,
-          file_url: uploadResult.file_url,
+          file_url: uploadResult.url,
           file_mime: uploadResult.file_mime,
-          file_size_bytes: uploadResult.file_size_bytes,
-          width: uploadResult.width,
-          height: uploadResult.height,
-          duration: uploadResult.duration,
+          file_size_bytes: uploadResult.file_size,
+          width: uploadResult.width || null,
+          height: uploadResult.height || null,
+          duration: uploadResult.duration || null,
         };
       }
 
@@ -237,12 +231,12 @@ export function MediaDialog({
 
       // Get file dimensions for images
       if (file.type.startsWith('image/')) {
-        const img = new Image();
+        const img = document.createElement('img');
         img.onload = () => {
           setFormData(prev => ({ 
             ...prev, 
-            width: img.width,
-            height: img.height 
+            width: img.naturalWidth,
+            height: img.naturalHeight 
           }));
         };
         img.src = url;
@@ -314,7 +308,7 @@ export function MediaDialog({
           <DialogDescription>
             {mode === 'edit' 
               ? 'Update the media item details and metadata.' 
-              : 'Upload a new image, video, or document to your media library.'
+              : 'Upload a new photo or video to your media library.'
             }
           </DialogDescription>
         </DialogHeader>
@@ -390,7 +384,7 @@ export function MediaDialog({
                           Drag and drop a file here, or click to select
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          Images, videos, and documents are supported
+                          Images and videos are supported
                         </p>
                       </div>
                     )}
@@ -435,7 +429,7 @@ export function MediaDialog({
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+                  accept="image/*,video/*"
                   onChange={handleFileChange}
                   className="hidden"
                 />
