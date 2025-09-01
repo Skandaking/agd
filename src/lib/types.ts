@@ -152,3 +152,50 @@ export interface DatabaseDocumentItem {
   created_by_name?: string;
   updated_by_name?: string;
 }
+
+// Media
+export interface MediaItem {
+  id?: string;
+  title: string;
+  alt_text?: string | null;
+  description?: string | null;
+  category: string;
+  file_name: string;
+  file_url: string;
+  file_mime: string;
+  file_size_bytes: number;
+  width?: number | null;
+  height?: number | null;
+  duration?: number | null; // For videos in seconds
+  status: 'active' | 'archived';
+  tags?: string[];
+  usage_count?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  created_by_name?: string;
+  updated_by_name?: string;
+}
+
+export interface DatabaseMediaItem {
+  id: number;
+  title: string;
+  alt_text: string | null;
+  description: string | null;
+  category: string;
+  file_name: string;
+  file_url: string;
+  file_mime: string;
+  file_size_bytes: number;
+  width: number | null;
+  height: number | null;
+  duration: number | null;
+  status: 'active' | 'archived';
+  tags: string | null;
+  usage_count: number;
+  created_by: number;
+  updated_by: number;
+  created_at: Date;
+  updated_at: Date;
+  created_by_name?: string;
+  updated_by_name?: string;
+}
