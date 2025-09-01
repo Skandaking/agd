@@ -20,6 +20,8 @@ interface MediaDialogProps {
   existingMedia?: MediaItem | null;
   mode?: 'add' | 'edit';
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const categoryOptions = [
@@ -33,11 +35,17 @@ export function MediaDialog({
   onClose,
   existingMedia, 
   mode = 'add',
-  trigger 
+  trigger,
+  open,
+  onOpenChange
 }: MediaDialogProps) {
   const { showToast } = useDashboard();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Use controlled open state if provided, otherwise use internal state
+  const isOpen = open !== undefined ? open : internalIsOpen;
+  const setIsOpen = onOpenChange || setInternalIsOpen;
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,7 +114,7 @@ export function MediaDialog({
       setCustomCategory('');
       setShowCustomCategory(false);
     }
-  }, [mode, existingMedia, isOpen]);
+  }, [mode, existingMedia]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -193,6 +201,30 @@ export function MediaDialog({
     setIsOpen(open);
     if (!open) {
       onClose?.();
+      // Reset form when dialog closes
+      if (mode === 'add') {
+        setFormData({
+          title: '',
+          alt_text: '',
+          description: '',
+          category: 'photo',
+          file_name: '',
+          file_url: '',
+          file_mime: '',
+          file_size_bytes: 0,
+          width: null,
+          height: null,
+          duration: null,
+          status: 'active',
+          tags: [],
+          usage_count: 0,
+        });
+        setTags('');
+        setSelectedFile(null);
+        setPreviewUrl('');
+        setCustomCategory('');
+        setShowCustomCategory(false);
+      }
     }
   };
 

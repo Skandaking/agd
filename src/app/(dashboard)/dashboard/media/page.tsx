@@ -76,6 +76,7 @@ export default function MediaPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [editingMedia, setEditingMedia] = useState<MediaItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Confirmation dialog state for delete
   const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; media: MediaItem | null }>({ isOpen: false, media: null });
@@ -307,10 +308,13 @@ export default function MediaPage() {
           <MediaDialog 
             mode={editingMedia ? "edit" : "add"}
             existingMedia={editingMedia}
+            open={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
             onMediaCreate={handleCreateMedia}
             onMediaUpdate={handleUpdateMedia}
             onClose={() => {
               setEditingMedia(null);
+              setIsDialogOpen(false);
             }}
           />
         </div>
@@ -428,7 +432,10 @@ export default function MediaPage() {
                         <Button size="sm" variant="secondary" onClick={() => handleViewClick(media)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="secondary" onClick={() => setEditingMedia(media)}>
+                        <Button size="sm" variant="secondary" onClick={() => {
+                          setEditingMedia(media);
+                          setIsDialogOpen(true);
+                        }}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <DropdownMenu>
@@ -562,7 +569,10 @@ export default function MediaPage() {
                                   <Eye className="mr-2 h-4 w-4" />
                                   View Details
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setEditingMedia(media)}>
+                                <DropdownMenuItem onClick={() => {
+                                  setEditingMedia(media);
+                                  setIsDialogOpen(true);
+                                }}>
                                   <Edit className="mr-2 h-4 w-4" />
                                   Edit Media
                                 </DropdownMenuItem>
@@ -819,6 +829,7 @@ export default function MediaPage() {
                   onClick={() => {
                     setViewDialog({ isOpen: false, media: null });
                     setEditingMedia(viewDialog.media);
+                    setIsDialogOpen(true);
                   }}
                 >
                   <Edit className="mr-2 h-4 w-4" />
