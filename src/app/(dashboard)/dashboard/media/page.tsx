@@ -281,7 +281,7 @@ export default function MediaPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Media Gallery</h1>
           <p className="text-muted-foreground">
-            Upload, manage, and organize your media files and assets.
+            Upload, manage, and organize your media files.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
