@@ -168,6 +168,13 @@ export default function DocumentsPage() {
   };
 
   const handlePreviewClick = (document: DocumentItem) => {
+    // For PDFs, open directly in a new tab for better viewing experience
+    if (document.file_mime.includes('pdf')) {
+      window.open(document.file_url, '_blank');
+      return;
+    }
+    
+    // For other files, use the preview dialog
     setPreviewDialog({ isOpen: true, document });
   };
 
@@ -514,7 +521,7 @@ export default function DocumentsPage() {
                               className="cursor-pointer"
                             >
                               <FileText className="mr-2 h-4 w-4" />
-                              Preview
+                              {document.file_mime.includes('pdf') ? 'Open in New Tab' : 'Preview'}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => handleDownload(document)}
@@ -778,6 +785,12 @@ export default function DocumentsPage() {
       {/* Preview Document Dialog */}
       <Dialog open={previewDialog.isOpen} onOpenChange={(open) => setPreviewDialog({ isOpen: open, document: previewDialog.document })}>
         <DialogContent className="max-w-5xl w-[95vw] h-[85vh] p-0 overflow-hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Document Preview</DialogTitle>
+            <DialogDescription>
+              Preview of {previewDialog.document?.title}
+            </DialogDescription>
+          </DialogHeader>
           <div className="h-full flex flex-col">
             <div className="px-4 py-3 border-b flex items-center justify-between">
               <div className="flex items-center gap-2">
