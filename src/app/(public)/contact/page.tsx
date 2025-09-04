@@ -72,7 +72,7 @@ export default function ContactPage() {
                       type="text"
                       id="firstName"
                       name="firstName"
-                      placeholder="Skanda"
+                      placeholder="Gomezgani"
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-colors duration-200 outline-none"
                     />
                   </div>
@@ -98,7 +98,7 @@ export default function ContactPage() {
                     type="email"
                     id="email"
                     name="email"
-                    placeholder="skandakaunda@gmail.com"
+                    placeholder="gomezgani.kaunda@gmail.com"
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-colors duration-200 outline-none"
                   />
                 </div>
@@ -248,7 +248,7 @@ export default function ContactPage() {
                           href="mailto:ag@agd.gov.mw"
                           className="text-[var(--primary)] hover:text-[var(--primary)]/80 transition-colors duration-200"
                         >
-                          ag@agd.gov.mw
+                          enquiries@agd.gov.mw
                         </a>
                       </div>
                     </div>

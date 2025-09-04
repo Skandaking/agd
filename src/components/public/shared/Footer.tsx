@@ -131,10 +131,10 @@ export default function Footer() {
               <li className="flex items-center gap-3 text-white/80 group hover:text-white transition-colors">
                 <Mail className="h-5 w-5 text-white/90 group-hover:text-white" />
                 <a
-                  href="mailto:info@agd.gov.mw"
+                  href="mailto:enquiries@agd.gov.mw"
                   className="text-sm hover:text-white transition-colors"
                 >
-                  info@agd.gov.mw
+                  enquiries@agd.gov.mw
                 </a>
               </li>
             </ul>
