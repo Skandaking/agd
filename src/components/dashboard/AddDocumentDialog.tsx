@@ -170,8 +170,11 @@ export function DocumentDialog({
 
   const handleCategoryChange = (value: string) => {
     if (value === 'custom') {
+      // Mark selection as custom and reveal input
       setCustomCategory('');
+      setFormData(prev => ({ ...prev, category: 'custom' }));
     } else {
+      // Use a predefined category and hide custom
       setCustomCategory('');
       setFormData(prev => ({ ...prev, category: value }));
     }
@@ -183,8 +186,11 @@ export function DocumentDialog({
 
   const handleDepartmentChange = (value: string) => {
     if (value === 'custom') {
+      // Mark selection as custom and reveal input
       setCustomDepartment('');
+      setFormData(prev => ({ ...prev, department: 'custom' }));
     } else {
+      // Use a predefined department and hide custom
       setCustomDepartment('');
       setFormData(prev => ({ ...prev, department: value }));
     }
@@ -349,7 +355,7 @@ export function DocumentDialog({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select value={customCategory ? 'custom' : formData.category} onValueChange={handleCategoryChange}>
+                  <Select value={formData.category === 'custom' ? 'custom' : formData.category} onValueChange={handleCategoryChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -362,7 +368,7 @@ export function DocumentDialog({
                       <SelectItem value="custom">Custom...</SelectItem>
                     </SelectContent>
                   </Select>
-                  {customCategory !== '' && (
+                  {(formData.category === 'custom' || customCategory !== '') && (
                     <Input
                       value={customCategory}
                       onChange={(e) => handleCustomCategoryChange(e.target.value)}
@@ -388,7 +394,7 @@ export function DocumentDialog({
 
               <div className="space-y-2">
                 <Label htmlFor="department">Department</Label>
-                <Select value={customDepartment ? 'custom' : formData.department || ''} onValueChange={handleDepartmentChange}>
+                <Select value={formData.department === 'custom' ? 'custom' : formData.department || ''} onValueChange={handleDepartmentChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select department" />
                   </SelectTrigger>
@@ -401,7 +407,7 @@ export function DocumentDialog({
                     <SelectItem value="custom">Custom...</SelectItem>
                   </SelectContent>
                 </Select>
-                {customDepartment !== '' && (
+                {(formData.department === 'custom' || customDepartment !== '') && (
                   <Input
                     value={customDepartment}
                     onChange={(e) => handleCustomDepartmentChange(e.target.value)}
