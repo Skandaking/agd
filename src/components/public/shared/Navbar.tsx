@@ -239,17 +239,7 @@ export default function Navbar() {
 
                     {/* Dropdown Menu */}
                     <div className="absolute left-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                      <Link
-                        href="/projects/obdx"
-                        className={cn(
-                          "block px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
-                          isActive("/projects/obdx")
-                            ? "text-primary font-bold"
-                            : "text-gray-700"
-                        )}
-                      >
-                        OBDX Project
-                      </Link>
+                   
                       <Link
                         href="/projects/ipsas"
                         className={cn(
@@ -260,17 +250,6 @@ export default function Navbar() {
                         )}
                       >
                         IPSAS Project
-                      </Link>
-                      <Link
-                        href="/projects/eft"
-                        className={cn(
-                          "block px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors",
-                          isActive("/projects/eft")
-                            ? "text-primary font-bold"
-                            : "text-gray-700"
-                        )}
-                      >
-                        EFT Project
                       </Link>
                     </div>
                   </div>
@@ -546,7 +525,6 @@ export default function Navbar() {
                   >
                     IFMIS Division
                   </Link>
-               
                 </div>
               </div>
             </div>
@@ -576,18 +554,6 @@ export default function Navbar() {
               )}>
                 <div className="pl-4 space-y-1">
                   <Link
-                    href="/projects/obdx"
-                    onClick={closeMobileMenu}
-                    className={cn(
-                      "block px-4 py-2 rounded-md text-sm transition-colors",
-                      isActive("/projects/ifmis-implementations")
-                        ? "text-primary bg-primary/10 font-medium"
-                        : "text-gray-600 hover:text-primary hover:bg-gray-100"
-                    )}
-                  >
-                    OBDX Project
-                  </Link>
-                  <Link
                     href="/projects/ipsas"
                     onClick={closeMobileMenu}
                     className={cn(
@@ -599,19 +565,6 @@ export default function Navbar() {
                   >
                     IPSAS Project
                   </Link>
-                  <Link
-                    href="/projects/eft"
-                    onClick={closeMobileMenu}
-                    className={cn(
-                      "block px-4 py-2 rounded-md text-sm transition-colors",
-                      isActive("/projects/ipsas-implementation")
-                        ? "text-primary bg-primary/10 font-medium"
-                        : "text-gray-600 hover:text-primary hover:bg-gray-100"
-                    )}
-                  >
-                    EFT Project
-                  </Link>
-                
                 </div>
               </div>
             </div>
