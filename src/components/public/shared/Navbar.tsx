@@ -578,7 +578,7 @@ export default function Navbar() {
                   isActive("/publications")
                     ? "text-primary bg-primary/10 font-bold"
                     : "text-gray-700 hover:text-primary hover:bg-gray-100"
-                )}
+                )} 
               >
                 Publications
                 <ChevronDown 
