@@ -147,7 +147,7 @@ export default function Home() {
           
           <div className="text-center mt-12">
             <Link
-              href="/services"
+              href="/about"
               className="inline-flex items-center gap-2 py-3 px-8 bg-white text-[var(--primary)] font-semibold rounded-lg hover:bg-[var(--primary)] hover:text-white transition-all duration-300"
             >
               Learn More About AGD Divisions
