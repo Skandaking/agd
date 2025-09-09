@@ -15,7 +15,11 @@ import {
   ArrowUpRight,
   Activity,
   Image as ImageIcon,
-  Loader2
+  Loader2,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  RefreshCw
 } from 'lucide-react';
 import { NewsArticle, DocumentItem, EventItem, MediaItem } from '@/lib/types';
 
@@ -62,6 +66,20 @@ interface StatCard {
   changeType: 'increase' | 'decrease' | 'neutral';
   icon: React.ComponentType<{ className?: string }>;
   href: string;
+}
+
+interface SystemCheck {
+  name: string;
+  status: 'operational' | 'degraded' | 'down';
+  responseTime?: number;
+  details?: string;
+  error?: string;
+}
+
+interface SystemStatus {
+  overall: 'operational' | 'degraded' | 'down';
+  checks: SystemCheck[];
+  timestamp: string;
 }
 
 const getItemIcon = (type: RecentItem['type']) => {
@@ -135,12 +153,53 @@ const calculateThisMonth = (items: Array<Record<string, Date | string | number |
   }).length;
 };
 
+const getStatusIcon = (status: SystemCheck['status']) => {
+  switch (status) {
+    case 'operational':
+      return CheckCircle;
+    case 'degraded':
+      return AlertTriangle;
+    case 'down':
+      return XCircle;
+    default:
+      return AlertTriangle;
+  }
+};
+
+const getStatusColor = (status: SystemCheck['status']) => {
+  switch (status) {
+    case 'operational':
+      return 'bg-green-50 text-green-700 border-green-200';
+    case 'degraded':
+      return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+    case 'down':
+      return 'bg-red-50 text-red-700 border-red-200';
+    default:
+      return 'bg-gray-50 text-gray-700 border-gray-200';
+  }
+};
+
+const getStatusText = (status: SystemCheck['status']) => {
+  switch (status) {
+    case 'operational':
+      return 'Operational';
+    case 'degraded':
+      return 'Degraded';
+    case 'down':
+      return 'Down';
+    default:
+      return 'Unknown';
+  }
+};
+
 export default function DashboardPage() {
   const { setPageTitle, setBreadcrumbs, showToast } = useDashboard();
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
+  const [isSystemStatusLoading, setIsSystemStatusLoading] = useState(false);
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -261,6 +320,51 @@ export default function DashboardPage() {
     }
   }, [showToast]);
 
+  const fetchSystemStatus = useCallback(async () => {
+    try {
+      setIsSystemStatusLoading(true);
+      
+      const response = await fetch('/api/system/status');
+      const result = await response.json();
+      
+      if (result.success) {
+        setSystemStatus(result.status);
+      } else {
+        showToast.error('Failed to fetch system status');
+        // Set fallback status
+        setSystemStatus({
+          overall: 'down',
+          checks: [
+            {
+              name: 'System Check',
+              status: 'down',
+              error: result.error || 'Unknown error'
+            }
+          ],
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching system status:', error);
+      showToast.error('Failed to check system status');
+      
+      // Set fallback status for network errors
+      setSystemStatus({
+        overall: 'down',
+        checks: [
+          {
+            name: 'System Check',
+            status: 'down',
+            error: 'Unable to reach system status API'
+          }
+        ],
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      setIsSystemStatusLoading(false);
+    }
+  }, [showToast]);
+
   useEffect(() => {
     setPageTitle('Dashboard');
     setBreadcrumbs([
@@ -268,7 +372,8 @@ export default function DashboardPage() {
     ]);
     
     fetchDashboardData();
-  }, [setPageTitle, setBreadcrumbs, fetchDashboardData]);
+    fetchSystemStatus();
+  }, [setPageTitle, setBreadcrumbs, fetchDashboardData, fetchSystemStatus]);
 
   // Set current time on client-side only to prevent hydration mismatch
   useEffect(() => {
@@ -487,37 +592,106 @@ export default function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* System Status */}
         <Card>
-          <CardHeader>
-            <CardTitle>System Status</CardTitle>
-            <CardDescription>
-              Overview of system health and performance
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <div>
+              <CardTitle>System Status</CardTitle>
+              <CardDescription>
+                Real-time system health and performance monitoring
+              </CardDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => fetchSystemStatus()}
+              disabled={isSystemStatusLoading}
+            >
+              {isSystemStatusLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Database</span>
-              <Badge variant="outline" className="bg-green-50 text-green-700">
-                Operational
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">File Storage</span>
-              <Badge variant="outline" className="bg-green-50 text-green-700">
-                Operational
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Email Service</span>
-              <Badge variant="outline" className="bg-green-50 text-green-700">
-                Operational
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">IFMIS Integration</span>
-              <Badge variant="outline" className="bg-green-50 text-green-700">
-                Operational
-              </Badge>
-            </div>
+            {systemStatus ? (
+              <>
+                {/* Overall Status */}
+                <div className="flex items-center justify-between p-3 rounded-lg border bg-gray-50/50">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Overall Status</span>
+                    <span className="text-xs text-muted-foreground">
+                      (checked {formatTimeAgo(new Date(systemStatus.timestamp), currentTime || undefined)})
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {(() => {
+                      const StatusIcon = getStatusIcon(systemStatus.overall);
+                      return (
+                        <>
+                          <StatusIcon className="h-4 w-4" />
+                          <Badge variant="outline" className={getStatusColor(systemStatus.overall)}>
+                            {getStatusText(systemStatus.overall)}
+                          </Badge>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Individual Service Status */}
+                {systemStatus.checks.map((check, index) => {
+                  const StatusIcon = getStatusIcon(check.status);
+                  return (
+                    <div key={index} className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{check.name}</span>
+                          {check.responseTime && (
+                            <span className="text-xs text-muted-foreground">
+                              ({check.responseTime}ms)
+                            </span>
+                          )}
+                        </div>
+                        {(check.details || check.error) && (
+                          <div className="text-xs text-muted-foreground mt-1 max-w-sm truncate">
+                            {check.error || check.details}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <StatusIcon className="h-4 w-4" />
+                        <Badge variant="outline" className={getStatusColor(check.status)}>
+                          {getStatusText(check.status)}
+                        </Badge>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            ) : isSystemStatusLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span className="ml-2 text-sm text-muted-foreground">
+                  Checking system status...
+                </span>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <AlertTriangle className="mx-auto h-8 w-8 text-yellow-600 mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  Unable to fetch system status
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => fetchSystemStatus()}
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Retry
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
