@@ -1,128 +1,126 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { FileText, Download, Calendar, Search, Filter, Eye, File } from 'lucide-react';
 
-export default function DocumentsPage() {
-  const documents = [
-    {
-      id: 1,
-      title: "Annual Financial Statement 2023",
-      slug: "annual-financial-statement-2023",
-      date: "June 10, 2024",
-      category: "Financial Reports",
-      fileSize: "2.4 MB",
-      fileType: "PDF",
-      downloadCount: 1247,
-      description: "Comprehensive financial statement for the fiscal year 2023, including revenue, expenditure, and asset management reports.",
-      image: "/hero/3.jpg",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Budget Implementation Report 2024",
-      slug: "budget-implementation-report-2024",
-      date: "May 22, 2024",
-      category: "Budget Reports",
-      fileSize: "3.7 MB",
-      fileType: "PDF",
-      downloadCount: 892,
-      description: "Detailed analysis of budget implementation and financial performance for the year 2024.",
-      image: "/hero/1.JPG",
-      featured: true
-    },
-    {
-      id: 3,
-      title: "Procurement Guidelines 2024",
-      slug: "procurement-guidelines-2024",
-      date: "April 15, 2024",
-      category: "Guidelines",
-      fileSize: "1.8 MB",
-      fileType: "PDF",
-      downloadCount: 2156,
-      description: "Updated guidelines for government procurement processes, ensuring transparency and compliance.",
-      image: "/hero/6.jpg",
-      featured: false
-    },
-    {
-      id: 4,
-      title: "IFMIS User Manual v3.2",
-      slug: "ifmis-user-manual-v3-2",
-      date: "March 30, 2024",
-      category: "Manuals",
-      fileSize: "5.2 MB",
-      fileType: "PDF",
-      downloadCount: 3421,
-      description: "Complete user manual for the IFMIS system version 3.2, including step-by-step instructions and troubleshooting guides.",
-      image: "/hero/2.JPG",
-      featured: false
-    },
-    {
-      id: 5,
-      title: "Public Finance Management Act",
-      slug: "public-finance-management-act",
-      date: "January 15, 2024",
-      category: "Legal Documents",
-      fileSize: "892 KB",
-      fileType: "PDF",
-      downloadCount: 1876,
-      description: "The complete Public Finance Management Act governing financial management in the public sector.",
-      image: "/hero/4.jpg",
-      featured: false
-    },
-    {
-      id: 6,
-      title: "Quarterly Performance Report Q1 2024",
-      slug: "quarterly-performance-report-q1-2024",
-      date: "April 30, 2024",
-      category: "Performance Reports",
-      fileSize: "1.3 MB",
-      fileType: "PDF",
-      downloadCount: 654,
-      description: "First quarter performance report highlighting key achievements and challenges in financial management.",
-      image: "/hero/5.jpg",
-      featured: false
-    },
-    {
-      id: 7,
-      title: "Asset Management Policy",
-      slug: "asset-management-policy",
-      date: "February 20, 2024",
-      category: "Policies",
-      fileSize: "967 KB",
-      fileType: "PDF",
-      downloadCount: 1234,
-      description: "Comprehensive policy document outlining asset management procedures and best practices.",
-      image: "/hero/7.JPG",
-      featured: false
-    },
-    {
-      id: 8,
-      title: "Training Manual - Financial Reporting",
-      slug: "training-manual-financial-reporting",
-      date: "March 10, 2024",
-      category: "Training Materials",
-      fileSize: "2.1 MB",
-      fileType: "PDF",
-      downloadCount: 987,
-      description: "Training manual for government accountants on modern financial reporting standards and practices.",
-      image: "/hero/6.jpg",
-      featured: false
-    },
-    {
-      id: 9,
-      title: "Audit Report 2023",
-      slug: "audit-report-2023",
-      date: "May 5, 2024",
-      category: "Audit Reports",
-      fileSize: "4.1 MB",
-      fileType: "PDF",
-      downloadCount: 1567,
-      description: "Independent audit report for the fiscal year 2023, including findings and recommendations.",
-      image: "/hero/1.JPG",
-      featured: false
-    }
-  ];
+interface DocumentUIItem {
+  id: string;
+  title: string;
+  date: string;
+  category: string;
+  fileSize: string;
+  fileType: string;
+  downloadCount: number;
+  description: string;
+  image: string; // placeholder image to keep design
+  featured: boolean;
+  file_url: string;
+}
 
-  const categories = ["All", "Financial Reports", "Budget Reports", "Guidelines", "Manuals", "Legal Documents", "Performance Reports", "Policies", "Training Materials", "Audit Reports"];
+interface DocumentAPIItem {
+  id: string | number;
+  title: string;
+  summary: string | null;
+  category: string;
+  file_name: string;
+  file_url: string;
+  file_mime: string;
+  file_size_bytes: number;
+  downloads: number;
+  publishedAt?: string | null;
+  createdAt?: string | null;
+  image_url?: string | null;
+}
+
+export default function DocumentsPage() {
+  const [items, setItems] = useState<DocumentUIItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  const formatFileSize = (bytes: number) => {
+    if (!bytes || bytes <= 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  };
+
+  const getFileTypeName = (mime: string, fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase() || '';
+    const map: Record<string, string> = {
+      'application/pdf': 'PDF',
+      'application/msword': 'Word',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word',
+      'application/vnd.ms-excel': 'Excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel',
+      'text/csv': 'CSV',
+      'text/plain': 'Text',
+    };
+    const extMap: Record<string, string> = {
+      pdf: 'PDF', doc: 'Word', docx: 'Word', xls: 'Excel', xlsx: 'Excel', csv: 'CSV', txt: 'Text'
+    };
+    return map[mime] || extMap[ext] || (ext ? ext.toUpperCase() : 'Document');
+  };
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/documents?status=published&limit=100');
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Failed to load documents');
+        const mapped: DocumentUIItem[] = (json.items as DocumentAPIItem[]).map((d) => ({
+          id: String(d.id),
+          title: d.title,
+          date: d.publishedAt ? new Date(d.publishedAt).toLocaleDateString() : (d.createdAt ? new Date(d.createdAt).toLocaleDateString() : ''),
+          category: d.category || 'General',
+          fileSize: formatFileSize(d.file_size_bytes || 0),
+          fileType: getFileTypeName(d.file_mime, d.file_name),
+          downloadCount: d.downloads || 0,
+          description: d.summary || '',
+          image: '/images/t3.jpg',
+          featured: Boolean(d.downloads && d.downloads > 0),
+          file_url: d.file_url,
+        }));
+        // Sort by downloads desc (fallback created date) and set
+        setItems(mapped.sort((a, b) => (b.downloadCount - a.downloadCount)));
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to load documents');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>(['All']);
+    items.forEach((i) => set.add(i.category));
+    return Array.from(set);
+  }, [items]);
+
+  const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return items.filter((d) => {
+      const matchSearch = !q || d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q) || d.category.toLowerCase().includes(q);
+      const matchCategory = selectedCategory === 'All' || d.category === selectedCategory;
+      return matchSearch && matchCategory;
+    });
+  }, [items, searchTerm, selectedCategory]);
+
+  const featuredDocuments = filtered.slice(0, 2);
+
+  const handleDownload = (doc: DocumentUIItem) => {
+    if (!doc.id) return;
+    window.open(`/api/documents/${doc.id}/download`, '_blank');
+  };
+
+  const handlePreview = (doc: DocumentUIItem) => {
+    if (doc.file_url) window.open(doc.file_url, '_blank');
+  };
 
   return (
     <div className="bg-gray-50">
@@ -157,7 +155,6 @@ export default function DocumentsPage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
-        
         {/* Search and Filter Section */}
         <section className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
           <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
@@ -167,11 +164,12 @@ export default function DocumentsPage() {
                 <input
                   type="text"
                   placeholder="Search documents..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]"
                 />
               </div>
             </div>
-            
             <div className="flex flex-wrap gap-2">
               <div className="flex items-center gap-2 mr-4">
                 <Filter className="h-5 w-5 text-gray-500" />
@@ -180,10 +178,11 @@ export default function DocumentsPage() {
               {categories.slice(0, 5).map((category) => (
                 <button
                   key={category}
+                  onClick={() => setSelectedCategory(category)}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    category === "All"
-                      ? "bg-[var(--primary)] text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    category === selectedCategory
+                      ? 'bg-[var(--primary)] text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
                   {category}
@@ -193,15 +192,20 @@ export default function DocumentsPage() {
           </div>
         </section>
 
+        {loading ? (
+          <div className="text-center text-gray-500 py-12">Loading documents...</div>
+        ) : error ? (
+          <div className="text-center text-red-600 py-12">{error}</div>
+        ) : (
+          <>
         {/* Featured Documents */}
         <section className="mb-12">
           <div className="flex items-center gap-4 mb-6">
             <div className="h-8 w-1 bg-[var(--accent)] rounded-full" />
             <h2 className="text-3xl font-bold text-[var(--accent)]">Featured Documents</h2>
           </div>
-          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {documents.filter(doc => doc.featured).map((document) => (
+                {featuredDocuments.map((document) => (
               <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative h-48 overflow-hidden">
                   <Image
@@ -216,11 +220,6 @@ export default function DocumentsPage() {
                       {document.category}
                     </span>
                   </div>
-                  <div className="absolute top-4 right-4">
-                    <span className="px-3 py-1 bg-red-500 text-white text-xs font-medium rounded-full">
-                      Featured
-                    </span>
-                  </div>
                   <div className="absolute bottom-4 left-4 right-4">
                     <div className="flex items-center gap-2 text-white text-sm">
                       <File className="h-4 w-4" />
@@ -228,7 +227,6 @@ export default function DocumentsPage() {
                     </div>
                   </div>
                 </div>
-                
                 <div className="p-6">
                   <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                     <div className="flex items-center gap-1">
@@ -240,21 +238,18 @@ export default function DocumentsPage() {
                       {document.downloadCount.toLocaleString()} downloads
                     </div>
                   </div>
-                  
                   <h3 className="text-xl font-bold text-gray-800 mb-3 hover:text-[var(--accent)] transition-colors">
                     {document.title}
                   </h3>
-                  
                   <p className="text-gray-600 mb-4 line-clamp-3">
                     {document.description}
                   </p>
-                  
                   <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 bg-[var(--primary)] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[var(--primary)]/90 transition-colors">
+                        <button onClick={() => handleDownload(document)} className="flex items-center gap-2 bg-[var(--primary)] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[var(--primary)]/90 transition-colors">
                       <Download className="h-4 w-4" />
                       Download
                     </button>
-                    <button className="flex items-center gap-2 text-[var(--secondary)] font-semibold hover:text-[var(--accent)] transition-colors">
+                        <button onClick={() => handlePreview(document)} className="flex items-center gap-2 text-[var(--secondary)] font-semibold hover:text-[var(--accent)] transition-colors">
                       <Eye className="h-4 w-4" />
                       Preview
                     </button>
@@ -271,9 +266,8 @@ export default function DocumentsPage() {
             <div className="h-8 w-1 bg-[var(--primary)] rounded-full" />
             <h2 className="text-3xl font-bold text-[var(--accent)]">All Documents</h2>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {documents.map((document) => (
+                {filtered.map((document) => (
               <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="p-6">
                   <div className="flex items-start gap-4">
@@ -285,21 +279,13 @@ export default function DocumentsPage() {
                         <span className="px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-medium rounded-full">
                           {document.category}
                         </span>
-                        {document.featured && (
-                          <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
-                            Featured
-                          </span>
-                        )}
                       </div>
-                      
                       <h3 className="text-lg font-bold text-gray-800 mb-2 hover:text-[var(--accent)] transition-colors line-clamp-2">
                         {document.title}
                       </h3>
-                      
                       <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                         {document.description}
                       </p>
-                      
                       <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
@@ -310,18 +296,16 @@ export default function DocumentsPage() {
                           {document.fileSize}
                         </div>
                       </div>
-                      
                       <div className="flex items-center gap-2">
-                        <button className="flex items-center gap-1 bg-[var(--primary)] text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-[var(--primary)]/90 transition-colors">
+                            <button onClick={() => handleDownload(document)} className="flex items-center gap-1 bg-[var(--primary)] text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-[var(--primary)]/90 transition-colors">
                           <Download className="h-3 w-3" />
                           Download
                         </button>
-                        <button className="flex items-center gap-1 text-[var(--secondary)] text-sm font-semibold hover:text-[var(--accent)] transition-colors">
+                            <button onClick={() => handlePreview(document)} className="flex items-center gap-1 text-[var(--secondary)] text-sm font-semibold hover:text-[var(--accent)] transition-colors">
                           <Eye className="h-3 w-3" />
                           Preview
                         </button>
                       </div>
-                      
                       <div className="mt-2 text-xs text-gray-400">
                         {document.downloadCount.toLocaleString()} downloads
                       </div>
@@ -333,26 +317,18 @@ export default function DocumentsPage() {
           </div>
         </section>
         
-        {/* Pagination */}
+            {/* Pagination (static placeholder) */}
         <section className="flex justify-center">
           <div className="flex items-center gap-2">
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              Previous
-            </button>
-            <button className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg">
-              1
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              2
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              3
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              Next
-            </button>
+                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Previous</button>
+                <button className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg">1</button>
+                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">2</button>
+                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">3</button>
+                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Next</button>
           </div>
         </section>
+          </>
+        )}
       </div>
     </div>
   );
