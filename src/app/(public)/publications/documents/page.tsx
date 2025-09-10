@@ -113,7 +113,7 @@ export default function DocumentsPage() {
     });
   }, [items, searchTerm, selectedCategory]);
 
-  const featuredDocuments = filtered.slice(0, 2);
+  const featuredDocuments = filtered.slice(0, 4);
 
   // Pagination derived values
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -163,8 +163,8 @@ export default function DocumentsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="w-full px-3 md:px-4 lg:px-6 xl:px-8 py-12">
-        <div className="max-w-7xl mx-auto">
+      <div className="w-full px-2 md:px-3 lg:px-4 xl:px-6 2xl:px-8 py-12">
+        <div className="max-w-[98%] xl:max-w-[95%] 2xl:max-w-[90%] mx-auto">
         {/* Search and Filter Section */}
         <section className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
           <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
@@ -214,7 +214,7 @@ export default function DocumentsPage() {
                 <div className="h-8 w-1 bg-[var(--accent)] rounded-full" />
                 <h2 className="text-3xl font-bold text-[var(--accent)]">Featured Documents</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {featuredDocuments.map((document) => (
                   <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
                     {/* Header without image */}
@@ -271,7 +271,7 @@ export default function DocumentsPage() {
                 <h2 className="text-3xl font-bold text-[var(--accent)]">All Documents</h2>
               </div>
               {/* Client-side pagination applied below via pagedDocuments */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                 {pagedDocuments.map((document) => (
                   <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
                     <div className="p-6">
