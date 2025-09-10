@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
+// no thumbnails used on documents listing
 import { FileText, Download, Calendar, Search, Filter, Eye, File } from 'lucide-react';
 
 interface DocumentUIItem {
@@ -39,6 +39,8 @@ export default function DocumentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 12;
 
   const formatFileSize = (bytes: number) => {
     if (!bytes || bytes <= 0) return '0 Bytes';
@@ -113,6 +115,13 @@ export default function DocumentsPage() {
 
   const featuredDocuments = filtered.slice(0, 2);
 
+  // Pagination derived values
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const start = (safePage - 1) * pageSize;
+  const end = start + pageSize;
+  const pagedDocuments = filtered.slice(start, end);
+
   const handleDownload = (doc: DocumentUIItem) => {
     if (!doc.id) return;
     window.open(`/api/documents/${doc.id}/download`, '_blank');
@@ -154,7 +163,8 @@ export default function DocumentsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="w-full px-3 md:px-4 lg:px-6 xl:px-8 py-12">
+        <div className="max-w-7xl mx-auto">
         {/* Search and Filter Section */}
         <section className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
           <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
@@ -198,137 +208,146 @@ export default function DocumentsPage() {
           <div className="text-center text-red-600 py-12">{error}</div>
         ) : (
           <>
-        {/* Featured Documents */}
-        <section className="mb-12">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-8 w-1 bg-[var(--accent)] rounded-full" />
-            <h2 className="text-3xl font-bold text-[var(--accent)]">Featured Documents</h2>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {featuredDocuments.map((document) => (
-              <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="relative h-48 overflow-hidden">
-                  <Image
-                    src={document.image}
-                    alt={document.title}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-[var(--accent)] text-white text-xs font-medium rounded-full">
-                      {document.category}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="flex items-center gap-2 text-white text-sm">
-                      <File className="h-4 w-4" />
-                      {document.fileType} • {document.fileSize}
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {document.date}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Download className="h-4 w-4" />
-                      {document.downloadCount.toLocaleString()} downloads
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-3 hover:text-[var(--accent)] transition-colors">
-                    {document.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4 line-clamp-3">
-                    {document.description}
-                  </p>
-                  <div className="flex items-center gap-3">
-                        <button onClick={() => handleDownload(document)} className="flex items-center gap-2 bg-[var(--primary)] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[var(--primary)]/90 transition-colors">
-                      <Download className="h-4 w-4" />
-                      Download
-                    </button>
-                        <button onClick={() => handlePreview(document)} className="flex items-center gap-2 text-[var(--secondary)] font-semibold hover:text-[var(--accent)] transition-colors">
-                      <Eye className="h-4 w-4" />
-                      Preview
-                    </button>
-                  </div>
-                </div>
+            {/* Featured Documents */}
+            <section className="mb-12">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="h-8 w-1 bg-[var(--accent)] rounded-full" />
+                <h2 className="text-3xl font-bold text-[var(--accent)]">Featured Documents</h2>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* All Documents */}
-        <section className="mb-12">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-8 w-1 bg-[var(--primary)] rounded-full" />
-            <h2 className="text-3xl font-bold text-[var(--accent)]">All Documents</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filtered.map((document) => (
-              <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-[var(--secondary)]/10 rounded-lg flex-shrink-0">
-                      <FileText className="h-8 w-8 text-[var(--secondary)]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-medium rounded-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredDocuments.map((document) => (
+                  <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
+                    {/* Header without image */}
+                    <div className="h-40 bg-gradient-to-r from-[var(--primary)]/10 to-[var(--secondary)]/10 flex items-center justify-between px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-[var(--primary)]/15 rounded-lg">
+                          <File className="h-7 w-7 text-[var(--primary)]" />
+                        </div>
+                        <span className="px-3 py-1 bg-[var(--accent)] text-white text-xs font-medium rounded-full">
                           {document.category}
                         </span>
                       </div>
-                      <h3 className="text-lg font-bold text-gray-800 mb-2 hover:text-[var(--accent)] transition-colors line-clamp-2">
-                        {document.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                        {document.description}
-                      </p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                      <div className="text-sm text-gray-600">
+                        {document.fileType} • {document.fileSize}
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           {document.date}
                         </div>
                         <div className="flex items-center gap-1">
-                          <File className="h-4 w-4" />
-                          {document.fileSize}
+                          <Download className="h-4 w-4" />
+                          {document.downloadCount.toLocaleString()} downloads
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                            <button onClick={() => handleDownload(document)} className="flex items-center gap-1 bg-[var(--primary)] text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-[var(--primary)]/90 transition-colors">
-                          <Download className="h-3 w-3" />
+                      <h3 className="text-xl font-bold text-gray-800 mb-3 hover:text-[var(--accent)] transition-colors">
+                        {document.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 line-clamp-3">
+                        {document.description}
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => handleDownload(document)} className="flex items-center gap-2 bg-[var(--primary)] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[var(--primary)]/90 transition-colors">
+                          <Download className="h-4 w-4" />
                           Download
                         </button>
-                            <button onClick={() => handlePreview(document)} className="flex items-center gap-1 text-[var(--secondary)] text-sm font-semibold hover:text-[var(--accent)] transition-colors">
-                          <Eye className="h-3 w-3" />
+                        <button onClick={() => handlePreview(document)} className="flex items-center gap-2 text-[var(--secondary)] font-semibold hover:text-[var(--accent)] transition-colors">
+                          <Eye className="h-4 w-4" />
                           Preview
                         </button>
                       </div>
-                      <div className="mt-2 text-xs text-gray-400">
-                        {document.downloadCount.toLocaleString()} downloads
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* All Documents */}
+            <section className="mb-12">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="h-8 w-1 bg-[var(--primary)] rounded-full" />
+                <h2 className="text-3xl font-bold text-[var(--accent)]">All Documents</h2>
+              </div>
+              {/* Client-side pagination applied below via pagedDocuments */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pagedDocuments.map((document) => (
+                  <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
+                    <div className="p-6">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-[var(--secondary)]/10 rounded-lg flex-shrink-0">
+                          <FileText className="h-8 w-8 text-[var(--secondary)]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-medium rounded-full">
+                              {document.category}
+                            </span>
+                          </div>
+                          <h3 className="text-lg font-bold text-gray-800 mb-2 hover:text-[var(--accent)] transition-colors line-clamp-2">
+                            {document.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                            {document.description}
+                          </p>
+                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {document.date}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <File className="h-4 w-4" />
+                              {document.fileSize}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => handleDownload(document)} className="flex items-center gap-1 bg-[var(--primary)] text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-[var(--primary)]/90 transition-colors">
+                              <Download className="h-3 w-3" />
+                              Download
+                            </button>
+                            <button onClick={() => handlePreview(document)} className="flex items-center gap-1 text-[var(--secondary)] text-sm font-semibold hover:text-[var(--accent)] transition-colors">
+                              <Eye className="h-3 w-3" />
+                              Preview
+                            </button>
+                          </div>
+                          <div className="mt-2 text-xs text-gray-400">
+                            {document.downloadCount.toLocaleString()} downloads
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
-        
-            {/* Pagination (static placeholder) */}
-        <section className="flex justify-center">
-          <div className="flex items-center gap-2">
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Previous</button>
-                <button className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg">1</button>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">2</button>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">3</button>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Next</button>
-          </div>
-        </section>
+            </section>
+            {/* Pagination - show only when more than one page */}
+            {totalPages > 1 && (
+              <section className="flex justify-center mt-6">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <button className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg">
+                    {currentPage}
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              </section>
+            )}
           </>
         )}
+        </div>
       </div>
     </div>
   );
