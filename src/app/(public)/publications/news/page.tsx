@@ -120,54 +120,36 @@ export default function NewsPage() {
                     <TrendingUp className="h-5 w-5 text-[var(--primary)]" />
                     <h2 className="text-xl font-semibold">Featured</h2>
                   </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-8">
-                      <article className="rounded-xl border bg-white">
-                        <div className="relative h-64">
-                          <Image
-                            src={featuredArticles[0].image_url || '/images/t1.jpg'}
-                            alt={featuredArticles[0].title}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 1024px) 100vw, 66vw"
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {featuredArticles.slice(0, 3).map((a) => (
+                      <article key={a.id} className="rounded-xl border bg-white overflow-hidden">
+                        <div className="relative h-44">
+                          <Image 
+                            src={a.image_url || '/images/t3.jpg'} 
+                            alt={a.title} 
+                            fill 
+                            className="object-cover" 
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" 
                           />
                         </div>
                         <div className="p-4 space-y-2">
-                          <div className="flex items-center gap-3 text-xs text-gray-500">
-                            <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(featuredArticles[0].publishedAt || featuredArticles[0].createdAt)}</span>
-                            <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{featuredArticles[0].reading_time_minutes || 1} min read</span>
-                            <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" />{(featuredArticles[0].views || 0).toLocaleString()}</span>
+                          <div className="text-xs text-gray-500 flex items-center gap-3">
+                            <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(a.publishedAt || a.createdAt)}</span>
+                            <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{a.reading_time_minutes || 1} min</span>
+                            <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" />{(a.views || 0).toLocaleString()}</span>
                           </div>
-                          <Link href={`/news/${featuredArticles[0].slug || featuredArticles[0].id}`}>
-                            <h3 className="text-2xl font-bold hover:text-[var(--primary)]">{featuredArticles[0].title}</h3>
-                          </Link>
-                          <p className="text-gray-600">{featuredArticles[0].excerpt}</p>
-                          <div className="flex items-center justify-between pt-2 text-sm text-gray-600">
-                            <span>By {featuredArticles[0].author}</span>
-                            <Link href={`/news/${featuredArticles[0].slug || featuredArticles[0].id}`} className="inline-flex items-center gap-1 text-[var(--primary)]">
+                          <Link href={`/news/${a.slug || a.id}`} className="font-semibold hover:text-[var(--primary)] line-clamp-2">{a.title}</Link>
+                          <p className="text-sm text-gray-600 line-clamp-3">{a.excerpt}</p>
+                          <div className="pt-2 text-sm text-gray-600 flex items-center justify-between">
+                            <span>By {a.author}</span>
+                            <Link href={`/news/${a.slug || a.id}`} className="inline-flex items-center gap-1 text-[var(--primary)]">
                               Read More
                               <ArrowRight className="h-4 w-4" />
                             </Link>
                           </div>
                         </div>
                       </article>
-                    </div>
-                    <div className="lg:col-span-4 space-y-4">
-                      {featuredArticles.slice(1).map(a => (
-                        <article key={a.id} className="rounded-xl border bg-white p-3 flex gap-3">
-                          <div className="relative w-24 h-20 flex-shrink-0 rounded-md overflow-hidden">
-                            <Image src={a.image_url || '/images/t2.jpg'} alt={a.title} fill className="object-cover" sizes="96px" />
-                          </div>
-                          <div className="min-w-0">
-                            <Link href={`/news/${a.slug || a.id}`} className="font-medium hover:text-[var(--primary)] line-clamp-2">{a.title}</Link>
-                            <div className="mt-1 text-xs text-gray-500 flex items-center gap-2">
-                              <span>{formatDate(a.publishedAt || a.createdAt)}</span>
-                              <span>· {a.reading_time_minutes || 1} min</span>
-                            </div>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
+                    ))}
                   </div>
                 </section>
               )}
@@ -177,16 +159,23 @@ export default function NewsPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <h2 className="text-xl font-semibold">Recent Articles</h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {regularArticles.map((a) => (
                     <article key={a.id} className="rounded-xl border bg-white overflow-hidden">
                       <div className="relative h-44">
-                        <Image src={a.image_url || '/images/t3.jpg'} alt={a.title} fill className="object-cover" sizes="(max-width:768px) 100vw, 33vw" />
+                        <Image 
+                          src={a.image_url || '/images/t3.jpg'} 
+                          alt={a.title} 
+                          fill 
+                          className="object-cover" 
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw" 
+                        />
                       </div>
                       <div className="p-4 space-y-2">
                         <div className="text-xs text-gray-500 flex items-center gap-3">
                           <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(a.publishedAt || a.createdAt)}</span>
                           <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{a.reading_time_minutes || 1} min</span>
+                          <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" />{(a.views || 0).toLocaleString()}</span>
                         </div>
                         <Link href={`/news/${a.slug || a.id}`} className="font-semibold hover:text-[var(--primary)] line-clamp-2">{a.title}</Link>
                         <p className="text-sm text-gray-600 line-clamp-3">{a.excerpt}</p>
