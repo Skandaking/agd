@@ -33,6 +33,7 @@ export default function NewsDetailPage() {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [moreNews, setMoreNews] = useState<Article[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -42,6 +43,13 @@ export default function NewsDetailPage() {
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Failed to load article');
         setArticle(data.news);
+        // Load additional news for sidebar (exclude current)
+        const listRes = await fetch('/api/news?status=published&limit=12');
+        const listData = await listRes.json();
+        if (listData.success) {
+          const others = (listData.news as Article[]).filter((n) => (n.slug || String(n.id)) !== (data.news.slug || String(data.news.id)));
+          setMoreNews(others.slice(0, 8));
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load article');
       } finally {
@@ -90,8 +98,8 @@ export default function NewsDetailPage() {
       </div>
 
       {/* Content */}
-      <div className="w-full px-4 md:px-6 lg:px-8 py-10">
-        <div className="max-w-4xl mx-auto">
+      <div className="w-full px-3 md:px-4 lg:px-6 xl:px-8 py-10">
+        <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="text-center text-gray-500 py-10">Loading article...</div>
           ) : error ? (
@@ -99,18 +107,43 @@ export default function NewsDetailPage() {
           ) : !article ? (
             <div className="text-center text-gray-500 py-10">Article not found.</div>
           ) : (
-            <div className="space-y-6">
-              {article.excerpt && (
-                <p className="text-lg text-gray-700 bg-gray-50 border-l-4 border-[var(--primary)] rounded-md p-4">{article.excerpt}</p>
-              )}
-              {article.image_url && (
-                <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
-                  <Image src={article.image_url} alt={article.title} fill className="object-cover" />
+            <div className="grid gap-8 lg:grid-cols-12">
+              <div className="lg:col-span-8 space-y-6">
+                {article.excerpt && (
+                  <p className="text-lg text-gray-700 bg-gray-50 border-l-4 border-[var(--primary)] rounded-md p-4">{article.excerpt}</p>
+                )}
+                {article.image_url && (
+                  <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
+                    <Image src={article.image_url} alt={article.title} fill className="object-cover" />
+                  </div>
+                )}
+                <div className="prose prose-sm max-w-none">
+                  <div className="text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content }} />
                 </div>
-              )}
-              <div className="prose prose-sm max-w-none">
-                <div className="text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content }} />
               </div>
+              <aside className="lg:col-span-4 space-y-4">
+                <h3 className="text-lg font-semibold">More News</h3>
+                <div className="space-y-3">
+                  {moreNews.map((n) => (
+                    <Link key={n.id || n.slug} href={`/news/${n.slug || n.id}`} className="group">
+                      <div className="flex gap-3 rounded-lg border p-2 hover:border-[var(--primary)]/50">
+                        <div className="relative w-20 h-16 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
+                          {n.image_url ? (
+                            <Image src={n.image_url} alt={n.title} fill className="object-cover" />
+                          ) : null}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium line-clamp-2 group-hover:text-[var(--primary)]">{n.title}</div>
+                          <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                            <span>{n.reading_time_minutes || 1} min</span>
+                            {n.publishedAt && <span>• {formatDate(n.publishedAt)}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </aside>
             </div>
           )}
         </div>
