@@ -81,14 +81,14 @@ export default function NewsPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search news..."
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg bg.white/95 focus:bg-white text-gray-900 placeholder:text-gray-500 outline-none focus:ring-4 focus:ring-[var(--primary)]/25 transition"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-white focus:bg-white text-gray-900 placeholder:text-gray-500 outline-none focus:ring-4 focus:ring-[var(--primary)]/25 transition"
                 />
               </div>
             </div>
 
             <div className="mt-6 flex justify-center gap-3 text-xs text-white/90">
-              <span className="bg-white/10 rounded-full px-3 py-1">Articles: {articles.length}</span>
-              <span className="bg-white/10 rounded-full px-3 py-1">Updated regularly</span>
+              <span className="bg-white/10 rounded-full px-4 py-1">Articles: {articles.length}</span>
+              <span className="bg-white/10 rounded-full px-4 py-1">Updated regularly</span>
             </div>
 
             <div className="mt-5 flex justify-center gap-2">

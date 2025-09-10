@@ -1,124 +1,96 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, Clock, MapPin, Users, Search } from 'lucide-react';
 import { EventsSidebar } from '@/components/public/events/EventsSidebar';
 
-export default function EventsPage() {
-  const events = [
-    {
-      id: 1,
-      title: "Financial Management Training Workshop",
-      slug: "financial-management-training-workshop",
-      date: "July 15, 2024",
-      time: "09:00 AM - 05:00 PM",
-      location: "AGD Training Center, Lilongwe",
-      venue: "Main Conference Hall",
-      type: "Training",
-      description: "Comprehensive training on financial management best practices for government accountants and financial officers.",
-      image: "/hero/6.jpg",
-      registrationRequired: true,
-      maxAttendees: 150,
-      currentAttendees: 89,
-      registrationDeadline: "July 10, 2024",
-      status: "upcoming",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "IFMIS User Conference 2024",
-      slug: "ifmis-user-conference-2024",
-      date: "July 22-24, 2024",
-      time: "08:00 AM - 04:00 PM",
-      location: "Bingu International Convention Centre",
-      venue: "Main Auditorium",
-      type: "Conference",
-      description: "Annual conference bringing together IFMIS users from across all government departments to share experiences and best practices.",
-      image: "/hero/1.JPG",
-      registrationRequired: true,
-      maxAttendees: 500,
-      currentAttendees: 342,
-      registrationDeadline: "July 18, 2024",
-      status: "upcoming",
-      featured: true
-    },
-    {
-      id: 3,
-      title: "Budget Planning Seminar",
-      slug: "budget-planning-seminar",
-      date: "August 5, 2024",
-      time: "10:00 AM - 03:00 PM",
-      location: "AGD Main Conference Room",
-      venue: "Conference Room A",
-      type: "Seminar",
-      description: "Seminar on budget planning and execution strategies for the upcoming fiscal year.",
-      image: "/hero/3.jpg",
-      registrationRequired: true,
-      maxAttendees: 100,
-      currentAttendees: 67,
-      registrationDeadline: "August 1, 2024",
-      status: "upcoming",
-      featured: false
-    },
-    {
-      id: 4,
-      title: "Public Finance Management Forum",
-      slug: "public-finance-management-forum",
-      date: "August 12, 2024",
-      time: "02:00 PM - 06:00 PM",
-      location: "Capital Hotel, Lilongwe",
-      venue: "Grand Ballroom",
-      type: "Forum",
-      description: "Forum discussing challenges and opportunities in public finance management with stakeholders.",
-      image: "/hero/2.JPG",
-      registrationRequired: false,
-      maxAttendees: 200,
-      currentAttendees: 0,
-      registrationDeadline: null,
-      status: "upcoming",
-      featured: false
-    },
-    {
-      id: 5,
-      title: "Technology in Government Finance",
-      slug: "technology-in-government-finance",
-      date: "May 20, 2024",
-      time: "09:00 AM - 01:00 PM",
-      location: "ICT Lab, AGD Headquarters",
-      venue: "Computer Lab 1",
-      type: "Workshop",
-      description: "Workshop on leveraging technology to improve government financial management and reporting.",
-      image: "/hero/5.jpg",
-      registrationRequired: true,
-      maxAttendees: 50,
-      currentAttendees: 50,
-      registrationDeadline: "May 15, 2024",
-      status: "past",
-      featured: false
-    },
-    {
-      id: 6,
-      title: "Annual Stakeholders Meeting",
-      slug: "annual-stakeholders-meeting",
-      date: "April 10, 2024",
-      time: "08:30 AM - 04:30 PM",
-      location: "AGD Auditorium",
-      venue: "Main Auditorium",
-      type: "Meeting",
-      description: "Annual meeting with stakeholders to discuss AGD's performance and future plans.",
-      image: "/hero/4.jpg",
-      registrationRequired: false,
-      maxAttendees: 300,
-      currentAttendees: 0,
-      registrationDeadline: null,
-      status: "past",
-      featured: false
-    }
-  ];
+interface EventAPIItem {
+  id: string | number;
+  title: string;
+  excerpt: string;
+  content: string;
+  type: string;
+  state: 'upcoming' | 'ongoing' | 'past' | 'cancelled' | 'postponed';
+  status: 'draft' | 'published' | 'archived';
+  start_at: string;
+  end_at: string | null;
+  location: string;
+  venue: string | null;
+  registration_required: boolean | number;
+  registration_deadline: string | null;
+  registration_url?: string | null;
+  max_attendees: number | null;
+  current_attendees: number | null;
+  image_url: string | null;
+  featured: boolean | number;
+}
 
-  const eventTypes = ["All", "Training", "Conference", "Seminar", "Forum", "Workshop", "Meeting"];
+interface EventUIItem {
+  id: number;
+  title: string;
+  slug: string;
+  date: string;
+  time: string;
+  location: string;
+  venue?: string | null;
+  type: string;
+  description: string;
+  image: string;
+  registrationRequired: boolean;
+  maxAttendees: number | null;
+  currentAttendees: number;
+  registrationDeadline: string | null;
+  status: 'upcoming' | 'ongoing' | 'past' | 'cancelled' | 'postponed';
+  featured: boolean;
+}
+
+export default function EventsPage() {
+  const [events, setEvents] = useState<EventUIItem[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/events?status=published&limit=100');
+        const json = await res.json();
+        if (!json.success) return;
+        const mapped: EventUIItem[] = (json.items as EventAPIItem[]).map((e) => {
+          const start = e.start_at ? new Date(e.start_at) : null;
+          const end = e.end_at ? new Date(e.end_at) : null;
+          const date = start ? start.toLocaleDateString() : '';
+          const startTime = start ? start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          const endTime = end ? end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          const idNum = typeof e.id === 'string' ? Number(e.id) : e.id;
+          return {
+            id: idNum,
+            title: e.title,
+            slug: String(e.id),
+            date,
+            time: endTime ? `${startTime} - ${endTime}` : startTime,
+            location: e.location,
+            venue: e.venue,
+            type: e.type,
+            description: e.excerpt || '',
+            image: e.image_url || '/hero/6.JPG',
+            registrationRequired: Boolean(e.registration_required),
+            maxAttendees: e.max_attendees ?? null,
+            currentAttendees: e.current_attendees ?? 0,
+            registrationDeadline: e.registration_deadline ? new Date(e.registration_deadline).toLocaleDateString() : null,
+            status: (e.state || 'upcoming') as EventUIItem['status'],
+            featured: Boolean(e.featured),
+          };
+        });
+        setEvents(mapped);
+      } catch (e) {
+        console.error('Failed to load events', e);
+        setEvents([]);
+      }
+    };
+    load();
+  }, []);
+
+  const eventTypes = ["All", "Training", "Conference", "Seminar", "Forum", "Workshop", "Meeting"]; // UI labels only
   const eventStatuses = ["Upcoming", "Past", "All"];
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -127,7 +99,7 @@ export default function EventsPage() {
 
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
+                          (event.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === 'All' || event.type === selectedType;
     const matchesStatus = selectedStatus === 'All' || event.status.toLowerCase() === selectedStatus.toLowerCase();
     return matchesSearch && matchesType && matchesStatus;
@@ -135,7 +107,10 @@ export default function EventsPage() {
 
   const featuredEvents = filteredEvents.filter(event => event.featured);
   const otherEvents = filteredEvents.filter(event => !event.featured);
-  const upcomingEventsForSidebar = events.filter(e => e.status === 'upcoming').slice(0, 3);
+  const upcomingEventsForSidebar = events
+    .filter(e => e.status === 'upcoming')
+    .slice(0, 3)
+    .map((e) => ({ id: e.id, slug: e.slug, title: e.title, date: e.date }));
 
   const eventCounts = {
     'Upcoming': events.filter(e => e.status === 'upcoming').length,
@@ -289,7 +264,7 @@ export default function EventsPage() {
                               {event.registrationRequired && (
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                   <Users className="h-4 w-4 text-[var(--accent)]" />
-                                  {event.currentAttendees}/{event.maxAttendees} registered
+                                  {event.currentAttendees}/{event.maxAttendees || '-'} registered
                                 </div>
                               )}
                             </div>
