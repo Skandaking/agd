@@ -1,38 +1,61 @@
+"use client";
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 
-interface Event {
+interface EventAPIItem {
+  id: string | number;
+  title: string;
+  excerpt: string;
+  type: string;
+  state: 'upcoming' | 'ongoing' | 'past' | 'cancelled' | 'postponed';
+  start_at: string;
+  end_at?: string | null;
+  location: string;
+}
+
+interface EventUIItem {
+  id: string;
   title: string;
   date: string;
   time: string;
   location: string;
-  type: "training" | "meeting" | "workshop";
+  type: 'training' | 'meeting' | 'workshop' | string;
 }
 
 export const Events = () => {
-  const events: Event[] = [
-    {
-      title: "Financial Management Training",
-      date: "2024-02-20",
-      time: "09:00 AM",
-      location: "AGD Training Center",
-      type: "training",
-    },
-    {
-      title: "Quarterly Budget Review",
-      date: "2024-02-25",
-      time: "10:30 AM",
-      location: "Main Conference Room",
-      type: "meeting",
-    },
-    {
-      title: "IFMIS Workshop",
-      date: "2024-03-01",
-      time: "02:00 PM",
-      location: "ICT Lab",
-      type: "workshop",
-    },
-  ];
+  const [items, setItems] = useState<EventUIItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/events?status=published&limit=5');
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Failed to load events');
+        const mapped: EventUIItem[] = (json.items as EventAPIItem[])
+          .filter(e => e.state === 'upcoming' || e.state === 'ongoing')
+          .slice(0, 5)
+          .map((e) => ({
+            id: String(e.id),
+            title: e.title,
+            date: new Date(e.start_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }),
+            time: new Date(e.start_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
+            location: e.location,
+            type: e.type || 'meeting',
+          }));
+        setItems(mapped);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to load events');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   return (
     <section className="bg-white rounded-xl shadow-lg border border-gray-100 h-full flex flex-col overflow-hidden">
@@ -46,9 +69,16 @@ export const Events = () => {
       </div>
 
       <div className="flex-1 p-6 overflow-auto space-y-4">
-        {events.map((event, index) => (
+        {loading ? (
+          <div className="text-sm text-gray-500">Loading events...</div>
+        ) : error ? (
+          <div className="text-sm text-red-600">{error}</div>
+        ) : items.length === 0 ? (
+          <div className="text-sm text-gray-500">No upcoming events.</div>
+        ) : (
+        items.map((event) => (
           <div
-            key={index}
+            key={event.id}
             className="p-4 rounded-lg border border-gray-200 hover:border-[var(--primary)] transition-colors bg-white hover:shadow-md"
           >
             <div className="flex items-start justify-between">
@@ -71,10 +101,7 @@ export const Events = () => {
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    <span>{new Date(event.date).toLocaleDateString(
-                      undefined,
-                      { year: 'numeric', month: 'long', day: 'numeric' }
-                    )}</span>
+                    <span>{event.date}</span>
                   </div>
                   <div className="flex items-center text-gray-600">
                     <svg
@@ -131,7 +158,8 @@ export const Events = () => {
               </span>
             </div>
           </div>
-        ))}
+        ))
+        )}
       </div>
 
       {/* View All Events Button */}
