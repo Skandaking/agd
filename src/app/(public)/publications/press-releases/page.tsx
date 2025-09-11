@@ -1,121 +1,84 @@
+'use client';
+
+import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight, Search, Filter, Megaphone } from 'lucide-react';
 
-export default function PressReleasesPage() {
-  const pressReleases = [
-    {
-      id: 1,
-      title: "AGD Announces Successful Implementation of New IFMIS Module",
-      slug: "agd-announces-successful-implementation-new-ifmis-module",
-      date: "June 20, 2024",
-      excerpt: "The Accountant General's Department is pleased to announce the successful implementation of the new Asset Management module in the IFMIS system across all government departments.",
-      image: "/hero/1.JPG",
-      category: "System Updates",
-      readTime: "3 min read",
-      priority: "high",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Public Sector Financial Performance Shows Significant Improvement",
-      slug: "public-sector-financial-performance-shows-significant-improvement",
-      date: "June 15, 2024",
-      excerpt: "Latest quarterly reports indicate a marked improvement in public sector financial management, with increased transparency and reduced processing times across all MDAs.",
-      image: "/hero/3.jpg",
-      category: "Performance",
-      readTime: "5 min read",
-      priority: "high",
-      featured: true
-    },
-    {
-      id: 3,
-      title: "AGD Launches Comprehensive Training Program for Government Accountants",
-      slug: "agd-launches-comprehensive-training-program",
-      date: "May 28, 2024",
-      excerpt: "A new comprehensive training program has been launched to enhance the skills and capabilities of government accountants in modern financial management practices.",
-      image: "/hero/6.jpg",
-      category: "Training",
-      readTime: "4 min read",
-      priority: "medium",
-      featured: false
-    },
-    {
-      id: 4,
-      title: "New Procurement Guidelines Enhance Transparency in Government Spending",
-      slug: "new-procurement-guidelines-enhance-transparency",
-      date: "May 20, 2024",
-      excerpt: "Updated procurement guidelines have been introduced to further enhance transparency and accountability in government procurement processes.",
-      image: "/hero/2.JPG",
-      category: "Policy",
-      readTime: "6 min read",
-      priority: "medium",
-      featured: false
-    },
-    {
-      id: 5,
-      title: "AGD Receives Recognition for Excellence in Financial Management",
-      slug: "agd-receives-recognition-excellence-financial-management",
-      date: "May 10, 2024",
-      excerpt: "The Accountant General's Department has been recognized by international partners for its outstanding improvements in public financial management systems.",
-      image: "/hero/5.jpg",
-      category: "Awards",
-      readTime: "3 min read",
-      priority: "high",
-      featured: false
-    },
-    {
-      id: 6,
-      title: "Electronic Payment System Reduces Processing Time by 70%",
-      slug: "electronic-payment-system-reduces-processing-time",
-      date: "April 25, 2024",
-      excerpt: "The implementation of the electronic payment system has resulted in a significant 70% reduction in payment processing times across all government departments.",
-      image: "/hero/4.jpg",
-      category: "Technology",
-      readTime: "4 min read",
-      priority: "medium",
-      featured: false
-    },
-    {
-      id: 7,
-      title: "AGD Partners with Development Organizations for Capacity Building",
-      slug: "agd-partners-development-organizations-capacity-building",
-      date: "April 15, 2024",
-      excerpt: "Strategic partnerships have been established with international development organizations to enhance capacity building in public financial management.",
-      image: "/hero/7.JPG",
-      category: "Partnerships",
-      readTime: "5 min read",
-      priority: "low",
-      featured: false
-    },
-    {
-      id: 8,
-      title: "Quarterly Budget Review Shows Improved Fiscal Discipline",
-      slug: "quarterly-budget-review-shows-improved-fiscal-discipline",
-      date: "April 5, 2024",
-      excerpt: "The latest quarterly budget review demonstrates improved fiscal discipline and better alignment between budget allocations and actual expenditures.",
-      image: "/hero/1.JPG",
-      category: "Budget",
-      readTime: "6 min read",
-      priority: "medium",
-      featured: false
-    },
-    {
-      id: 9,
-      title: "AGD Introduces Digital Document Management System",
-      slug: "agd-introduces-digital-document-management-system",
-      date: "March 30, 2024",
-      excerpt: "A new digital document management system has been introduced to streamline document processing and improve record-keeping across all departments.",
-      image: "/hero/3.jpg",
-      category: "Technology",
-      readTime: "4 min read",
-      priority: "low",
-      featured: false
-    }
-  ];
+interface PressReleaseUIItem {
+  id: string;
+  title: string;
+  slug: string;
+  date: string;
+  excerpt: string;
+  image: string;
+  category: string;
+  readTime: string;
+  featured: boolean;
+}
 
-  const categories = ["All", "System Updates", "Performance", "Training", "Policy", "Awards", "Technology", "Partnerships", "Budget"];
-  const priorities = ["All", "High", "Medium", "Low"];
+interface PressReleaseAPIItem {
+  id: string | number;
+  title: string;
+  excerpt: string;
+  category: string;
+  publishedAt?: string | null;
+  createdAt?: string;
+  image_url?: string | null;
+  featured: boolean | number;
+  reading_time_minutes?: number;
+  slug?: string;
+}
+
+export default function PressReleasesPage() {
+  const [items, setItems] = useState<PressReleaseUIItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/press-releases?status=published&limit=100');
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Failed to load press releases');
+        const mapped: PressReleaseUIItem[] = (json.items as PressReleaseAPIItem[]).map((pr) => ({
+          id: String(pr.id),
+          title: pr.title,
+          slug: pr.slug || String(pr.id),
+          date: pr.publishedAt ? new Date(pr.publishedAt).toLocaleDateString() : (pr.createdAt ? new Date(pr.createdAt).toLocaleDateString() : ''),
+          excerpt: pr.excerpt || '',
+          image: pr.image_url || '/hero/6.JPG',
+          category: pr.category || 'General',
+          readTime: `${pr.reading_time_minutes || 3} min read`,
+          featured: Boolean(pr.featured),
+        }));
+        setItems(mapped);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to load press releases');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>(['All']);
+    items.forEach((i) => set.add(i.category));
+    return Array.from(set);
+  }, [items]);
+
+  const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return items.filter((pr) => {
+      const matchSearch = !q || pr.title.toLowerCase().includes(q) || pr.excerpt.toLowerCase().includes(q) || pr.category.toLowerCase().includes(q);
+      const matchCategory = selectedCategory === 'All' || pr.category === selectedCategory;
+      return matchSearch && matchCategory;
+    });
+  }, [items, searchTerm, selectedCategory]);
 
   return (
     <div className="bg-gray-50">
@@ -149,7 +112,8 @@ export default function PressReleasesPage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="w-full px-2 md:px-3 lg:px-4 xl:px-6 2xl:px-8 py-12">
+        <div className="max-w-[98%] xl:max-w-[95%] 2xl:max-w-[90%] mx-auto">
         
         {/* Search and Filter Section */}
         <section className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
@@ -160,6 +124,8 @@ export default function PressReleasesPage() {
                 <input
                   type="text"
                   placeholder="Search press releases..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]"
                 />
               </div>
@@ -174,8 +140,9 @@ export default function PressReleasesPage() {
                 {categories.slice(0, 5).map((category) => (
                   <button
                     key={category}
+                    onClick={() => setSelectedCategory(category)}
                     className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      category === "All"
+                      category === selectedCategory
                         ? "bg-[var(--primary)] text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
@@ -185,34 +152,26 @@ export default function PressReleasesPage() {
                 ))}
               </div>
               
-              <div className="flex flex-wrap gap-2">
-                <span className="text-sm font-medium text-gray-700">Priority:</span>
-                {priorities.map((priority) => (
-                  <button
-                    key={priority}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      priority === "All"
-                        ? "bg-[var(--secondary)] text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {priority}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         </section>
 
+        {loading ? (
+          <div className="text-center text-gray-500 py-12">Loading press releases...</div>
+        ) : error ? (
+          <div className="text-center text-red-600 py-12">{error}</div>
+        ) : (
+          <>
         {/* Featured Press Releases */}
+            {filtered.filter(release => release.featured).length > 0 && (
         <section className="mb-12">
           <div className="flex items-center gap-4 mb-6">
             <div className="h-8 w-1 bg-[var(--accent)] rounded-full" />
             <h2 className="text-3xl font-bold text-[var(--accent)]">Featured Announcements</h2>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {pressReleases.filter(release => release.featured).map((release) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {filtered.filter(release => release.featured).map((release) => (
               <article key={release.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative h-64 overflow-hidden">
                   <Image
@@ -227,14 +186,7 @@ export default function PressReleasesPage() {
                       {release.category}
                     </span>
                   </div>
-                  <div className="absolute top-4 right-4 flex gap-2">
-                    <span className={`px-3 py-1 text-white text-xs font-medium rounded-full ${
-                      release.priority === 'high' ? 'bg-red-500' :
-                      release.priority === 'medium' ? 'bg-yellow-500' :
-                      'bg-green-500'
-                    }`}>
-                      {release.priority.charAt(0).toUpperCase() + release.priority.slice(1)} Priority
-                    </span>
+                  <div className="absolute top-4 right-4">
                     <span className="px-3 py-1 bg-blue-500 text-white text-xs font-medium rounded-full">
                       Featured
                     </span>
@@ -257,7 +209,7 @@ export default function PressReleasesPage() {
                     </div>
                   </div>
                   
-                  <Link href={`/publications/press-releases/${release.slug}`}>
+                  <Link href={`/press-releases/${release.slug}`}>
                     <h3 className="text-xl font-bold text-gray-800 mb-3 hover:text-[var(--accent)] transition-colors">
                       {release.title}
                     </h3>
@@ -268,7 +220,7 @@ export default function PressReleasesPage() {
                   </p>
                   
                   <Link
-                    href={`/publications/press-releases/${release.slug}`}
+                    href={`/press-releases/${release.slug}`}
                     className="inline-flex items-center gap-2 text-[var(--primary)] font-semibold hover:text-[var(--secondary)] transition-colors"
                   >
                     Read Full Release
@@ -279,6 +231,7 @@ export default function PressReleasesPage() {
             ))}
           </div>
         </section>
+            )}
 
         {/* All Press Releases */}
         <section className="mb-12">
@@ -287,8 +240,8 @@ export default function PressReleasesPage() {
             <h2 className="text-3xl font-bold text-[var(--accent)]">All Press Releases</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pressReleases.map((release) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            {filtered.map((release) => (
               <article key={release.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative h-48 overflow-hidden">
                   <Image
@@ -303,20 +256,13 @@ export default function PressReleasesPage() {
                       {release.category}
                     </span>
                   </div>
-                  <div className="absolute top-4 right-4 flex gap-1">
-                    <span className={`px-2 py-1 text-white text-xs font-medium rounded-full ${
-                      release.priority === 'high' ? 'bg-red-500' :
-                      release.priority === 'medium' ? 'bg-yellow-500' :
-                      'bg-green-500'
-                    }`}>
-                      {release.priority.charAt(0).toUpperCase()}
-                    </span>
                     {release.featured && (
+                    <div className="absolute top-4 right-4">
                       <span className="px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded-full">
                         Featured
                       </span>
+                    </div>
                     )}
-                  </div>
                 </div>
                 
                 <div className="p-6">
@@ -331,7 +277,7 @@ export default function PressReleasesPage() {
                     </div>
                   </div>
                   
-                  <Link href={`/publications/press-releases/${release.slug}`}>
+                  <Link href={`/press-releases/${release.slug}`}>
                     <h3 className="text-xl font-bold text-gray-800 mb-3 hover:text-[var(--accent)] transition-colors">
                       {release.title}
                     </h3>
@@ -342,7 +288,7 @@ export default function PressReleasesPage() {
                   </p>
                   
                   <Link
-                    href={`/publications/press-releases/${release.slug}`}
+                    href={`/press-releases/${release.slug}`}
                     className="inline-flex items-center gap-2 text-[var(--primary)] font-semibold hover:text-[var(--secondary)] transition-colors"
                   >
                     Read More
@@ -353,27 +299,9 @@ export default function PressReleasesPage() {
             ))}
           </div>
         </section>
-
-    {/* Pagination */}
-        <section className="flex justify-center">
-          <div className="flex items-center gap-2">
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              Previous
-            </button>
-            <button className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg">
-              1
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              2
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              3
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              Next
-            </button>
-          </div>
-        </section>
+          </>
+        )}
+        </div>
       </div>
     </div>
   );
