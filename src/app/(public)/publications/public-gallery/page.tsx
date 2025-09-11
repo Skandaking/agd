@@ -1,118 +1,97 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { Camera, Search, Filter, Eye, Download, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AGDStaff } from '@/components/public/public-gallery/AGDStaff';
 import { ImageModal } from '@/components/public/public-gallery/ImageModal';
 
+interface MediaUIItem {
+  id: string;
+  src: string;
+  title: string;
+  date: string;
+  location: string;
+  category: string;
+  description: string;
+  albumImageCount: number;
+}
+
+interface MediaAPIItem {
+  id: string | number;
+  title: string;
+  description?: string | null;
+  category: string;
+  file_url: string;
+  file_mime: string;
+  createdAt?: string;
+  alt_text?: string | null;
+}
+
 export default function PublicGalleryPage() {
-  const galleryItems = [
-    {
-      id: 1,
-      title: "Annual Financial Management Conference 2024",
-      date: "June 15, 2024",
-      location: "Bingu International Convention Centre",
-      category: "Training",
-      images: ["/hero/1.JPG", "/hero/3.jpg", "/hero/6.jpg"],
-      description: "Government officials and stakeholders gathered for the annual financial management conference to discuss best practices and innovations in public finance.",
-    },
-    {
-      id: 2,
-      title: "IFMIS Training Workshop",
-      date: "May 20, 2024",
-      location: "AGD Training Center",
-      category: "Training",
-      images: ["/hero/5.jpg", "/hero/7.JPG", "/hero/2.JPG"],
-      description: "Comprehensive training session for government accountants on the new IFMIS system features and functionalities.",
-    },
-    {
-      id: 3,
-      title: "Staff Development Program",
-      date: "April 30, 2024",
-      location: "AGD Main Office",
-      category: "Training",
-      images: ["/hero/4.jpg", "/hero/8.JPG", "/hero/9.jpg"],
-      description: "Professional development sessions focused on enhancing skills in modern financial management practices.",
-    },
-    {
-      id: 4,
-      title: "Community Outreach Program",
-      date: "April 10, 2024",
-      location: "Various Communities",
-      category: "Meeting",
-      images: ["/hero/10.jpg", "/images/t1.jpg", "/images/t2.jpg"],
-      description: "AGD team visited local communities to educate citizens about public finance management and transparency.",
-    },
-    {
-      id: 5,
-      title: "International Partners Meeting",
-      date: "March 25, 2024",
-      location: "Capital Hotel",
-      category: "Meeting",
-      images: ["/images/t3.jpg", "/images/t4.jpg", "/images/t5.jpg"],
-      description: "Strategic meeting with international development partners to discuss financial management reforms.",
-    },
-    {
-      id: 6,
-      title: "AGD Team Building Event",
-      date: "March 15, 2024",
-      location: "Salima",
-      category: "Team Building",
-      images: ["/images/t6.jpg", "/images/t7.jpg", "/images/t8.jpg"],
-      description: "Annual team building event to strengthen collaboration and teamwork among AGD staff members.",
-    },
-    {
-      id: 7,
-      title: "Budget Review Session",
-      date: "February 28, 2024",
-      location: "AGD Conference Room",
-      category: "Meeting",
-      images: ["/images/t9.jpg", "/images/t10.jpg", "/images/t11.jpg"],
-      description: "Quarterly budget review session with heads of departments to assess financial performance.",
-    },
-    {
-      id: 8,
-      title: "Technology Innovation Showcase",
-      date: "February 10, 2024",
-      location: "AGD ICT Center",
-      category: "Meeting",
-      images: ["/images/t12.jpg", "/images/t13.jpg", "/images/t14.jpg"],
-      description: "Showcase of new technology solutions implemented to improve government financial processes.",
-    }
-  ];
-
-  const allImages = galleryItems.flatMap(item =>
-    item.images.map((imageSrc, index) => ({
-      id: `${item.id}-${index}`,
-      src: imageSrc,
-      title: item.title,
-      date: item.date,
-      location: item.location,
-      category: item.category,
-      description: item.description,
-      albumImageCount: item.images.length
-    }))
-  );
-
-  const categories = ["All", "Training", "Meeting", "Team Building"];
+  const [mediaItems, setMediaItems] = useState<MediaUIItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedImage, setSelectedImage] = useState<typeof allImages[0] | null>(null);
+  const [selectedImage, setSelectedImage] = useState<MediaUIItem | null>(null);
   const [currentView, setCurrentView] = useState<'gallery' | 'staff'>('gallery');
 
-  const filteredImages = allImages.filter(image => {
-    const matchesSearch = image.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          image.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || image.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  useEffect(() => {
+    const loadMediaItems = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/media?status=active&limit=100');
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Failed to load media items');
+        
+        // Filter only images and map to UI format
+        const imageItems = (json.items as MediaAPIItem[])
+          .filter(item => item.file_mime.startsWith('image/'))
+          .map((item) => ({
+            id: String(item.id),
+            src: item.file_url,
+            title: item.title,
+            date: item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '',
+            location: 'AGD Office', // Default location since API doesn't have this field
+            category: item.category || 'General',
+            description: item.description || item.alt_text || '',
+            albumImageCount: 1, // Single images from media API
+          }));
+        
+        setMediaItems(imageItems);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to load media items');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadMediaItems();
+  }, []);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>(['All']);
+    mediaItems.forEach((item) => set.add(item.category));
+    return Array.from(set);
+  }, [mediaItems]);
+
+  const filteredImages = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return mediaItems.filter(image => {
+      const matchesSearch = !q || 
+        image.title.toLowerCase().includes(q) ||
+        image.description.toLowerCase().includes(q) ||
+        image.category.toLowerCase().includes(q);
+      const matchesCategory = selectedCategory === 'All' || image.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [mediaItems, searchTerm, selectedCategory]);
 
   const getFilenameFromSrc = (src: string) => src.split('/').pop() || 'download.jpg';
 
-  const handleImageClick = (image: typeof allImages[0]) => {
+  const handleImageClick = (image: MediaUIItem) => {
     setSelectedImage(image);
   };
 
@@ -150,13 +129,14 @@ export default function PublicGalleryPage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 ">
+      <div className="w-full px-2 md:px-3 lg:px-4 xl:px-6 2xl:px-8 py-12">
+        <div className="max-w-[98%] xl:max-w-[95%] 2xl:max-w-[90%] mx-auto">
         
         {/* View Toggle and Search Section */}
-        <section className="bg-white rounded-xl shadow-lg p-3 mb-8 border border-gray-100 sticky top-4 z-20">
+        <section className="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-8 border border-gray-100 sticky top-4 z-20">
           {/* Main View Toggle */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-center gap-2">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
               <button
                 onClick={() => setCurrentView('gallery')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
@@ -166,7 +146,8 @@ export default function PublicGalleryPage() {
                 }`}
               >
                 <Camera className="h-4 w-4" />
-                Public Gallery
+                <span className="hidden sm:inline">Public Gallery</span>
+                <span className="sm:hidden">Gallery</span>
               </button>
               <button
                 onClick={() => setCurrentView('staff')}
@@ -177,41 +158,44 @@ export default function PublicGalleryPage() {
                 }`}
               >
                 <Users className="h-4 w-4" />
-                AGD Staff
+                <span className="hidden sm:inline">AGD Staff</span>
+                <span className="sm:hidden">Staff</span>
               </button>
             </div>
             
             {/* Gallery Filters - Only show when gallery view is active */}
             {currentView === 'gallery' && (
-              <div className="flex flex-col md:flex-row gap-3 items-center pt-2 border-t border-gray-100">
-                <div className="w-full md:w-auto md:flex-1">
+              <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center pt-4 border-t border-gray-100">
+                <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <input
                       type="text"
-                      placeholder="Search by event title or description..."
-                      className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 text-sm"
+                      placeholder="Search by title or description..."
+                      className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 text-sm"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2 overflow-x-auto">
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0">
                   <Filter className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                  {categories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => setSelectedCategory(category)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
-                        selectedCategory === category
-                          ? "bg-[var(--secondary)] text-white shadow-md"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
+                  <div className="flex gap-2">
+                    {categories.map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => setSelectedCategory(category)}
+                        className={`px-3 py-2 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
+                          selectedCategory === category
+                            ? "bg-[var(--secondary)] text-white shadow-md"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -219,41 +203,60 @@ export default function PublicGalleryPage() {
         </section>
 
         {/* Main Content Area */}
-        {currentView === 'gallery' ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary)] mx-auto"></div>
+            <h3 className="mt-4 text-xl font-semibold text-gray-700">Loading Gallery...</h3>
+            <p className="mt-2 text-gray-500">Please wait while we fetch the media items.</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16">
+            <div className="text-red-500 text-4xl mb-4">⚠️</div>
+            <h3 className="text-xl font-semibold text-gray-700">Error Loading Gallery</h3>
+            <p className="mt-2 text-gray-500">{error}</p>
+          </div>
+        ) : currentView === 'gallery' ? (
           /* Gallery View */
           filteredImages.length > 0 ? (
-            <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 gap-4 space-y-4">
               {filteredImages.map((image) => (
-                <div key={image.id} className="break-inside-avoid relative rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 group overflow-hidden border border-gray-100">
+                <div key={image.id} className="break-inside-avoid relative rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 group overflow-hidden border border-gray-100 bg-white">
                   <Image
                     src={image.src}
                     alt={image.title}
-                    width={500}
-                    height={500}
+                    width={400}
+                    height={400}
                     className="object-cover w-full h-auto"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, (max-width: 1536px) 20vw, 16vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                    <h3 className="text-white font-bold text-lg leading-tight drop-shadow-md">{image.title}</h3>
-                    <div className="flex items-center gap-4 mt-4">
-                                          <Button
-                      size="sm"
-                      className="bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 flex-1"
-                      onClick={() => handleImageClick(image)}
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      View
-                    </Button>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
+                    <h3 className="text-white font-bold text-sm sm:text-base leading-tight drop-shadow-md line-clamp-2">{image.title}</h3>
+                    <p className="text-white/80 text-xs mt-1 line-clamp-2">{image.description}</p>
+                    <div className="flex items-center gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        className="bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 flex-1 text-xs py-1.5"
+                        onClick={() => handleImageClick(image)}
+                      >
+                        <Eye className="mr-1 h-3 w-3" />
+                        View
+                      </Button>
                       <a
                         href={image.src}
                         download={getFilenameFromSrc(image.src)}
                         className="flex-1"
                       >
-                        <Button size="sm" variant="secondary" className="w-full">
-                          <Download className="mr-2 h-4 w-4" />
+                        <Button size="sm" variant="secondary" className="w-full text-xs py-1.5">
+                          <Download className="mr-1 h-3 w-3" />
                           Download
                         </Button>
                       </a>
                     </div>
+                  </div>
+                  {/* Info overlay for mobile */}
+                  <div className="sm:hidden absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                    <h3 className="text-white font-medium text-sm leading-tight line-clamp-1">{image.title}</h3>
+                    <p className="text-white/70 text-xs mt-1">{image.category}</p>
                   </div>
                 </div>
               ))}
@@ -262,7 +265,12 @@ export default function PublicGalleryPage() {
             <div className="text-center py-16">
               <Search className="h-12 w-12 mx-auto text-gray-300" />
               <h3 className="mt-4 text-xl font-semibold text-gray-700">No Images Found</h3>
-              <p className="mt-2 text-gray-500">Try adjusting your search or filters.</p>
+              <p className="mt-2 text-gray-500">
+                {searchTerm || selectedCategory !== 'All' 
+                  ? 'Try adjusting your search or filters.' 
+                  : 'No images are available in the gallery at the moment.'
+                }
+              </p>
             </div>
           )
         ) : (
@@ -277,6 +285,7 @@ export default function PublicGalleryPage() {
           onClose={handleCloseModal}
         />
 
+        </div>
       </div>
     </div>
   );
