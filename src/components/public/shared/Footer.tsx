@@ -71,8 +71,8 @@ export default function Footer() {
               {[
                 { text: "About Us", href: "/about" },
                 { text: "Services", href: "/services" },
-                { text: "Publications", href: "/publications" },
-                { text: "News & Updates", href: "/news" },
+                { text: "Publications", href: "/publications/documents" },
+                { text: "News & Updates", href: "/publications/news" },
                 { text: "Contact Us", href: "/contact" },
               ].map((link) => (
                 <li key={link.href}>

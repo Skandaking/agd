@@ -119,7 +119,7 @@
   body {
     @apply bg-background text-foreground;
   }
-  .container { max-width: 100% !important; }
+ /* .container { max-width: 100% !important; } */
 }
 
 /* Gallery sliding animations */
