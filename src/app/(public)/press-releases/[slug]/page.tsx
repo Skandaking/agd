@@ -91,8 +91,8 @@ export default function PressReleaseDetailPage() {
       {/* Hero Section */}
       {!loading && !error && pressRelease && (
         <div className="relative min-h-[240px] flex items-center justify-center overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: `url(${pressRelease.image_url || '/hero/6.JPG'})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/80 to-[var(--secondary)]/80" />
@@ -103,7 +103,7 @@ export default function PressReleaseDetailPage() {
               <span className="px-4 py-2 bg-[var(--accent)] text-white text-sm font-medium rounded-full">
                 {pressRelease.category}
               </span>
-            </div>
+        </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-white leading-tight">
               {pressRelease.title}
             </h1>
@@ -124,9 +124,9 @@ export default function PressReleaseDetailPage() {
                 <Eye className="h-4 w-4" />
                 {(pressRelease.views || 0).toLocaleString()} views
               </div>
-            </div>
           </div>
         </div>
+      </div>
       )}
 
       {/* Content */}
@@ -167,11 +167,11 @@ export default function PressReleaseDetailPage() {
                       className="object-cover"
                       sizes="(max-width: 1024px) 100vw, 75vw"
                     />
-                  </div>
-                )}
+                </div>
+              )}
 
                 {/* Content */}
-                <div className="prose prose-sm max-w-none">
+              <div className="prose prose-sm max-w-none">
                   <div
                     className="text-gray-800 leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: pressRelease.content }}
@@ -296,7 +296,7 @@ export default function PressReleaseDetailPage() {
                           </div>
                         </Link>
                       ))}
-                    </div>
+              </div>
                   </div>
                 )}
               </aside>

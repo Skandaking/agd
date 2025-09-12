@@ -208,68 +208,68 @@ export default function DocumentsPage() {
           <div className="text-center text-red-600 py-12">{error}</div>
         ) : (
           <>
-            {/* Featured Documents */}
-            <section className="mb-12">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="h-8 w-1 bg-[var(--accent)] rounded-full" />
-                <h2 className="text-3xl font-bold text-[var(--accent)]">Featured Documents</h2>
-              </div>
+        {/* Featured Documents */}
+        <section className="mb-12">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-8 w-1 bg-[var(--accent)] rounded-full" />
+            <h2 className="text-3xl font-bold text-[var(--accent)]">Featured Documents</h2>
+          </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {featuredDocuments.map((document) => (
-                  <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
+              <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
                     {/* Header without image */}
                     <div className="h-40 bg-gradient-to-r from-[var(--primary)]/10 to-[var(--secondary)]/10 flex items-center justify-between px-6">
                       <div className="flex items-center gap-3">
                         <div className="p-3 bg-[var(--primary)]/15 rounded-lg">
                           <File className="h-7 w-7 text-[var(--primary)]" />
                         </div>
-                        <span className="px-3 py-1 bg-[var(--accent)] text-white text-xs font-medium rounded-full">
-                          {document.category}
-                        </span>
-                      </div>
+                    <span className="px-3 py-1 bg-[var(--accent)] text-white text-xs font-medium rounded-full">
+                      {document.category}
+                    </span>
+                  </div>
                       <div className="text-sm text-gray-600">
-                        {document.fileType} • {document.fileSize}
-                      </div>
-                    </div>
-                    <div className="p-6">
-                      <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {document.date}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Download className="h-4 w-4" />
-                          {document.downloadCount.toLocaleString()} downloads
-                        </div>
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-800 mb-3 hover:text-[var(--accent)] transition-colors">
-                        {document.title}
-                      </h3>
-                      <p className="text-gray-600 mb-4 line-clamp-3">
-                        {document.description}
-                      </p>
-                      <div className="flex items-center gap-3">
-                        <button onClick={() => handleDownload(document)} className="flex items-center gap-2 bg-[var(--primary)] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[var(--primary)]/90 transition-colors">
-                          <Download className="h-4 w-4" />
-                          Download
-                        </button>
-                        <button onClick={() => handlePreview(document)} className="flex items-center gap-2 text-[var(--secondary)] font-semibold hover:text-[var(--accent)] transition-colors">
-                          <Eye className="h-4 w-4" />
-                          Preview
-                        </button>
-                      </div>
+                      {document.fileType} • {document.fileSize}
                     </div>
                   </div>
-                ))}
+                <div className="p-6">
+                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      {document.date}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Download className="h-4 w-4" />
+                      {document.downloadCount.toLocaleString()} downloads
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 mb-3 hover:text-[var(--accent)] transition-colors">
+                    {document.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4 line-clamp-3">
+                    {document.description}
+                  </p>
+                  <div className="flex items-center gap-3">
+                        <button onClick={() => handleDownload(document)} className="flex items-center gap-2 bg-[var(--primary)] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[var(--primary)]/90 transition-colors">
+                      <Download className="h-4 w-4" />
+                      Download
+                    </button>
+                        <button onClick={() => handlePreview(document)} className="flex items-center gap-2 text-[var(--secondary)] font-semibold hover:text-[var(--accent)] transition-colors">
+                      <Eye className="h-4 w-4" />
+                      Preview
+                    </button>
+                  </div>
+                </div>
               </div>
-            </section>
+            ))}
+          </div>
+        </section>
 
-            {/* All Documents */}
-            <section className="mb-12">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="h-8 w-1 bg-[var(--primary)] rounded-full" />
-                <h2 className="text-3xl font-bold text-[var(--accent)]">All Documents</h2>
-              </div>
+        {/* All Documents */}
+        <section className="mb-12">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-8 w-1 bg-[var(--primary)] rounded-full" />
+            <h2 className="text-3xl font-bold text-[var(--accent)]">All Documents</h2>
+          </div>
               {/* Client-side pagination applied below via pagedDocuments */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                 {pagedDocuments.map((document) => (
@@ -314,35 +314,35 @@ export default function DocumentsPage() {
                           <Eye className="h-4 w-4" />
                           Preview
                         </button>
-                      </div>
-                    </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </section>
+            ))}
+          </div>
+        </section>
             {/* Pagination - show only when more than one page */}
             {totalPages > 1 && (
               <section className="flex justify-center mt-6">
-                <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
                   <button
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     disabled={currentPage === 1}
                   >
-                    Previous
-                  </button>
-                  <button className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg">
+              Previous
+            </button>
+            <button className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg">
                     {currentPage}
-                  </button>
+            </button>
                   <button
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     disabled={currentPage === totalPages}
                   >
-                    Next
-                  </button>
-                </div>
-              </section>
+              Next
+            </button>
+          </div>
+        </section>
             )}
           </>
         )}

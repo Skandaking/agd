@@ -301,7 +301,7 @@ export default function PressReleasesPage() {
         </section>
           </>
         )}
-        </div>
+          </div>
       </div>
     </div>
   );

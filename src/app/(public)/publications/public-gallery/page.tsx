@@ -218,45 +218,82 @@ export default function PublicGalleryPage() {
         ) : currentView === 'gallery' ? (
           /* Gallery View */
           filteredImages.length > 0 ? (
-            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 gap-4 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredImages.map((image) => (
-                <div key={image.id} className="break-inside-avoid relative rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 group overflow-hidden border border-gray-100 bg-white">
-                  <Image
-                    src={image.src}
-                    alt={image.title}
-                    width={400}
-                    height={400}
-                    className="object-cover w-full h-auto"
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, (max-width: 1536px) 20vw, 16vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-                    <h3 className="text-white font-bold text-sm sm:text-base leading-tight drop-shadow-md line-clamp-2">{image.title}</h3>
-                    <p className="text-white/80 text-xs mt-1 line-clamp-2">{image.description}</p>
-                    <div className="flex items-center gap-2 mt-3">
-                      <Button
-                        size="sm"
-                        className="bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 flex-1 text-xs py-1.5"
-                        onClick={() => handleImageClick(image)}
-                      >
-                        <Eye className="mr-1 h-3 w-3" />
-                        View
-                      </Button>
-                      <a
-                        href={image.src}
-                        download={getFilenameFromSrc(image.src)}
-                        className="flex-1"
-                      >
-                        <Button size="sm" variant="secondary" className="w-full text-xs py-1.5">
-                          <Download className="mr-1 h-3 w-3" />
-                          Download
-                        </Button>
-                      </a>
+                <div key={image.id} className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+                  {/* Image Container */}
+                  <div className="relative aspect-[4/3] overflow-hidden cursor-pointer" onClick={() => handleImageClick(image)}>
+                    <Image
+                      src={image.src}
+                      alt={image.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                    />
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Category badge */}
+                    <div className="absolute top-3 left-3">
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-semibold rounded-full shadow-sm">
+                        {image.category}
+                      </span>
+                    </div>
+                    
+                    {/* Hover actions */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleImageClick(image);
+                          }}
+                          className="p-3 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+                        >
+                          <Eye className="h-5 w-5 text-white" />
+                        </button>
+                        <a
+                          href={image.src}
+                          download={getFilenameFromSrc(image.src)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-3 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+                        >
+                          <Download className="h-5 w-5 text-white" />
+                        </a>
+                      </div>
                     </div>
                   </div>
-                  {/* Info overlay for mobile */}
-                  <div className="sm:hidden absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                    <h3 className="text-white font-medium text-sm leading-tight line-clamp-1">{image.title}</h3>
-                    <p className="text-white/70 text-xs mt-1">{image.category}</p>
+                  
+                  {/* Content */}
+                  <div className="p-5">
+                    <h3 className="font-bold text-gray-900 text-lg leading-tight mb-2 line-clamp-2">
+                      {image.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
+                      {image.description}
+                    </p>
+                    
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <span className="text-xs text-gray-500 font-medium">{image.date}</span>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-3 text-xs hover:bg-gray-100"
+                          onClick={() => handleImageClick(image)}
+                        >
+                          <Eye className="mr-1.5 h-3.5 w-3.5" />
+                          View
+                        </Button>
+                        <a href={image.src} download={getFilenameFromSrc(image.src)}>
+                          <Button size="sm" className="h-8 px-3 text-xs bg-[var(--primary)] hover:bg-[var(--primary)]/90">
+                            <Download className="mr-1.5 h-3.5 w-3.5" />
+                            Download
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
