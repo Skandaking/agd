@@ -271,50 +271,49 @@ export default function DocumentsPage() {
                 <h2 className="text-3xl font-bold text-[var(--accent)]">All Documents</h2>
               </div>
               {/* Client-side pagination applied below via pagedDocuments */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                 {pagedDocuments.map((document) => (
-                  <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
-                    <div className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-[var(--secondary)]/10 rounded-lg flex-shrink-0">
-                          <FileText className="h-8 w-8 text-[var(--secondary)]" />
+                  <div key={document.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
+                    <div className="p-4 flex-grow">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-medium rounded-full">
+                          {document.category}
+                        </span>
+                        <div className="p-2 bg-[var(--secondary)]/10 rounded-lg">
+                          <FileText className="h-5 w-5 text-[var(--secondary)]" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-medium rounded-full">
-                              {document.category}
-                            </span>
-                          </div>
-                          <h3 className="text-lg font-bold text-gray-800 mb-2 hover:text-[var(--accent)] transition-colors line-clamp-2">
-                            {document.title}
-                          </h3>
-                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                            {document.description}
-                          </p>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              {document.date}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <File className="h-4 w-4" />
-                              {document.fileSize}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button onClick={() => handleDownload(document)} className="flex items-center gap-1 bg-[var(--primary)] text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-[var(--primary)]/90 transition-colors">
-                              <Download className="h-3 w-3" />
-                              Download
-                            </button>
-                            <button onClick={() => handlePreview(document)} className="flex items-center gap-1 text-[var(--secondary)] text-sm font-semibold hover:text-[var(--accent)] transition-colors">
-                              <Eye className="h-3 w-3" />
-                              Preview
-                            </button>
-                          </div>
-                          <div className="mt-2 text-xs text-gray-400">
-                            {document.downloadCount.toLocaleString()} downloads
-                          </div>
+                      </div>
+                      <h3 className="text-md font-bold text-gray-800 mb-1 hover:text-[var(--accent)] transition-colors line-clamp-2 min-h-[40px]">
+                        {document.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-3 min-h-[60px]">
+                        {document.description}
+                      </p>
+                    </div>
+                    <div className="p-4 mt-auto pt-3 border-t border-gray-100 bg-gray-50/50">
+                      <div className="flex justify-between items-center text-xs text-gray-500 mb-3">
+                        <div className="flex items-center gap-1" title="Date published">
+                          <Calendar className="h-3 w-3" />
+                          {document.date}
                         </div>
+                        <div className="flex items-center gap-1" title="File size">
+                          <File className="h-3 w-3" />
+                          {document.fileSize}
+                        </div>
+                        <div className="flex items-center gap-1" title="Total downloads">
+                          <Download className="h-3 w-3" />
+                          {document.downloadCount.toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button onClick={() => handleDownload(document)} className="w-full flex items-center justify-center gap-2 bg-[var(--primary)] text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-[var(--primary)]/90 transition-colors">
+                          <Download className="h-4 w-4" />
+                          Download
+                        </button>
+                        <button onClick={() => handlePreview(document)} className="w-full flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300 transition-colors">
+                          <Eye className="h-4 w-4" />
+                          Preview
+                        </button>
                       </div>
                     </div>
                   </div>
