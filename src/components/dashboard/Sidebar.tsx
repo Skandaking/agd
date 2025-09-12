@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import NextImage from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -28,6 +28,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
   badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  countKey?: string; // Key to identify which count to show
 }
 
 interface NavSection {
@@ -35,7 +36,16 @@ interface NavSection {
   items: NavItem[];
 }
 
-const navigation: NavSection[] = [
+interface ContentCounts {
+  news: number;
+  pressReleases: number;
+  events: number;
+  documents: number;
+  media: number;
+  users: number;
+}
+
+const getNavigationSections = (counts: ContentCounts): NavSection[] => [
   {
     title: 'Overview',
     items: [
@@ -53,30 +63,36 @@ const navigation: NavSection[] = [
         title: 'News',
         href: '/dashboard/news',
         icon: Newspaper,
-        badge: '3',
+        badge: counts.news > 0 ? counts.news.toString() : undefined,
         badgeVariant: 'secondary',
       },
       {
         title: 'Press Releases',
         href: '/dashboard/press-releases',
         icon: Megaphone,
-        badge: '2',
+        badge: counts.pressReleases > 0 ? counts.pressReleases.toString() : undefined,
         badgeVariant: 'secondary',
       },
       {
         title: 'Events',
         href: '/dashboard/events',
         icon: Calendar,
+        badge: counts.events > 0 ? counts.events.toString() : undefined,
+        badgeVariant: 'secondary',
       },
       {
         title: 'Documents',
         href: '/dashboard/documents',
         icon: FileText,
+        badge: counts.documents > 0 ? counts.documents.toString() : undefined,
+        badgeVariant: 'secondary',
       },
       {
         title: 'Media Gallery',
         href: '/dashboard/media',
         icon: Image,
+        badge: counts.media > 0 ? counts.media.toString() : undefined,
+        badgeVariant: 'secondary',
       },
     ],
   },
@@ -87,6 +103,8 @@ const navigation: NavSection[] = [
         title: 'Users',
         href: '/dashboard/users',
         icon: Users,
+        badge: counts.users > 0 ? counts.users.toString() : undefined,
+        badgeVariant: 'secondary',
       },
     ],
   },
@@ -101,6 +119,54 @@ export function Sidebar() {
   } = useDashboard();
   const { logout, user } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [counts, setCounts] = useState<ContentCounts>({
+    news: 0,
+    pressReleases: 0,
+    events: 0,
+    documents: 0,
+    media: 0,
+    users: 0,
+  });
+
+  // Fetch counts on component mount
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [newsRes, pressRes, eventsRes, docsRes, mediaRes, usersRes] = await Promise.all([
+          fetch('/api/news'),
+          fetch('/api/press-releases'),
+          fetch('/api/events'),
+          fetch('/api/documents'),
+          fetch('/api/media'),
+          fetch('/api/users'),
+        ]);
+
+        const [newsData, pressData, eventsData, docsData, mediaData, usersData] = await Promise.all([
+          newsRes.json(),
+          pressRes.json(),
+          eventsRes.json(),
+          docsRes.json(),
+          mediaRes.json(),
+          usersRes.json(),
+        ]);
+
+        setCounts({
+          news: newsData.success ? (newsData.news || []).length : 0,
+          pressReleases: pressData.success ? (pressData.items || []).length : 0,
+          events: eventsData.success ? (eventsData.items || []).length : 0,
+          documents: docsData.success ? (docsData.items || []).length : 0,
+          media: mediaData.success ? (mediaData.items || []).length : 0,
+          users: usersData.success ? (usersData.users || []).length : 0,
+        });
+      } catch (error) {
+        console.error('Error fetching sidebar counts:', error);
+      }
+    };
+
+    fetchCounts();
+  }, []);
+
+  const navigation = getNavigationSections(counts);
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
