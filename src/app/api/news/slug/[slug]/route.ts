@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeQuerySingle } from '@/lib/database';
+import { executeQuerySingle, executeQuery } from '@/lib/database';
 import { DatabaseNewsArticle } from '@/lib/types';
 
 // GET /api/news/slug/[slug] - Fetch single news article by slug (fallback to numeric id if no slug)
@@ -38,6 +38,13 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'News article not found' }, { status: 404 });
     }
 
+    // Increment views count (best-effort; don't fail the request if this errors)
+    try {
+      await executeQuery('UPDATE news SET views = views + 1 WHERE id = ?', [news.id]);
+    } catch (e) {
+      console.error('Error incrementing news views:', e);
+    }
+
     const transformedNews = {
       id: news.id.toString(),
       title: news.title,
@@ -49,7 +56,7 @@ export async function GET(
       publishedAt: news.published_at ? news.published_at.toISOString() : null,
       createdAt: news.created_at.toISOString(),
       updatedAt: news.updated_at.toISOString(),
-      views: news.views,
+      views: (news.views || 0) + 1,
       featured: Boolean(news.featured),
       slug: news.slug,
       meta_title: news.meta_title,
