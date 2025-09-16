@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeQuerySingle } from '@/lib/database';
+import { executeQuerySingle, executeQuery } from '@/lib/database';
 
 interface DatabasePressRelease {
   id: number;
@@ -62,6 +62,13 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Press release not found' }, { status: 404 });
     }
 
+    // Increment views count (best-effort; don't fail the request if this errors)
+    try {
+      await executeQuery('UPDATE press_releases SET views = views + 1 WHERE id = ?', [release.id]);
+    } catch (e) {
+      console.error('Error incrementing press release views:', e);
+    }
+
     const transformedRelease = {
       id: release.id.toString(),
       title: release.title,
@@ -73,7 +80,7 @@ export async function GET(
       publishedAt: release.published_at ? release.published_at.toISOString() : null,
       createdAt: release.created_at.toISOString(),
       updatedAt: release.updated_at.toISOString(),
-      views: release.views,
+      views: (release.views || 0) + 1,
       featured: Boolean(release.featured),
       slug: release.slug,
       meta_title: release.meta_title,
