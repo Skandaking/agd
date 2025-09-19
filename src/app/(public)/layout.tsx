@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Header from "@/components/public/shared/Header";
 import Footer from "@/components/public/shared/Footer";
 import WhatsAppButton from "@/components/public/shared/WhatsAppButton";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Accountant General Department | Malawi",
@@ -24,6 +25,9 @@ export default function PublicLayout({
       
       {/* WhatsApp floating button */}
       <WhatsAppButton />
+
+      {/* Toast notifications for public pages */}
+      <Toaster />
     </div>
   );
 }

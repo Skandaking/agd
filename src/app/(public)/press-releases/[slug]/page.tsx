@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Clock, User, Eye, Megaphone, Facebook, Linkedin, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface PressRelease {
   id?: string;
@@ -128,14 +129,38 @@ export default function PressReleaseDetailPage() {
     }
   };
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     if (!pageUrl) return;
-    navigator.clipboard.writeText(pageUrl).then(() => {
-      alert('Link copied to clipboard!');
-    }, (err) => {
+    
+    try {
+      // Modern clipboard API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(pageUrl);
+        toast.success('Link copied to clipboard!');
+      } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = pageUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          textArea.remove();
+          toast.success('Link copied to clipboard!');
+        } catch (err) {
+          console.error('Fallback: Could not copy text: ', err);
+          toast.error('Failed to copy link');
+        }
+      }
+    } catch (err) {
       console.error('Could not copy text: ', err);
-      alert('Failed to copy link.');
-    });
+      toast.error('Failed to copy link');
+    }
   };
 
   return (
