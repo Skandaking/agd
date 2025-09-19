@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Clock, User, Eye, Megaphone, Share2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, User, Eye, Megaphone, Facebook, Twitter, Linkedin, Copy } from 'lucide-react';
 
 interface PressRelease {
   id?: string;
@@ -37,6 +37,23 @@ interface OtherPressRelease {
   slug?: string;
 }
 
+const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+  </svg>
+);
+
 export default function PressReleaseDetailPage() {
   const params = useParams<{ slug: string }>();
   const slug = params?.slug as string;
@@ -44,6 +61,13 @@ export default function PressReleaseDetailPage() {
   const [otherPressReleases, setOtherPressReleases] = useState<OtherPressRelease[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pageUrl, setPageUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setPageUrl(window.location.href);
+    }
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -84,6 +108,42 @@ export default function PressReleaseDetailPage() {
   const formatDate = (value?: string | null) => {
     if (!value) return '';
     return new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+  const handleShare = (platform: 'facebook' | 'twitter' | 'linkedin' | 'whatsapp') => {
+    if (!pressRelease || !pageUrl) return;
+    const url = encodeURIComponent(pageUrl);
+    const title = encodeURIComponent(pressRelease.title);
+    const excerpt = pressRelease.excerpt ? encodeURIComponent(pressRelease.excerpt) : '';
+    let shareUrl = '';
+
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}&summary=${excerpt}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `https://api.whatsapp.com/send?text=${title}%20${url}`;
+        break;
+    }
+    if (shareUrl) {
+        window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (!pageUrl) return;
+    navigator.clipboard.writeText(pageUrl).then(() => {
+      alert('Link copied to clipboard!');
+    }, (err) => {
+      console.error('Could not copy text: ', err);
+      alert('Failed to copy link.');
+    });
   };
 
   return (
@@ -199,10 +259,23 @@ export default function PressReleaseDetailPage() {
                 <div className="border-t pt-6">
                   <div className="flex items-center gap-4">
                     <h3 className="text-sm font-medium text-gray-500">Share this press release:</h3>
-                    <button className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--primary)] text-white text-sm rounded-lg hover:bg-[var(--primary)]/90 transition-colors">
-                      <Share2 className="h-4 w-4" />
-                      Share
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => handleShare('facebook')} title="Share on Facebook" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-blue-600 transition-colors">
+                        <Facebook className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleShare('twitter')} title="Share on Twitter" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-sky-500 transition-colors">
+                        <Twitter className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleShare('linkedin')} title="Share on LinkedIn" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-blue-700 transition-colors">
+                        <Linkedin className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleShare('whatsapp')} title="Share on WhatsApp" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-green-500 transition-colors">
+                        <WhatsAppIcon className="h-4 w-4" />
+                      </button>
+                      <button onClick={handleCopyLink} title="Copy link" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
+                        <Copy className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -245,26 +318,6 @@ export default function PressReleaseDetailPage() {
                     )}
                   </div>
                 </div>
-
-                {/* Contact Information */}
-                <div className="bg-white border rounded-lg p-6 shadow-sm">
-                  <h3 className="text-lg font-semibold mb-4">Media Contact</h3>
-                  <div className="space-y-3 text-sm">
-                    <div>
-                      <span className="text-gray-500">Department:</span>
-                      <p className="font-medium">Accountant General&apos;s Department</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Email:</span>
-                      <p className="font-medium">media@agd.gov.sl</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Phone:</span>
-                      <p className="font-medium">+232 XX XXX XXXX</p>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Other Press Releases */}
                 {otherPressReleases.length > 0 && (
                   <div className="bg-white border rounded-lg p-6 shadow-sm">
