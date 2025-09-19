@@ -69,27 +69,40 @@ export async function GET(
       console.error('Error incrementing press release views:', e);
     }
 
+    // Re-fetch the release to get the updated views count
+    const updatedRelease = await executeQuerySingle<DatabasePressRelease>(`
+      SELECT 
+        pr.*, u1.full_name as created_by_name, u2.full_name as updated_by_name
+      FROM press_releases pr
+      LEFT JOIN users u1 ON pr.created_by = u1.id
+      LEFT JOIN users u2 ON pr.updated_by = u2.id
+      WHERE pr.id = ?
+      LIMIT 1
+    `, [release.id]);
+
+    const finalRelease = updatedRelease || release;
+
     const transformedRelease = {
-      id: release.id.toString(),
-      title: release.title,
-      excerpt: release.excerpt,
-      content: release.content,
-      category: release.category,
-      status: release.status,
-      author: release.author,
-      publishedAt: release.published_at ? release.published_at.toISOString() : null,
-      createdAt: release.created_at.toISOString(),
-      updatedAt: release.updated_at.toISOString(),
-      views: (release.views || 0) + 1,
-      featured: Boolean(release.featured),
-      slug: release.slug,
-      meta_title: release.meta_title,
-      meta_description: release.meta_description,
-      tags: release.tags ? JSON.parse(release.tags) : [],
-      image_url: release.image_url,
-      reading_time_minutes: release.reading_time_minutes,
-      created_by_name: release.created_by_name,
-      updated_by_name: release.updated_by_name,
+      id: finalRelease.id.toString(),
+      title: finalRelease.title,
+      excerpt: finalRelease.excerpt,
+      content: finalRelease.content,
+      category: finalRelease.category,
+      status: finalRelease.status,
+      author: finalRelease.author,
+      publishedAt: finalRelease.published_at ? finalRelease.published_at.toISOString() : null,
+      createdAt: finalRelease.created_at.toISOString(),
+      updatedAt: finalRelease.updated_at.toISOString(),
+      views: finalRelease.views || 0,
+      featured: Boolean(finalRelease.featured),
+      slug: finalRelease.slug,
+      meta_title: finalRelease.meta_title,
+      meta_description: finalRelease.meta_description,
+      tags: finalRelease.tags ? JSON.parse(finalRelease.tags) : [],
+      image_url: finalRelease.image_url,
+      reading_time_minutes: finalRelease.reading_time_minutes,
+      created_by_name: finalRelease.created_by_name,
+      updated_by_name: finalRelease.updated_by_name,
     };
 
     return NextResponse.json({ success: true, item: transformedRelease });
