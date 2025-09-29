@@ -1,4 +1,4 @@
-import { CheckCircle2, FileText, Layers, LineChart, ListChecks, Map, Target } from "lucide-react";
+import { CheckCircle2, FileText, Layers, LineChart, Map, Target } from "lucide-react";
 
 // Hero background
 const heroImageUrl = "/hero/6.JPG";
