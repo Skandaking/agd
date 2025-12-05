@@ -348,10 +348,6 @@ export default function AboutAgdPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-xl" />
                   <div className="absolute bottom-4 left-4 right-4">
-                    <div className="flex gap-2">
-                      <div className="h-1.5 w-10 bg-white rounded-full shadow-md" />
-                      <div className="h-1.5 w-16 bg-white/80 rounded-full shadow-md" />
-                    </div>
                   </div>
                 </div>
               </div>
